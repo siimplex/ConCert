@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.Printing</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#"><span class="id" title="library">String</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">BasicAst</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <a name="remapped_inductive"><span class="id" title="record">remapped_inductive</span></a> := <a name="build_remapped_inductive"><span class="id" title="constructor">build_remapped_inductive</span></a> {<br/>
+&nbsp;&nbsp;<a name="re_ind_name"><span class="id" title="projection">re_ind_name</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>;<br/>
+&nbsp;&nbsp;<a name="re_ind_ctors"><span class="id" title="projection">re_ind_ctors</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>;<br/>
+&nbsp;&nbsp;<a name="re_ind_match"><span class="id" title="projection">re_ind_match</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">Record</span> <a name="remaps"><span class="id" title="record">remaps</span></a> := {<br/>
+&nbsp;&nbsp;<a name="remap_inductive"><span class="id" title="projection">remap_inductive</span></a> : <span class="id" title="record">inductive</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#remapped_inductive"><span class="id" title="record">remapped_inductive</span></a>;<br/>
+&nbsp;&nbsp;<a name="remap_constant"><span class="id" title="projection">remap_constant</span></a> : <span class="id" title="definition">kername</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>;<br/>
+&nbsp;&nbsp;<a name="remap_inline_constant"><span class="id" title="projection">remap_inline_constant</span></a> : <span class="id" title="definition">kername</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="no_remaps"><span class="id" title="definition">no_remaps</span></a> :=<br/>
+&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">remap_inductive</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">_</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">None</span></a><a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">remap_constant</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">_</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">None</span></a><a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">remap_inline_constant</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">_</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#Build_remaps"><span class="id" title="constructor">None</span></a> |}.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

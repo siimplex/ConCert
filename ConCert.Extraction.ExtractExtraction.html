@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.ExtractExtraction</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;This&nbsp;file&nbsp;is&nbsp;based&nbsp;on&nbsp;erasure/theories/Extraction.v&nbsp;from&nbsp;MetaCoq&nbsp;*)</span><br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.FSets.FSets.html#"><span class="id" title="library">FSets</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.extraction.ExtrOcamlBasic.html#"><span class="id" title="library">ExtrOcamlBasic</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.extraction.ExtrOcamlString.html#"><span class="id" title="library">ExtrOcamlString</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.extraction.ExtrOcamlZInt.html#"><span class="id" title="library">ExtrOcamlZInt</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">MC_ExtrOCamlInt63</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.extraction.ExtrOCamlFloats.html#"><span class="id" title="library">ExtrOCamlFloats</span></a>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Ignore&nbsp;<span class="inlinecode"><span class="id" title="var">Decimal.int</span></span>&nbsp;before&nbsp;the&nbsp;extraction&nbsp;issue&nbsp;is&nbsp;solved:<br/>
+&nbsp;&nbsp;&nbsp;https://github.com/coq/coq/issues/7017.&nbsp;*)</span><br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Decimal.html#int"><span class="id" title="inductive">Decimal.int</span></a> =&gt; <span class="id" title="var">unit</span> [ "(fun _ -&gt; ())" "(fun _ -&gt; ())" ] "(fun _ _ _ -&gt; assert false)".<br/>
+
+<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="var">Blacklist</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Classes</span> <span class="id" title="var">config</span> <span class="id" title="var">uGraph</span> <span class="id" title="keyword">Universes</span> <span class="id" title="var">Ast</span> <span class="id" title="var">String</span> <span class="id" title="var">List</span> <span class="id" title="var">Nat</span> <span class="id" title="var">Int</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">UnivSubst</span> <span class="id" title="var">Typing</span> <span class="id" title="var">Checker</span> <span class="id" title="var">Retyping</span> <span class="id" title="var">OrderedType</span> <span class="id" title="var">Logic</span> <span class="id" title="var">Common</span> <span class="id" title="var">Common0</span> <span class="id" title="var">Equality</span> <span class="id" title="var">Classes</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Extraction</span>.<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Warnings</span> "-extraction-opaque-accessed".<br/>
+<span class="id" title="keyword">Set</span> <span class="id" title="var">Warnings</span> "-extraction-reserved-identifier".<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#"><span class="id" title="library">PluginExtract</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Utils.html#"><span class="id" title="library">Utils</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Classes.noConfusion</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Logic.eq_elim</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Logic.eq_elim_r</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Logic.transport</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Logic.transport_r</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Logic.False_rect_dep</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.Logic.True_rect_dep</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Init.pr1</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Init.pr2</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Init.hidebody</span>.<br/>
+<span class="id" title="keyword">Extraction</span> <span class="id" title="keyword">Inline</span> <span class="id" title="var">Equations.Prop.DepElim.solution_left</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="record">Equations.Init.sigma</span> =&gt; "( * )" ["(,)"].<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">PCUICTyping.guard_checking</span> =&gt; "{ fix_guard = (fun _ _ _ -&gt; true); cofix_guard = (fun _ _ _ -&gt; true) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">PCUICSafeChecker.check_one_ind_body</span> =&gt; "(fun _ _ _ _ _ _ _ -&gt; ret envcheck_monad __)".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">timed</span> =&gt;<br/>
+"(fun c x -&gt;
+   let time = Unix.gettimeofday() in
+   let temp = x () in
+   let time = (Unix.gettimeofday() -. time) in
+   Feedback.msg_debug (Pp.str (Printf.sprintf ""%s executed in: %fs"" ((fun s-&gt; (String.concat """" (List.map (String.make 1) s))) c) time));
+              temp)".<br/>
+
+<br/>
+<span class="id" title="keyword">Cd</span> "plugin/src".<br/>
+<span class="id" title="var">Separate</span> <span class="id" title="keyword">Extraction</span> <span class="id" title="var">PluginExtract.extract</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;The&nbsp;following&nbsp;directives&nbsp;ensure&nbsp;separate&nbsp;extraction&nbsp;does&nbsp;not&nbsp;produce&nbsp;name&nbsp;clashes&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Bool</span> <span class="id" title="var">Nat</span> <span class="id" title="var">Coq.Strings.String</span> <span class="id" title="var">Common</span> <span class="id" title="var">utils</span> <span class="id" title="var">ELiftSubst</span> <span class="id" title="var">ETyping</span>.<br/>
+<span class="id" title="keyword">Cd</span> "../..".<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

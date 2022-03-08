@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.OptimizePropDiscr</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Pass&nbsp;that&nbsp;removes&nbsp;discrimination&nbsp;(matches&nbsp;and&nbsp;projections)&nbsp;on&nbsp;things&nbsp;in&nbsp;Prop.<br/>
+&nbsp;&nbsp;&nbsp;This&nbsp;uses&nbsp;MetaCoq's&nbsp;optimization&nbsp;but&nbsp;adapted&nbsp;to&nbsp;run&nbsp;on&nbsp;our&nbsp;environments.&nbsp;*)</span><br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ExAst.html#"><span class="id" title="library">ExAst</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Erasure</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">EOptimizePropDiscr</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="optimize_constant_body"><span class="id" title="definition">optimize_constant_body</span></a> <span class="id" title="var">Σ</span> <span class="id" title="var">cst</span> :=<br/>
+&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_type</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_type</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_body</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">option_map</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">(</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">optimize</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">Σ</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">)</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">(</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_body</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">)</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="optimize_decl"><span class="id" title="definition">optimize_decl</span></a> <span class="id" title="var">Σ</span> <span class="id" title="var">d</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#d"><span class="id" title="variable">d</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.ExAst.html#ConstantDecl"><span class="id" title="constructor">ConstantDecl</span></a> <span class="id" title="var">cst</span> =&gt; <a class="idref" href="ConCert.Extraction.ExAst.html#ConstantDecl"><span class="id" title="constructor">ConstantDecl</span></a> (<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#optimize_constant_body"><span class="id" title="definition">optimize_constant_body</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> <span class="id" title="var">cst</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#d"><span class="id" title="variable">d</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="optimize_env"><span class="id" title="definition">optimize_env</span></a> (<span class="id" title="var">Σ</span> : <a class="idref" href="ConCert.Extraction.ExAst.html#global_env"><span class="id" title="definition">global_env</span></a>) : <a class="idref" href="ConCert.Extraction.ExAst.html#global_env"><span class="id" title="definition">global_env</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> (<span class="id" title="definition">on_snd</span> (<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#optimize_decl"><span class="id" title="definition">optimize_decl</span></a> (<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>))) <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="Ee"><span class="id" title="module">Ee</span></a> := <span class="id" title="module">EWcbvEval</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="trans_env_optimize_env"><span class="id" title="lemma">trans_env_optimize_env</span></a> <span class="id" title="var">Σ</span> :<br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> (<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#optimize_env"><span class="id" title="definition">optimize_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="definition">EOptimizePropDiscr.optimize_env</span> (<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="definition">EOptimizePropDiscr.optimize_env</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#optimize_env"><span class="id" title="definition">optimize_env</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> !<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map_map"><span class="id" title="lemma">map_map</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="lemma">map_ext</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ((<span class="id" title="var">kn</span>&amp;<span class="id" title="var">has_deps</span>)&amp;<span class="id" title="var">decl</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">f_equal</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">decl</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">destruct</span> <span class="id" title="var">o</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="optimize_correct"><span class="id" title="lemma">optimize_correct</span></a> <span class="id" title="var">Σ</span> <span class="id" title="var">t</span> <span class="id" title="var">v</span> :<br/>
+&nbsp;&nbsp;@<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#eval"><span class="id" title="inductive">Ee.eval</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#default_wcbv_flags"><span class="id" title="definition">Ee.default_wcbv_flags</span></a> (<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>) <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#t"><span class="id" title="variable">t</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#v"><span class="id" title="variable">v</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a><br/>
+&nbsp;&nbsp;@<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#eval"><span class="id" title="inductive">Ee.eval</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#opt_wcbv_flags"><span class="id" title="definition">Ee.opt_wcbv_flags</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> (<a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#optimize_env"><span class="id" title="definition">optimize_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">optimize</span> (<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>) <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#t"><span class="id" title="variable">t</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">optimize</span> (<a class="idref" href="ConCert.Extraction.ExAst.html#trans_env"><span class="id" title="definition">trans_env</span></a> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>) <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#v"><span class="id" title="variable">v</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">ev</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <a class="idref" href="ConCert.Extraction.OptimizePropDiscr.html#trans_env_optimize_env"><span class="id" title="lemma">trans_env_optimize_env</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="lemma">EOptimizePropDiscr.optimize_correct</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.ResultMonad</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">monad_utils</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Inductive</span> <a name="result"><span class="id" title="inductive">result</span></a> <span class="id" title="var">T</span> <span class="id" title="var">E</span> :=<br/>
+| <a name="Ok"><span class="id" title="constructor">Ok</span></a> (<span class="id" title="var">t</span> : <a class="idref" href="ConCert.Extraction.ResultMonad.html#T"><span class="id" title="variable">T</span></a>)<br/>
+| <a name="Err"><span class="id" title="constructor">Err</span></a> (<span class="id" title="var">e</span> : <a class="idref" href="ConCert.Extraction.ResultMonad.html#E"><span class="id" title="variable">E</span></a>).<br/>
+
+<br/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> {<span class="id" title="var">_</span> <span class="id" title="var">_</span>}.<br/>
+<span class="id" title="var">Arguments</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Err"><span class="id" title="constructor">Err</span></a> {<span class="id" title="var">_</span> <span class="id" title="var">_</span>}.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <a name="Monad_result"><span class="id" title="instance">Monad_result</span></a> {<span class="id" title="var">E</span>} : <span class="id" title="class">Monad</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">T</span> =&gt; <a class="idref" href="ConCert.Extraction.ResultMonad.html#result"><span class="id" title="inductive">result</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#T"><span class="id" title="variable">T</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#E"><span class="id" title="variable">E</span></a>) :=<br/>
+&nbsp;&nbsp;{| <span class="id" title="constructor">ret</span> <span class="id" title="constructor">_</span> <span class="id" title="constructor">t</span> <span class="id" title="constructor">:=</span> <span class="id" title="constructor">Ok</span> <span class="id" title="constructor">t</span><span class="id" title="constructor">;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">bind</span> <span class="id" title="constructor">_</span> <span class="id" title="constructor">_</span> <span class="id" title="constructor">mt</span> <span class="id" title="constructor">f</span> <span class="id" title="constructor">:=</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">match</span> <span class="id" title="constructor">mt</span> <span class="id" title="constructor">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">|</span> <span class="id" title="constructor">Ok</span> <span class="id" title="constructor">t</span> <span class="id" title="constructor">=&gt;</span> <span class="id" title="constructor">f</span> <span class="id" title="constructor">t</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">|</span> <span class="id" title="constructor">Err</span> <span class="id" title="constructor">e</span> <span class="id" title="constructor">=&gt;</span> <span class="id" title="constructor">Err</span> <span class="id" title="constructor">e</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">end</span> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="map_error"><span class="id" title="definition">map_error</span></a> {<span class="id" title="var">T</span> <span class="id" title="var">E1</span> <span class="id" title="var">E2</span>} (<span class="id" title="var">f</span> : <a class="idref" href="ConCert.Extraction.ResultMonad.html#E1"><span class="id" title="variable">E1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#E2"><span class="id" title="variable">E2</span></a>) (<span class="id" title="var">r</span> : <a class="idref" href="ConCert.Extraction.ResultMonad.html#result"><span class="id" title="inductive">result</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#T"><span class="id" title="variable">T</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#E1"><span class="id" title="variable">E1</span></a>) : <a class="idref" href="ConCert.Extraction.ResultMonad.html#result"><span class="id" title="inductive">result</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#T"><span class="id" title="variable">T</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#E2"><span class="id" title="variable">E2</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#r"><span class="id" title="variable">r</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <span class="id" title="var">t</span> =&gt; <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <span class="id" title="var">t</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.ResultMonad.html#Err"><span class="id" title="constructor">Err</span></a> <span class="id" title="var">e</span> =&gt; <a class="idref" href="ConCert.Extraction.ResultMonad.html#Err"><span class="id" title="constructor">Err</span></a> (<a class="idref" href="ConCert.Extraction.ResultMonad.html#f"><span class="id" title="variable">f</span></a> <span class="id" title="var">e</span>)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

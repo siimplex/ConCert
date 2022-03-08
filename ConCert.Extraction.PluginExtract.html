@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.PluginExtract</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab60"></a><h1 class="section">Definitions below are used in the extracted plugin</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ExAst.html#"><span class="id" title="library">ExAst</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Extraction.html#"><span class="id" title="library">Extraction</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.PrettyPrinterMonad.html#"><span class="id" title="library">PrettyPrinterMonad</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Printing.html#"><span class="id" title="library">Printing</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#"><span class="id" title="library">ResultMonad</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Utils.html#"><span class="id" title="library">Utils</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.RustExtract.html#"><span class="id" title="library">RustExtract</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">Kernames</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <a name="plugin_extract_preamble"><span class="id" title="instance">plugin_extract_preamble</span></a> : <a class="idref" href="ConCert.Extraction.RustExtract.html#Preamble"><span class="id" title="class">Preamble</span></a> :=<br/>
+{| <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">top_preamble</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">[</span></a><br/>
+"#![allow(dead_code)]"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"#![allow(non_camel_case_types)]"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"#![allow(unused_imports)]"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"#![allow(non_snake_case)]"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"#![allow(unused_variables)]"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"use std::marker::PhantomData;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __nat_succ(x: u64) -&gt; u64 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  x.checked_add(1).unwrap()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __nat_elim {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    ($zcase:expr, $pred:ident, $scase:expr, $val:expr) =&gt; {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        { let v = $val;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        if v == 0 { $zcase } else { let $pred = v - 1; $scase } }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __andb { ($b1:expr, $b2:expr) =&gt; { $b1 &amp;&amp; $b2 } }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __orb { ($b1:expr, $b2:expr) =&gt; { $b1 || $b2 } }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __pos_onebit(x: u64) -&gt; u64 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  x.checked_mul(2).unwrap() + 1"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __pos_zerobit(x: u64) -&gt; u64 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  x.checked_mul(2).unwrap()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __pos_elim {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    ($p:ident, $onebcase:expr, $p2:ident, $zerobcase:expr, $onecase:expr, $val:expr) =&gt; {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            let n = $val;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            if n == 1 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                $onecase"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            } else if (n &amp; 1) == 0 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                let $p2 = n &gt;&gt; 1;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                $zerobcase"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            } else {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                let $p = n &gt;&gt; 1;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                $onebcase"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __Z_frompos(z: u64) -&gt; i64 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  use std::convert::TryFrom;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  i64::try_from(z).unwrap()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __Z_fromneg(z : u64) -&gt; i64 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  use std::convert::TryFrom;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  i64::try_from(z).unwrap().checked_neg().unwrap()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __Z_elim {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    ($zero_case:expr, $p:ident, $pos_case:expr, $p2:ident, $neg_case:expr, $val:expr) =&gt; {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            let n = $val;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            if n == 0 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                $zero_case"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            } else if n &lt; 0 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                let $p2 = n.unsigned_abs();"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                $neg_case"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            } else {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                let $p = n as u64;"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"                $pos_case"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"            }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __N_frompos(z: u64) -&gt; u64 {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  z"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __N_elim {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    ($zero_case:expr, $p:ident, $pos_case:expr, $val:expr) =&gt; {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        { let $p = $val; if $p == 0 { $zero_case } else { $pos_case } }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"type __pair&lt;A, B&gt; = (A, B);"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"macro_rules! __pair_elim {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    ($fst:ident, $snd:ident, $body:expr, $p:expr) =&gt; {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"        { let ($fst, $snd) = $p; $body }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"    }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn __mk_pair&lt;A: Copy, B: Copy&gt;(a: A, b: B) -&gt; __pair&lt;A, B&gt; { (a, b) }"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn hint_app&lt;TArg, TRet&gt;(f: &amp;dyn Fn(TArg) -&gt; TRet) -&gt; &amp;dyn Fn(TArg) -&gt; TRet {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  f"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">];</span></a><br/>
+<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">program_preamble</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">[</span></a><br/>
+"fn alloc&lt;T&gt;(&amp;'a self, t: T) -&gt; &amp;'a T {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  self.__alloc.alloc(t)"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+""<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"fn closure&lt;TArg, TRet&gt;(&amp;'a self, F: impl Fn(TArg) -&gt; TRet + 'a) -&gt; &amp;'a dyn Fn(TArg) -&gt; TRet {"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"  self.__alloc.alloc(F)"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_Preamble"><span class="id" title="constructor">]</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <a name="RustConfig"><span class="id" title="instance">RustConfig</span></a> : <a class="idref" href="ConCert.Extraction.RustExtract.html#RustPrintConfig"><span class="id" title="class">RustPrintConfig</span></a> :=<br/>
+&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">term_box_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">type_box_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">any_type_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">print_full_names</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">true</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="default_attrs"><span class="id" title="definition">default_attrs</span></a> : <a class="idref" href="ConCert.Extraction.RustExtract.html#ind_attr_map"><span class="id" title="definition">ind_attr_map</span></a> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; "#[derive(Debug, Clone)]".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="extract_lines"><span class="id" title="definition">extract_lines</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span> : <a class="idref" href="ConCert.Extraction.RustExtract.html#T.program"><span class="id" title="definition">T.program</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">remaps</span> : <a class="idref" href="ConCert.Extraction.Printing.html#remaps"><span class="id" title="record">remaps</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">should_inline</span> : <span class="id" title="definition">kername</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a>) : <a class="idref" href="ConCert.Extraction.ResultMonad.html#result"><span class="id" title="inductive">result</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">entry</span> <span class="id" title="notation">&lt;-</span> <span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#p"><span class="id" title="variable">p</span></a><span class="id" title="notation">.2</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.RustExtract.html#T.tConst"><span class="id" title="constructor">T.tConst</span></a> <span class="id" title="var">kn</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="method">ret</span> <span class="id" title="var">kn</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.RustExtract.html#T.tInd"><span class="id" title="constructor">T.tInd</span></a> <span class="id" title="var">ind</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="method">ret</span> (<span class="id" title="projection">inductive_mind</span> <span class="id" title="var">ind</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ResultMonad.html#Err"><span class="id" title="constructor">Err</span></a> "Expected program to be a tConst or tInd"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">without_deps</span> <span class="id" title="var">kn</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <a class="idref" href="ConCert.Extraction.Printing.html#remap_inductive"><span class="id" title="projection">remap_inductive</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#remaps"><span class="id" title="variable">remaps</span></a> (<span class="id" title="constructor">mkInd</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#kn"><span class="id" title="variable">kn</span></a> 0) <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> <span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <a class="idref" href="ConCert.Extraction.Printing.html#remap_constant"><span class="id" title="projection">remap_constant</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#remaps"><span class="id" title="variable">remaps</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#kn"><span class="id" title="variable">kn</span></a> <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> <span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <a class="idref" href="ConCert.Extraction.Printing.html#remap_inline_constant"><span class="id" title="projection">remap_inline_constant</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#remaps"><span class="id" title="variable">remaps</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#kn"><span class="id" title="variable">kn</span></a> <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> <span class="id" title="keyword">else</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Σ</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.Extraction.html#extract_template_env"><span class="id" title="definition">extract_template_env</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.RustExtract.html#extract_rust_within_coq"><span class="id" title="definition">extract_rust_within_coq</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>) <a class="idref" href="ConCert.Extraction.PluginExtract.html#should_inline"><span class="id" title="variable">should_inline</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.PluginExtract.html#p"><span class="id" title="variable">p</span></a><span class="id" title="notation">.1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">KernameSet.singleton</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#entry"><span class="id" title="variable">entry</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.PluginExtract.html#without_deps"><span class="id" title="variable">without_deps</span></a><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">p</span> := <a class="idref" href="ConCert.Extraction.RustExtract.html#print_program"><span class="id" title="definition">print_program</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#remaps"><span class="id" title="variable">remaps</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#default_attrs"><span class="id" title="definition">default_attrs</span></a> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">'</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">s</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.Utils.html#timed"><span class="id" title="definition">timed</span></a> "Printing" (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.PrettyPrinterMonad.html#finish_print_lines"><span class="id" title="definition">finish_print_lines</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#p"><span class="id" title="variable">p</span></a>)<span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="method">ret</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#s"><span class="id" title="variable">s</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="extract"><span class="id" title="definition">extract</span></a> <span class="id" title="var">p</span> <span class="id" title="var">remaps</span> <span class="id" title="var">should_inline</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">lines</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#extract_lines"><span class="id" title="definition">extract_lines</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#p"><span class="id" title="variable">p</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#remaps"><span class="id" title="variable">remaps</span></a> <a class="idref" href="ConCert.Extraction.PluginExtract.html#should_inline"><span class="id" title="variable">should_inline</span></a><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="method">ret</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#concat"><span class="id" title="definition">String.concat</span></a> <span class="id" title="definition">nl</span> <a class="idref" href="ConCert.Extraction.PluginExtract.html#lines"><span class="id" title="variable">lines</span></a>).<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

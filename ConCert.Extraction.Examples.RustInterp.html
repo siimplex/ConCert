@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.Examples.RustInterp</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#"><span class="id" title="library">String</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#"><span class="id" title="library">List</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.ZArith.html#"><span class="id" title="library">ZArith</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Bool.Bool.html#"><span class="id" title="library">Bool</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Examples</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Examples.StackInterpreter.html#"><span class="id" title="library">StackInterpreter</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.RustExtract.html#"><span class="id" title="library">RustExtract</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Common.html#"><span class="id" title="library">Common</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Printing.html#"><span class="id" title="library">Printing</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#"><span class="id" title="library">ConcordiumExtract</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Utils.StringExtra.html#"><span class="id" title="library">StringExtra</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">All</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string</span>.<br/>
+<span class="id" title="keyword">Module</span> <a name="SI"><span class="id" title="module">SI</span></a> := <a class="idref" href="ConCert.Execution.Examples.StackInterpreter.html#"><span class="id" title="module">StackInterpreter</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="map_lookup"><span class="id" title="definition">map_lookup</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a> "fn ##name##&lt;V&gt;(&amp;'a self, key : (&amp;'a String,i64) , m : &amp;'a immutable_map::TreeMap&lt;(&amp;'a String,i64), V&gt;) -&gt; Option&lt;&amp;'a V&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"   m.get(&amp;key)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="remap_extra_consts"><span class="id" title="definition">remap_extra_consts</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<span class="id" title="definition">kername</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"><span class="id" title="notation">*</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a>) := <span class="id" title="keyword">Eval</span> <span class="id" title="tactic">compute</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a> <a class="idref" href="ConCert.Extraction.Common.html#remap"><span class="id" title="definition">remap</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#lookup"><span class="id" title="definition">SI.lookup</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#map_lookup"><span class="id" title="definition">map_lookup</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="ConCert.Extraction.Common.html#remap"><span class="id" title="definition">remap</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#ext_map"><span class="id" title="definition">SI.ext_map</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a> "type Ext_map&lt;'a&gt; = &amp;'a immutable_map::TreeMap&lt;(&amp;'a String, i64), Value&lt;'a&gt;&gt;;"<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="ex1"><span class="id" title="definition">ex1</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">[</span></a><a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#IPushZ"><span class="id" title="constructor">SI.IPushZ</span></a> 1<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#IPushZ"><span class="id" title="constructor">SI.IPushZ</span></a> 1<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#IOp"><span class="id" title="constructor">SI.IOp</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#Add"><span class="id" title="constructor">SI.Add</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#e76c6291366b599375c28eba0aae94bb"><span class="id" title="notation">]</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="STACK_INTERP_MODULE"><span class="id" title="definition">STACK_INTERP_MODULE</span></a> : <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumMod"><span class="id" title="record">ConcordiumMod</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span> :=<br/>
+&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">concmd_contract_name</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">:=</span></a> "interpreter"<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">concmd_init</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">@</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">SI.init</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">concmd_receive</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">@</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">SI.receive</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Extracting&nbsp;the&nbsp;example&nbsp;as&nbsp;well&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">concmd_extra</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">[@</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">existT</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">_</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">(</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">fun</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">T</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">:</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">Type</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">=&gt;</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">T</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">)</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">_</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">ex1</span></a><a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#Build_ConcordiumMod"><span class="id" title="constructor">];</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">list</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <a name="RustConfig"><span class="id" title="instance">RustConfig</span></a> : <a class="idref" href="ConCert.Extraction.RustExtract.html#RustPrintConfig"><span class="id" title="class">RustPrintConfig</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">term_box_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">type_box_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">any_type_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">print_full_names</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">false</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="var">Redirect</span> "examples/extracted-code/concordium-extract/interp.rs"<br/>
+<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#concordium_extraction"><span class="id" title="definition">concordium_extraction</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#STACK_INTERP_MODULE"><span class="id" title="definition">STACK_INTERP_MODULE</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumRemap.build_remaps"><span class="id" title="definition">ConcordiumRemap.build_remaps</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumRemap.remap_arith"><span class="id" title="definition">ConcordiumRemap.remap_arith</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c6"><span class="id" title="notation">++</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumRemap.remap_blockchain_consts"><span class="id" title="definition">ConcordiumRemap.remap_blockchain_consts</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c6"><span class="id" title="notation">++</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#remap_extra_consts"><span class="id" title="definition">remap_extra_consts</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumRemap.remap_inline_bool_ops"><span class="id" title="definition">ConcordiumRemap.remap_inline_bool_ops</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumRemap.remap_std_types"><span class="id" title="definition">ConcordiumRemap.remap_std_types</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bc347c51eaf667706ae54503b26d52c6"><span class="id" title="notation">++</span></a> <a class="idref" href="ConCert.Extraction.ConcordiumExtract.html#ConcordiumRemap.remap_blockchain_inductives"><span class="id" title="definition">ConcordiumRemap.remap_blockchain_inductives</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">kn</span> =&gt; <span class="id" title="definition">eq_kername</span> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool_rec"><span class="id" title="definition">bool_rec</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#kn"><span class="id" title="variable">kn</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#081ff67d3116402bb680e8692aa39185"><span class="id" title="notation">||</span></a> <span class="id" title="definition">eq_kername</span> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool_rect"><span class="id" title="definition">bool_rect</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustInterp.html#kn"><span class="id" title="variable">kn</span></a>)).<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

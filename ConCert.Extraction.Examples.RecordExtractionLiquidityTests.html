@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.Examples.RecordExtractionLiquidityTests</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#"><span class="id" title="library">String</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">All</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Embedding</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Embedding.Notations.html#"><span class="id" title="library">Notations</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Common.html#"><span class="id" title="library">Common</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#"><span class="id" title="library">LiquidityExtract</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="PREFIX"><span class="id" title="definition">PREFIX</span></a> := "".<br/>
+<span class="id" title="keyword">Definition</span> <a name="TT_defs"><span class="id" title="definition">TT_defs</span></a> := <br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Common.html#remap"><span class="id" title="definition">remap</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">&lt;%%</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="ConCert.Extraction.Common.html#f91ac6598892630a2bddbf8938e1b2db"><span class="id" title="notation">%%&gt;</span></a> "nat"<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="RecordsWithoutPrimitiveProjections"><span class="id" title="module">RecordsWithoutPrimitiveProjections</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <a name="RecordsWithoutPrimitiveProjections.A"><span class="id" title="record">A</span></a> := <a name="RecordsWithoutPrimitiveProjections.build_A"><span class="id" title="constructor">build_A</span></a> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="RecordsWithoutPrimitiveProjections.x"><span class="id" title="projection">x</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.proj_A"><span class="id" title="definition">proj_A</span></a> (<span class="id" title="var">a</span> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.A"><span class="id" title="record">A</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#a"><span class="id" title="variable">a</span></a>.(<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.x"><span class="id" title="projection">x</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">proj_A_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_A"><span class="id" title="definition">proj_A</span></a>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Print&nbsp;proj_A_quoted.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.proj_A_printed"><span class="id" title="definition">proj_A_printed</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_A_quoted"><span class="id" title="definition">proj_A_quoted</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordsWithoutPrimitiveProjections.A_printed_as_type_alias"><span class="id" title="definition">A_printed_as_type_alias</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_A_printed"><span class="id" title="definition">proj_A_printed</span></a> <a class="idref" href="ConCert.Extraction.Common.html#to_kername"><span class="id" title="definition">=?</span></a><br/>
+"
+
+type a = nat
+
+let proj_A (a : a) = a
+
+".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_A_printed"><span class="id" title="definition">proj_A_printed</span></a>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.constructA"><span class="id" title="definition">constructA</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.A"><span class="id" title="record">A</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a1</span> := {| <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_A"><span class="id" title="constructor">x</span></a><a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_A"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_A"><span class="id" title="constructor">0</span></a> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a2</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_A"><span class="id" title="constructor">build_A</span></a> 0 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#a1"><span class="id" title="variable">a1</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">constructA_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructA"><span class="id" title="definition">constructA</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.constructA_printed"><span class="id" title="definition">constructA_printed</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructA_quoted"><span class="id" title="definition">constructA_quoted</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructA_printed"><span class="id" title="definition">constructA_printed</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordsWithoutPrimitiveProjections.constructA_omits_constructor"><span class="id" title="definition">constructA_omits_constructor</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructA_printed"><span class="id" title="definition">constructA_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type a = nat
+
+let constructA  = let a1 = O in 
+let a2 = O in 
+a1
+
+". <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <a name="RecordsWithoutPrimitiveProjections.B"><span class="id" title="record">B</span></a> := <a name="RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">build_B</span></a> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="RecordsWithoutPrimitiveProjections.y"><span class="id" title="projection">y</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="RecordsWithoutPrimitiveProjections.z"><span class="id" title="projection">z</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.proj_B"><span class="id" title="definition">proj_B</span></a> (<span class="id" title="var">b</span> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.B"><span class="id" title="record">B</span></a>) := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#b"><span class="id" title="variable">b</span></a>.(<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.z"><span class="id" title="projection">z</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">proj_B_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_B"><span class="id" title="definition">proj_B</span></a>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Print&nbsp;proj_B_quoted.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_B_quoted"><span class="id" title="definition">proj_B_quoted</span></a>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordsWithoutPrimitiveProjections.B_printed_as_type_alias"><span class="id" title="definition">B_printed_as_type_alias</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type b = {
+y : nat;
+z : nat
+}
+
+let proj_B (b : b) = b.z
+
+".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.constructB"><span class="id" title="definition">constructB</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.B"><span class="id" title="record">B</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">B1</span> := {| <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">y</span></a><a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">0;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">z</span></a><a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">:=0</span></a> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">B2</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.build_B"><span class="id" title="constructor">build_B</span></a> 0 0 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#B1"><span class="id" title="variable">B1</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">constructB_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructB"><span class="id" title="definition">constructB</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordsWithoutPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructB_quoted"><span class="id" title="definition">constructB_quoted</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordsWithoutPrimitiveProjections.constructB_uses_record_syntax"><span class="id" title="definition">constructB_uses_record_syntax</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type b = {
+y : nat;
+z : nat
+}
+
+let constructB  = let b1 = {y = O; z = O} in 
+let b2 = {y = O; z = O} in 
+b1
+
+". <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordsWithoutPrimitiveProjections"><span class="id" title="module">RecordsWithoutPrimitiveProjections</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="RecordWithPrimitiveProjections"><span class="id" title="module">RecordWithPrimitiveProjections</span></a>.<br/>
+<span class="comment">(*&nbsp;Essentially,&nbsp;we&nbsp;expect&nbsp;the&nbsp;exact&nbsp;same&nbsp;results&nbsp;as&nbsp;when&nbsp;primitive&nbsp;projections&nbsp;are&nbsp;disabled&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Set</span> <span class="id" title="var">Primitive</span> <span class="id" title="var">Projections</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <a name="RecordWithPrimitiveProjections.A"><span class="id" title="record">A</span></a> := <a name="RecordWithPrimitiveProjections.build_A"><span class="id" title="constructor">build_A</span></a> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="RecordWithPrimitiveProjections.x"><span class="id" title="projection">x</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.proj_A"><span class="id" title="definition">proj_A</span></a> (<span class="id" title="var">a</span> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.A"><span class="id" title="record">A</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#a"><span class="id" title="variable">a</span></a>.(<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.x"><span class="id" title="projection">x</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">proj_A_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_A"><span class="id" title="definition">proj_A</span></a>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Print&nbsp;proj_A_quoted.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.proj_A_printed"><span class="id" title="definition">proj_A_printed</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_A_quoted"><span class="id" title="definition">proj_A_quoted</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordWithPrimitiveProjections.A_printed_as_type_alias"><span class="id" title="definition">A_printed_as_type_alias</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_A_printed"><span class="id" title="definition">proj_A_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type a = nat
+
+let proj_A (a : a) = a
+
+".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_A_printed"><span class="id" title="definition">proj_A_printed</span></a>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.constructA"><span class="id" title="definition">constructA</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.A"><span class="id" title="record">A</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a1</span> := {| <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_A"><span class="id" title="constructor">x</span></a><a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_A"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_A"><span class="id" title="constructor">0</span></a> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a2</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_A"><span class="id" title="constructor">build_A</span></a> 0 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#a1"><span class="id" title="variable">a1</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">constructA_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructA"><span class="id" title="definition">constructA</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.constructA_printed"><span class="id" title="definition">constructA_printed</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructA_quoted"><span class="id" title="definition">constructA_quoted</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructA_printed"><span class="id" title="definition">constructA_printed</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordWithPrimitiveProjections.constructA_omits_constructor"><span class="id" title="definition">constructA_omits_constructor</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructA_printed"><span class="id" title="definition">constructA_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type a = nat
+
+let constructA  = let a1 = O in 
+let a2 = O in 
+a1
+
+". <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <a name="RecordWithPrimitiveProjections.B"><span class="id" title="record">B</span></a> := <a name="RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">build_B</span></a> {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="RecordWithPrimitiveProjections.y"><span class="id" title="projection">y</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="RecordWithPrimitiveProjections.z"><span class="id" title="projection">z</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>;<br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.proj_B"><span class="id" title="definition">proj_B</span></a> (<span class="id" title="var">b</span> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.B"><span class="id" title="record">B</span></a>) := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#b"><span class="id" title="variable">b</span></a>.(<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.z"><span class="id" title="projection">z</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">proj_B_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_B"><span class="id" title="definition">proj_B</span></a>.<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Print&nbsp;proj_B_quoted.&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_B_quoted"><span class="id" title="definition">proj_B_quoted</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordWithPrimitiveProjections.B_printed_as_type_alias"><span class="id" title="definition">B_printed_as_type_alias</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type b = {
+y : nat;
+z : nat
+}
+
+let proj_B (b : b) = b.z
+
+".<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.proj_B_printed"><span class="id" title="definition">proj_B_printed</span></a>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.constructB"><span class="id" title="definition">constructB</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.B"><span class="id" title="record">B</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">B1</span> := {| <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">y</span></a><a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">0;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">z</span></a><a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">:=0</span></a> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">B2</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.build_B"><span class="id" title="constructor">build_B</span></a> 0 0 <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#B1"><span class="id" title="variable">B1</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">constructB_quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructB"><span class="id" title="definition">constructB</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="RecordWithPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a> := <br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.LiquidityExtract.html#unwrap_string_sum"><span class="id" title="definition">unwrap_string_sum</span></a> (<a class="idref" href="ConCert.Extraction.LiquidityExtract.html#liquidity_extract_single"><span class="id" title="definition">liquidity_extract_single</span></a> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#TT_defs"><span class="id" title="definition">TT_defs</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a> "" "" <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructB_quoted"><span class="id" title="definition">constructB_quoted</span></a>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Print</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="RecordWithPrimitiveProjections.constructB_uses_record_syntax"><span class="id" title="definition">constructB_uses_record_syntax</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#5886275aa8d678ebe8bc38ad41c652c0"><span class="id" title="notation">=?</span></a><br/>
+"
+
+type b = {
+y : nat;
+z : nat
+}
+
+let constructB  = let b1 = {y = O; z = O} in 
+let b2 = {y = O; z = O} in 
+b1
+
+". <span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections.constructB_printed"><span class="id" title="definition">constructB_printed</span></a>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html#RecordWithPrimitiveProjections"><span class="id" title="module">RecordWithPrimitiveProjections</span></a>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

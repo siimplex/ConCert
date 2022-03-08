@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.ExpandBranches</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ExAst.html#"><span class="id" title="library">ExAst</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#"><span class="id" title="library">ResultMonad</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Transform.html#"><span class="id" title="library">Transform</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Utils.html#"><span class="id" title="library">Utils</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Erasure</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">ELiftSubst</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a name="expand_branch"><span class="id" title="definition">expand_branch</span></a> (<span class="id" title="var">ar</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<span class="id" title="var">body</span> : <span class="id" title="inductive">term</span>) : <span class="id" title="inductive">term</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#ar"><span class="id" title="variable">ar</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 0 =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#body"><span class="id" title="variable">body</span></a><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">ar</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#body"><span class="id" title="variable">body</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="constructor">tLambda</span> <span class="id" title="var">na</span> <span class="id" title="var">body</span> =&gt; <span class="id" title="constructor">tLambda</span> <span class="id" title="var">na</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branch"><span class="id" title="definition">expand_branch</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#ar"><span class="id" title="variable">ar</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#body"><span class="id" title="variable">body</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="constructor">tLambda</span> <span class="id" title="constructor">nAnon</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branch"><span class="id" title="definition">expand_branch</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#ar"><span class="id" title="variable">ar</span></a> (<span class="id" title="constructor">tApp</span> (<span class="id" title="abbreviation">lift0</span> 1 <a class="idref" href="ConCert.Extraction.ExpandBranches.html#body"><span class="id" title="variable">body</span></a>) (<span class="id" title="constructor">tRel</span> 0)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a name="expand_branches"><span class="id" title="definition">expand_branches</span></a> (<span class="id" title="var">t</span> : <span class="id" title="inductive">term</span>) : <span class="id" title="inductive">term</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tBox</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tRel</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tVar</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tEvar</span> <span class="id" title="var">n</span> <span class="id" title="var">ts</span> =&gt; <span class="id" title="constructor">tEvar</span> <span class="id" title="var">n</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">ts</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tLambda</span> <span class="id" title="var">na</span> <span class="id" title="var">body</span> =&gt; <span class="id" title="constructor">tLambda</span> <span class="id" title="var">na</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">body</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tLetIn</span> <span class="id" title="var">na</span> <span class="id" title="var">val</span> <span class="id" title="var">body</span> =&gt; <span class="id" title="constructor">tLetIn</span> <span class="id" title="var">na</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">val</span>) (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">body</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tApp</span> <span class="id" title="var">hd</span> <span class="id" title="var">arg</span> =&gt; <span class="id" title="constructor">tApp</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">hd</span>) (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">arg</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tConst</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tConstruct</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tCase</span> <span class="id" title="var">p</span> <span class="id" title="var">discr</span> <span class="id" title="var">brs</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">on_branch</span> '<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">ar</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">t</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="ConCert.Extraction.ExpandBranches.html#ar"><span class="id" title="variable">ar</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branch"><span class="id" title="definition">expand_branch</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#ar"><span class="id" title="variable">ar</span></a> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a>)<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="constructor">tCase</span> <span class="id" title="var">p</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <span class="id" title="var">discr</span>) (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#on_branch"><span class="id" title="variable">on_branch</span></a> <span class="id" title="var">brs</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tProj</span> <span class="id" title="var">p</span> <span class="id" title="var">t</span> =&gt; <span class="id" title="constructor">tProj</span> <span class="id" title="var">p</span> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a>)<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tFix</span> <span class="id" title="var">defs</span> <span class="id" title="var">i</span> =&gt; <span class="id" title="constructor">tFix</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> (<span class="id" title="definition">map_def</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a>) <span class="id" title="var">defs</span>) <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tCoFix</span> <span class="id" title="var">defs</span> <span class="id" title="var">i</span> =&gt; <span class="id" title="constructor">tCoFix</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> (<span class="id" title="definition">map_def</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_branches"><span class="id" title="definition">expand_branches</span></a>) <span class="id" title="var">defs</span>) <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tPrim</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="expand_constant_body"><span class="id" title="definition">expand_constant_body</span></a> <span class="id" title="var">cst</span> :=<br/>
+&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_type</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_type</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_body</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">option_map</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">expand_branches</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">(</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_body</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">)</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="expand_decl"><span class="id" title="definition">expand_decl</span></a> <span class="id" title="var">d</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#d"><span class="id" title="variable">d</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.ExAst.html#ConstantDecl"><span class="id" title="constructor">ConstantDecl</span></a> <span class="id" title="var">cst</span> =&gt; <a class="idref" href="ConCert.Extraction.ExAst.html#ConstantDecl"><span class="id" title="constructor">ConstantDecl</span></a> (<a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_constant_body"><span class="id" title="definition">expand_constant_body</span></a> <span class="id" title="var">cst</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#d"><span class="id" title="variable">d</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="expand_env"><span class="id" title="definition">expand_env</span></a> (<span class="id" title="var">Σ</span> : <a class="idref" href="ConCert.Extraction.ExAst.html#global_env"><span class="id" title="definition">global_env</span></a>) : <a class="idref" href="ConCert.Extraction.ExAst.html#global_env"><span class="id" title="definition">global_env</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> (<span class="id" title="definition">on_snd</span> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_decl"><span class="id" title="definition">expand_decl</span></a>) <a class="idref" href="ConCert.Extraction.ExpandBranches.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="transform"><span class="id" title="definition">transform</span></a> : <a class="idref" href="ConCert.Extraction.Transform.html#ExtractTransform"><span class="id" title="definition">ExtractTransform</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">Σ</span> =&gt; <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> (<a class="idref" href="ConCert.Extraction.Utils.html#timed"><span class="id" title="definition">timed</span></a> "Expansion of match branches" (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ExpandBranches.html#expand_env"><span class="id" title="definition">expand_env</span></a> <a class="idref" href="ConCert.Extraction.ExpandBranches.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>)).<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

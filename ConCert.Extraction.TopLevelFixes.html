@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.TopLevelFixes</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;This&nbsp;implements&nbsp;an&nbsp;optimization&nbsp;that&nbsp;changes&nbsp;top&nbsp;level&nbsp;fixpoints&nbsp;to&nbsp;use<br/>
+&nbsp;&nbsp;&nbsp;tConst&nbsp;instead.&nbsp;For&nbsp;example,&nbsp;the&nbsp;environment&nbsp;<span class="inlinecode">(&quot;<span class="id" title="var">Foo</span>&quot;,</span> <span class="inlinecode"><span class="id" title="var">tFix</span></span> <span class="inlinecode">[{|</span> <span class="inlinecode"><span class="id" title="var">dbody</span></span> <span class="inlinecode">:=</span> <span class="inlinecode"><span class="id" title="var">tRel</span></span> <span class="inlinecode">0</span> <span class="inlinecode">|}]</span> <span class="inlinecode">0)</span><br/>
+&nbsp;&nbsp;&nbsp;is&nbsp;instead&nbsp;changed&nbsp;into&nbsp;something&nbsp;like&nbsp;<span class="inlinecode">(&quot;<span class="id" title="var">Foo</span>&quot;,</span> <span class="inlinecode"><span class="id" title="var">tConst</span></span> <span class="inlinecode">&quot;<span class="id" title="var">Foo</span>&quot;)</span>.&nbsp;*)</span><br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ExAst.html#"><span class="id" title="library">ExAst</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#"><span class="id" title="library">ResultMonad</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Transform.html#"><span class="id" title="library">Transform</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Utils.html#"><span class="id" title="library">Utils</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Erasure</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">ELiftSubst</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Fixpoint</span> <a name="optimize_aux"><span class="id" title="definition">optimize_aux</span></a> (<span class="id" title="var">t</span> : <span class="id" title="inductive">term</span>) (<span class="id" title="var">kn</span> : <span class="id" title="definition">kername</span>) (<span class="id" title="var">lams</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#t"><span class="id" title="variable">t</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tLambda</span> <span class="id" title="var">na</span> <span class="id" title="var">body</span> =&gt; <span class="id" title="constructor">tLambda</span> <span class="id" title="var">na</span> (<a class="idref" href="ConCert.Extraction.TopLevelFixes.html#optimize_aux"><span class="id" title="definition">optimize_aux</span></a> <span class="id" title="var">body</span> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#kn"><span class="id" title="variable">kn</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#lams"><span class="id" title="variable">lams</span></a>))<br/>
+&nbsp;&nbsp;| <span class="id" title="constructor">tFix</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">[</span></a><span class="id" title="var">def</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ddd65c2f7ee73ecec433744948d846bb"><span class="id" title="notation">]</span></a> 0 =&gt; <span class="id" title="notation">(</span><span class="id" title="projection">dbody</span> <span class="id" title="var">def</span><span class="id" title="notation">){</span>0 <span class="id" title="notation">:=</span> <span class="id" title="definition">mkApps</span> (<span class="id" title="constructor">tConst</span> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#kn"><span class="id" title="variable">kn</span></a>) (<span class="id" title="definition">rev_map</span> <span class="id" title="constructor">tRel</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#seq"><span class="id" title="definition">seq</span></a> 0 <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#lams"><span class="id" title="variable">lams</span></a>))<span class="id" title="notation">}</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#t"><span class="id" title="variable">t</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="optimize"><span class="id" title="definition">optimize</span></a> (<span class="id" title="var">t</span> : <span class="id" title="inductive">term</span>) (<span class="id" title="var">kn</span> : <span class="id" title="definition">kername</span>) : <span class="id" title="inductive">term</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.TopLevelFixes.html#optimize_aux"><span class="id" title="definition">optimize_aux</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#t"><span class="id" title="variable">t</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#kn"><span class="id" title="variable">kn</span></a> 0.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="optimize_decl"><span class="id" title="definition">optimize_decl</span></a> (<span class="id" title="var">p</span> : <span class="id" title="definition">kername</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"><span class="id" title="notation">*</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#bool"><span class="id" title="inductive">bool</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"><span class="id" title="notation">*</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#global_decl"><span class="id" title="inductive">global_decl</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> '<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">kn</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">includes_deps</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">decl</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> := <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#p"><span class="id" title="variable">p</span></a> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">new_decl</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">decl</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.ExAst.html#ConstantDecl"><span class="id" title="constructor">ConstantDecl</span></a> <span class="id" title="var">cst</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ExAst.html#ConstantDecl"><span class="id" title="constructor">ConstantDecl</span></a> {| <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_type</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_type</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_body</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">option_map</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">(</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">fun</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">t</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">=&gt;</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">optimize</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">t</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">kn</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">)</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">(</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst_body</span></a> <a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">cst</span></a><a class="idref" href="ConCert.Extraction.ExAst.html#Build_constant_body"><span class="id" title="constructor">);</span></a> |}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <span class="id" title="var">decl</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">kn</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">includes_deps</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#new_decl"><span class="id" title="variable">new_decl</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="optimize_env"><span class="id" title="definition">optimize_env</span></a> (<span class="id" title="var">Σ</span> : <a class="idref" href="ConCert.Extraction.ExAst.html#global_env"><span class="id" title="definition">global_env</span></a>) : <a class="idref" href="ConCert.Extraction.ExAst.html#global_env"><span class="id" title="definition">global_env</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#map"><span class="id" title="definition">map</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#optimize_decl"><span class="id" title="definition">optimize_decl</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="transform"><span class="id" title="definition">transform</span></a> : <a class="idref" href="ConCert.Extraction.Transform.html#ExtractTransform"><span class="id" title="definition">ExtractTransform</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">Σ</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> (<a class="idref" href="ConCert.Extraction.Utils.html#timed"><span class="id" title="definition">timed</span></a> "Substitution of top level fixes" (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#optimize_env"><span class="id" title="definition">optimize_env</span></a> <a class="idref" href="ConCert.Extraction.TopLevelFixes.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>)).<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

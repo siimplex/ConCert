@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library BernsteinYangTermination</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Computation&nbsp;needed&nbsp;to&nbsp;show&nbsp;termination&nbsp;of&nbsp;the&nbsp;Bernstein-Yang&nbsp;modular&nbsp;inversion&nbsp;algorithm&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Loader</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Bool</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Z</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">steps</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> 2 ^ 44 : <span class="id" title="var">N</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">shiftl</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="tactic">cbv</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Z.shiftl</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">shiftr</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="tactic">cbv</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Z.shiftr</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">divstep</span> <span class="id" title="var">d</span> <span class="id" title="var">f</span> <span class="id" title="var">g</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">if</span> (0 &lt;? <span class="id" title="var">d</span>) &amp;&amp; <span class="id" title="var">odd</span> <span class="id" title="var">g</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">then</span> (1 - <span class="id" title="var">d</span>, <span class="id" title="var">g</span>, <span class="id" title="var">shiftr</span> (<span class="id" title="var">g</span> - <span class="id" title="var">f</span>) 1)<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">else</span> (1 + <span class="id" title="var">d</span>, <span class="id" title="var">f</span>, <span class="id" title="var">shiftr</span> (<span class="id" title="var">g</span> + (<span class="id" title="keyword">if</span> <span class="id" title="var">odd</span> <span class="id" title="var">g</span> <span class="id" title="keyword">then</span> 1 <span class="id" title="keyword">else</span> 0) * <span class="id" title="var">f</span>) 1 ).<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">needs_n_steps</span> (<span class="id" title="var">d</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">Z</span>) <span class="id" title="var">n</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">n</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 0%<span class="id" title="var">nat</span> =&gt; <span class="id" title="var">true</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">n</span> =&gt; <span class="id" title="keyword">if</span> (<span class="id" title="var">b</span> =? 0)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">false</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">let</span> '(<span class="id" title="var">d'</span>, <span class="id" title="var">a'</span>, <span class="id" title="var">b'</span>) := <span class="id" title="var">divstep</span> <span class="id" title="var">d</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="tactic">in</span> <span class="id" title="var">needs_n_steps</span> <span class="id" title="var">d'</span> <span class="id" title="var">a'</span> <span class="id" title="var">b'</span> <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">min_needs_n_steps_nat</span> (<span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">Z</span>) <span class="id" title="var">n</span> (<span class="id" title="var">acc</span> : <span class="id" title="var">Z</span>) <span class="id" title="var">fuel</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">fuel</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| 0%<span class="id" title="var">nat</span> =&gt; 0<br/>
+&nbsp;&nbsp;| <span class="id" title="var">S</span> <span class="id" title="var">fuel</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">a2</span> := <span class="id" title="var">a</span> * <span class="id" title="var">a</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">acc</span> &lt;? <span class="id" title="var">a2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">acc</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">length</span> := <span class="id" title="var">a2</span> + <span class="id" title="var">b</span> * <span class="id" title="var">b</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">if</span> <span class="id" title="var">acc</span> &lt;? <span class="id" title="var">length</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">min_needs_n_steps_nat</span> (<span class="id" title="var">a</span> + 2) 0 <span class="id" title="var">n</span> <span class="id" title="var">acc</span> <span class="id" title="var">fuel</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">if</span> <span class="id" title="var">needs_n_steps</span> 1 <span class="id" title="var">a</span> (<span class="id" title="var">shiftr</span> <span class="id" title="var">b</span> 1) <span class="id" title="var">n</span> || <span class="id" title="var">needs_n_steps</span> 1 <span class="id" title="var">a</span> (- (<span class="id" title="var">shiftr</span> <span class="id" title="var">b</span> 1)) <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span> <span class="id" title="var">min_needs_n_steps_nat</span> (<span class="id" title="var">a</span> + 2) 0 <span class="id" title="var">n</span> (<span class="id" title="var">min</span> <span class="id" title="var">length</span> <span class="id" title="var">acc</span>) <span class="id" title="var">fuel</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">min_needs_n_steps_nat</span> <span class="id" title="var">a</span> (<span class="id" title="var">b</span> + 2) <span class="id" title="var">n</span> <span class="id" title="var">acc</span> <span class="id" title="var">fuel</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">nat_shiftl</span> := <span class="id" title="keyword">Eval</span> <span class="id" title="tactic">cbv</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Nat.shiftl</span>.<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">W</span> <span class="id" title="var">n</span> := <span class="id" title="var">min_needs_n_steps_nat</span> 1 0 <span class="id" title="var">n</span> (<span class="id" title="var">shiftl</span> 1 62) (<span class="id" title="var">nat_shiftl</span> 1 44).<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">nat_shiftl</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a &lt;&lt; b }".<br/>
+<span class="comment">(*&nbsp;Unsound&nbsp;in&nbsp;general,&nbsp;but&nbsp;fine&nbsp;for&nbsp;this&nbsp;program&nbsp;*)</span><br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">shiftl</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { a &lt;&lt; b }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">shiftr</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { a &gt;&gt; b }".<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtrRustBasic</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtrRustUncheckedArith</span>.<br/>
+<span class="id" title="var">Redirect</span> "../examples/extracted-code/rust-extract/BernsteinYangTermination.rs" <span class="id" title="var">ConCert</span> <span class="id" title="keyword">Extract</span> <span class="id" title="var">W</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

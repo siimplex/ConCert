@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ExtrRustCheckedArith</h1>
+
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="keyword">Extraction</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">nat</span> =&gt; "u64" ["0" "__nat_succ"] "__nat_elim!".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">positive</span> =&gt; "u64" ["__pos_onebit" "__pos_zerobit" "1"] "__pos_elim!".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">N</span> =&gt; "u64" ["0" "__N_frompos"] "__N_elim!".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">Z</span> =&gt; "i64" ["0" "__Z_frompos" "__Z_fromneg"] "__Z_elim!".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="keyword">Inductive</span> <span class="id" title="var">comparison</span> =&gt;<br/>
+&nbsp;&nbsp;"std::cmp::Ordering"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;["std::cmp::Ordering::Equal"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"std::cmp::Ordering::Less"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"std::cmp::Ordering::Greater"].<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.add</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_add(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.succ</span> =&gt; "fn ##name##(&amp;'a self, a: u64) -&gt; u64 { a.checked_add(1).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.pred</span> =&gt; "fn ##name##(&amp;'a self, a: u64) -&gt; u64 { a.checked_sub(1).unwrap_or(1) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.sub</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_sub(b).unwrap_or(1) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.mul</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_mul(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.min</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { std::cmp::min(a, b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.max</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { std::cmp::max(a, b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.eqb</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; bool { a == b }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.compare</span> =&gt;<br/>
+"fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; std::cmp::Ordering {
+  a.cmp(&amp;b)
+}".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinPosDef.Pos.compare_cont</span> =&gt;<br/>
+"fn ##name##(&amp;'a self, cont: std::cmp::Ordering, a: u64, b: u64) -&gt; std::cmp::Ordering {
+  if a &lt; b then
+    std::cmp::Ordering::Less
+  else if a == b then
+    cont
+  else
+    std::cmp::Ordering::Greater".<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.add</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_add(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.succ</span> =&gt; "fn ##name##(&amp;'a self, a: u64) -&gt; u64 { a.checked_add(1).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.pred</span> =&gt; "fn ##name##(&amp;'a self, a: u64) -&gt; u64 { a.checked_sub(1).unwrap_or(0) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.sub</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_sub(b).unwrap_or(0) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.mul</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_mul(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.div</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_div(b).unwrap_or(0) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.modulo</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { a.checked_rem(b).unwrap_or(a) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.min</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { std::cmp::min(a, b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.max</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; u64 { std::cmp::max(a, b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.eqb</span> =&gt; "fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; bool { a == b }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinNatDef.N.compare</span> =&gt;<br/>
+"fn ##name##(&amp;'a self, a: u64, b: u64) -&gt; std::cmp::Ordering { a.cmp(&amp;b) }".<br/>
+
+<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.add</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { a.checked_add(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.succ</span> =&gt; "fn ##name##(&amp;'a self, a: i64) -&gt; i64 { a.checked_add(1).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.pred</span> =&gt; "fn ##name##(&amp;'a self, a: i64) -&gt; i64 { a.checked_sub(1).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.sub</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { a.checked_sub(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.mul</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { a.checked_mul(b).unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.opp</span> =&gt; "fn ##name##(&amp;'a self, a: i64) -&gt; i64 { a.checked_neg().unwrap() }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.min</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { std::cmp::min(a, b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.max</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; i64 { std::cmp::max(a, b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.eqb</span> =&gt; "fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; bool { a == b }".<br/>
+<span class="comment">(*&nbsp;TODO:&nbsp;div&nbsp;and&nbsp;modulo&nbsp;are&nbsp;nontrivial&nbsp;since&nbsp;Coq&nbsp;rounds&nbsp;towards&nbsp;negative&nbsp;infinity&nbsp;*)</span><br/>
+<span class="comment">(*Extract&nbsp;ConstanBinIntDef.t&nbsp;Z.div&nbsp;=&gt;&nbsp;"fn&nbsp;#name#(a:&nbsp;i64,&nbsp;b:&nbsp;i64)&nbsp;-&gt;&nbsp;i64&nbsp;{&nbsp;a.checked_div(b).unwrap_or(0)&nbsp;}".<br/>
+Extract&nbsp;Constant&nbsp;BinIntDef.Z.modulo&nbsp;=&gt;&nbsp;"fn&nbsp;#name#(a:&nbsp;i64,&nbsp;b:&nbsp;i64)&nbsp;-&gt;&nbsp;i64&nbsp;{&nbsp;a.checked_rem(b).unwrap_or(a)&nbsp;}".*)</span><br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.compare</span> =&gt;<br/>
+"fn ##name##(&amp;'a self, a: i64, b: i64) -&gt; std::cmp::Ordering { a.cmp(&amp;b) }".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.of_N</span> =&gt;<br/>
+"fn ##name##(&amp;'a self, a: u64) -&gt; i64 {
+  use std::convert::TryFrom;
+  i64::try_from(a).unwrap()
+}".<br/>
+<span class="id" title="keyword">Extract</span> <span class="id" title="var">Constant</span> <span class="id" title="var">BinIntDef.Z.abs_N</span> =&gt; "fn ##name#(&amp;'a self, a: i64) -&gt; u64 { a.unsigned_abs() }".<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

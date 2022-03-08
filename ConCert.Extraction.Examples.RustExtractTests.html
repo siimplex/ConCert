@@ -1,0 +1,529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Extraction.Examples.RustExtractTests</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab72"></a><h1 class="section">Tests for extraction to Rust</h1>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Extraction.html#"><span class="id" title="library">Extraction</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.RustExtract.html#"><span class="id" title="library">RustExtract</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.Printing.html#"><span class="id" title="library">Printing</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Extraction</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Extraction.ResultMonad.html#"><span class="id" title="library">ResultMonad</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Utils.StringExtra.html#"><span class="id" title="library">StringExtra</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">Ast</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq.Template</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">Kernames</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">MetaCoq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">utils</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">PrettyPrinterMonad</span>.<br/>
+<span class="id" title="keyword">Local Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">string</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Instance</span> <a name="RustConfig"><span class="id" title="instance">RustConfig</span></a> : <a class="idref" href="ConCert.Extraction.RustExtract.html#RustPrintConfig"><span class="id" title="class">RustPrintConfig</span></a> :=<br/>
+&nbsp;&nbsp;{| <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">term_box_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">type_box_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">any_type_symbol</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> "()"<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">print_full_names</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Extraction.RustExtract.html#Build_RustPrintConfig"><span class="id" title="constructor">false</span></a> |}.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="default_attrs"><span class="id" title="definition">default_attrs</span></a> : <a class="idref" href="ConCert.Extraction.RustExtract.html#ind_attr_map"><span class="id" title="definition">ind_attr_map</span></a> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; "#[derive(Debug, Clone)]".<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="extract"><span class="id" title="definition">extract</span></a> (<span class="id" title="var">p</span> : <a class="idref" href="ConCert.Extraction.RustExtract.html#T.program"><span class="id" title="definition">T.program</span></a>) : <a class="idref" href="ConCert.Extraction.ResultMonad.html#result"><span class="id" title="inductive">result</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Strings.String.html#string"><span class="id" title="inductive">string</span></a> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">entry</span> <span class="id" title="notation">&lt;-</span> <span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#p"><span class="id" title="variable">p</span></a><span class="id" title="notation">.2</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.RustExtract.html#T.tConst"><span class="id" title="constructor">T.tConst</span></a> <span class="id" title="var">kn</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="method">ret</span> <span class="id" title="var">kn</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.RustExtract.html#T.tInd"><span class="id" title="constructor">T.tInd</span></a> <span class="id" title="var">ind</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="method">ret</span> (<span class="id" title="projection">inductive_mind</span> <span class="id" title="var">ind</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Extraction.ResultMonad.html#Err"><span class="id" title="constructor">Err</span></a> "Expected program to be a tConst or tInd"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="var">Σ</span> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.Extraction.html#extract_template_env"><span class="id" title="definition">extract_template_env</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<a class="idref" href="ConCert.Extraction.RustExtract.html#extract_rust_within_coq"><span class="id" title="definition">extract_rust_within_coq</span></a> (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a>) (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#p"><span class="id" title="variable">p</span></a><span class="id" title="notation">.1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="definition">KernameSet.singleton</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#entry"><span class="id" title="variable">entry</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">k</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a>)<span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">is_const</span> '<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">kn</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">decl</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#decl"><span class="id" title="variable">decl</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Extraction.RustExtract.html#Ex.ConstantDecl"><span class="id" title="constructor">Ex.ConstantDecl</span></a> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;Filtering&nbsp;out&nbsp;empty&nbsp;type&nbsp;declarations&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;TODO:&nbsp;possibly,&nbsp;move&nbsp;to&nbsp;extraction&nbsp;(requires&nbsp;modifications&nbsp;of&nbsp;the&nbsp;correctness&nbsp;proof)&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">Σ</span> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#filter"><span class="id" title="definition">filter</span></a> (<span class="id" title="keyword">fun</span> '<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">kn</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a><span class="id" title="var">d</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#negb"><span class="id" title="definition">negb</span></a> (<a class="idref" href="ConCert.Extraction.Extraction.html#is_empty_type_decl"><span class="id" title="definition">is_empty_type_decl</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#d"><span class="id" title="variable">d</span></a>)) <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> <span class="id" title="tactic">in</span><br/>
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">p</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#print_decls"><span class="id" title="definition">print_decls</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#no_remaps"><span class="id" title="definition">no_remaps</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#default_attrs"><span class="id" title="definition">default_attrs</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#filter"><span class="id" title="definition">filter</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#negb"><span class="id" title="definition">negb</span></a> <span class="id" title="notation">∘</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#is_const"><span class="id" title="variable">is_const</span></a>) (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#rev"><span class="id" title="definition">List.rev</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>))<span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.PrettyPrinterMonad.html#append_nl"><span class="id" title="definition">append_nl</span></a><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.PrettyPrinterMonad.html#append_nl"><span class="id" title="definition">append_nl</span></a><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.RustExtract.html#print_decls"><span class="id" title="definition">print_decls</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a> <a class="idref" href="ConCert.Extraction.Printing.html#no_remaps"><span class="id" title="definition">no_remaps</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#default_attrs"><span class="id" title="definition">default_attrs</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#filter"><span class="id" title="definition">filter</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#is_const"><span class="id" title="variable">is_const</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#rev"><span class="id" title="definition">List.rev</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#e15c0eb40e61adefe95778c26e7840f6"><span class="id" title="variable">Σ</span></a>))<span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="method">ret</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#tt"><span class="id" title="constructor">tt</span></a> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="notation">'</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">_</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <span class="id" title="var">s</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <span class="id" title="notation">&lt;-</span> <a class="idref" href="ConCert.Extraction.PrettyPrinterMonad.html#finish_print"><span class="id" title="definition">finish_print</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#p"><span class="id" title="variable">p</span></a><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;<span class="id" title="method">ret</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#s"><span class="id" title="variable">s</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="ex1"><span class="id" title="module">ex1</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="ex1.foo"><span class="id" title="definition">foo</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">{</span></a> <span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">:</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">|</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">}</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#exist"><span class="id" title="constructor">exist</span></a> 0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#eq_refl"><span class="id" title="constructor">eq_refl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="ex1.bar"><span class="id" title="definition">bar</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#proj1_sig"><span class="id" title="definition">proj1_sig</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex1.foo"><span class="id" title="definition">foo</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">ex1</span> := <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex1.bar"><span class="id" title="definition">bar</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="ex1.ex1_test"><span class="id" title="definition">ex1_test</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex1.ex1"><span class="id" title="definition">ex1</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Sig&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  exist(PhantomData&lt;&amp;'a A&gt;, A)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  O(PhantomData&lt;&amp;'a ()&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  S(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn proj1_sig&lt;A: Copy&gt;(&amp;'a self, e: &amp;'a Sig&lt;'a, A&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  match e {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Sig::exist(_, a) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      a"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn proj1_sig__curried&lt;A: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Sig&lt;'a, A&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |e| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.proj1_sig("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      e)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn foo(&amp;'a self) -&gt; &amp;'a Sig&lt;'a, &amp;'a Nat&lt;'a&gt;&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    Sig::exist("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        Nat::O("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          PhantomData))))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn bar(&amp;'a self) -&gt; &amp;'a Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.proj1_sig("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.foo())"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex1"><span class="id" title="module">ex1</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="ex2"><span class="id" title="module">ex2</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="ex2.only_in_type"><span class="id" title="definition">only_in_type</span></a> := 5.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="ex2.foo"><span class="id" title="definition">foo</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">{</span></a> <span class="id" title="var">n</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">:</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">|</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex2.only_in_type"><span class="id" title="definition">only_in_type</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> 5 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">}</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#exist"><span class="id" title="constructor">exist</span></a> 0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#eq_refl"><span class="id" title="constructor">eq_refl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="ex2.bar"><span class="id" title="definition">bar</span></a> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#proj1_sig"><span class="id" title="definition">proj1_sig</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex2.foo"><span class="id" title="definition">foo</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">ex2</span> := <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex2.bar"><span class="id" title="definition">bar</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="ex2.ex2_test"><span class="id" title="definition">ex2_test</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex2.ex2"><span class="id" title="definition">ex2</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Sig&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  exist(PhantomData&lt;&amp;'a A&gt;, A)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  O(PhantomData&lt;&amp;'a ()&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  S(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn proj1_sig&lt;A: Copy&gt;(&amp;'a self, e: &amp;'a Sig&lt;'a, A&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  match e {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Sig::exist(_, a) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      a"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn proj1_sig__curried&lt;A: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Sig&lt;'a, A&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |e| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.proj1_sig("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      e)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn foo(&amp;'a self) -&gt; &amp;'a Sig&lt;'a, &amp;'a Nat&lt;'a&gt;&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    Sig::exist("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        Nat::O("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          PhantomData))))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn bar(&amp;'a self) -&gt; &amp;'a Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.proj1_sig("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.foo())"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex2"><span class="id" title="module">ex2</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="ex3"><span class="id" title="module">ex3</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">quoted</span> := <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Peano.html#plus"><span class="id" title="abbreviation">plus</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="ex3.test"><span class="id" title="definition">test</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex3.quoted"><span class="id" title="definition">quoted</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  O(PhantomData&lt;&amp;'a ()&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  S(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn add(&amp;'a self, n: &amp;'a Nat&lt;'a&gt;, m: &amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  match n {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Nat::O(_) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      m"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Nat::S(_, p) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        Nat::S("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          self.add("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            p,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            m)))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn add__curried(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a dyn Fn(&amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |n| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.closure(move |m| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.add("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        n,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        m)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex3"><span class="id" title="module">ex3</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="ex4"><span class="id" title="module">ex4</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <a name="ex4.ack"><span class="id" title="definition">ack</span></a> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#n"><span class="id" title="variable">n</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#O"><span class="id" title="constructor">O</span></a> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#m"><span class="id" title="variable">m</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">p</span> =&gt; <span class="id" title="keyword">let</span> <span class="id" title="keyword">fix</span> <span class="id" title="var">ackn</span> (<span class="id" title="var">m</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#m"><span class="id" title="variable">m</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#O"><span class="id" title="constructor">O</span></a> =&gt; <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ack"><span class="id" title="definition">ack</span></a> <span class="id" title="var">p</span> 1<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <span class="id" title="var">q</span> =&gt; <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ack"><span class="id" title="definition">ack</span></a> <span class="id" title="var">p</span> (<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ackn"><span class="id" title="variable">ackn</span></a> <span class="id" title="var">q</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">in</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ackn"><span class="id" title="variable">ackn</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#m"><span class="id" title="variable">m</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex4.ack"><span class="id" title="definition">ack</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="ex4.test"><span class="id" title="definition">test</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex4.quoted"><span class="id" title="definition">quoted</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  O(PhantomData&lt;&amp;'a ()&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  S(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn ack(&amp;'a self, n: &amp;'a Nat&lt;'a&gt;, m: &amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  match n {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Nat::O(_) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        Nat::S("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          m))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Nat::S(_, p) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      let ackn = {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        let ackn = self.alloc(std::cell::Cell::new(None));"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        ackn.set(Some("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          self.closure(move |m2| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            match m2 {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"              &amp;Nat::O(_) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                self.ack("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                  p,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                  self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                    Nat::S("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                      PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                        Nat::O("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                          PhantomData)))))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"              },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"              &amp;Nat::S(_, q) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                self.ack("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                  p,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                  hint_app(ackn.get().unwrap())(q))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"              },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          })));"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        ackn.get().unwrap()"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      };"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      hint_app(ackn)(m)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn ack__curried(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a dyn Fn(&amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |n| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.closure(move |m| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.ack("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        n,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        m)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex4"><span class="id" title="module">ex4</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="ex5"><span class="id" title="module">ex5</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="ex5.code"><span class="id" title="definition">code</span></a> (<span class="id" title="var">n</span> <span class="id" title="var">m</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<span class="id" title="var">f</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Vectors.Fin.html#t"><span class="id" title="inductive">Fin.t</span></a> (<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#m"><span class="id" title="variable">m</span></a>)) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Vectors.Fin.html#t"><span class="id" title="inductive">Fin.t</span></a> (<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#m"><span class="id" title="variable">m</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Peano.html#0dacc1786c5ba797d47dd85006231633"><span class="id" title="notation">+</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#n"><span class="id" title="variable">n</span></a>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Arith.PeanoNat.html#Nat.add_comm"><span class="id" title="lemma">Nat.add_comm</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#n"><span class="id" title="variable">n</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#m"><span class="id" title="variable">m</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#eq_refl"><span class="id" title="constructor">eq_refl</span></a> =&gt; <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#f"><span class="id" title="variable">f</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Quote</span> <span class="id" title="var">Recursively</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">quoted</span> := <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex5.code"><span class="id" title="definition">code</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="ex5.test"><span class="id" title="definition">test</span></a> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex5.quoted"><span class="id" title="definition">quoted</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  O(PhantomData&lt;&amp;'a ()&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  S(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum T&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  F1(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  FS(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;, &amp;'a T&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Eq&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  eq_refl(PhantomData&lt;&amp;'a A&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn code(&amp;'a self, f: &amp;'a T&lt;'a&gt;) -&gt; &amp;'a T&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  f"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn code__curried(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a T&lt;'a&gt;) -&gt; &amp;'a T&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |f| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.code("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      f)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#ex5"><span class="id" title="module">ex5</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <a name="SafeHead"><span class="id" title="module">SafeHead</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <a name="SafeHead.safe_head"><span class="id" title="definition">safe_head</span></a> {<span class="id" title="var">A</span>} (<span class="id" title="var">non_empty_list</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">{</span></a><span class="id" title="var">l</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">:</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#A"><span class="id" title="variable">A</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">|</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#length"><span class="id" title="abbreviation">length</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#l"><span class="id" title="variable">l</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Peano.html#7f2a7ef2c63af7359b22787a9daf336e"><span class="id" title="notation">&gt;</span></a> 0<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Specif.html#6556914db359db999889decec6a4a562"><span class="id" title="notation">}</span></a>) : <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#A"><span class="id" title="variable">A</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#non_empty_list"><span class="id" title="variable">non_empty_list</span></a> <span class="id" title="keyword">as</span> <span class="id" title="var">l'</span> <span class="id" title="keyword">return</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#l'"><span class="id" title="variable">l'</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#non_empty_list"><span class="id" title="variable">non_empty_list</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#A"><span class="id" title="variable">A</span></a>  <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;we&nbsp;use&nbsp;<span class="inlinecode"><span class="id" title="var">False_rect</span></span>&nbsp;to&nbsp;make&nbsp;the&nbsp;extracted&nbsp;code&nbsp;a&nbsp;bit&nbsp;nicer.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It's&nbsp;totally&nbsp;possible&nbsp;to&nbsp;leave&nbsp;the&nbsp;whole&nbsp;branch&nbsp;as&nbsp;an&nbsp;obligation,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;extraction&nbsp;will&nbsp;handle&nbsp;it.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;However,&nbsp;if&nbsp;the&nbsp;whole&nbsp;branch&nbsp;is&nbsp;an&nbsp;abligation,&nbsp;the&nbsp;proof&nbsp;it&nbsp;should<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;be&nbsp;left&nbsp;transparent&nbsp;(using&nbsp;<span class="inlinecode"><span class="id" title="keyword">Defined</span></span>),&nbsp;so&nbsp;the&nbsp;extraction&nbsp;could<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;produce&nbsp;reasonable&nbsp;code&nbsp;for&nbsp;it.&nbsp;If&nbsp;left&nbsp;opaque,&nbsp;it&nbsp;the&nbsp;body&nbsp;of<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;obligation&nbsp;will&nbsp;be&nbsp;ignored&nbsp;by&nbsp;extraction&nbsp;producing&nbsp;no<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;corresponding&nbsp;definiton*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#False_rect"><span class="id" title="definition">False_rect</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">hd</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#cbcf67aac0c2a85b8d93d37de9969adf"><span class="id" title="notation">::</span></a> <span class="id" title="var">tl</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">hd</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#eq_refl"><span class="id" title="constructor">eq_refl</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="keyword">goal</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">H</span> : 0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Peano.html#7f2a7ef2c63af7359b22787a9daf336e"><span class="id" title="notation">&gt;</span></a> 0 |- <span class="id" title="var">_</span> =&gt; <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Program Definition</span> <a name="SafeHead.head_of_repeat_plus_one"><span class="id" title="definition">head_of_repeat_plus_one</span></a> {<span class="id" title="var">A</span>} (<span class="id" title="var">n</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a>) (<span class="id" title="var">a</span> : <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#A"><span class="id" title="variable">A</span></a>) : <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#A"><span class="id" title="variable">A</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;:= <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#SafeHead.safe_head"><span class="id" title="definition">safe_head</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#repeat"><span class="id" title="definition">repeat</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#a"><span class="id" title="variable">a</span></a> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#S"><span class="id" title="constructor">S</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#n"><span class="id" title="variable">n</span></a>)).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Next</span> <span class="id" title="keyword">Obligation</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="var">cbn</span>. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">MetaCoq</span> <span class="id" title="var">Run</span> (<span class="id" title="var">p</span> <span class="id" title="notation">&lt;-</span> <span class="id" title="constructor">Core.tmQuoteRecTransp</span> (@<a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#SafeHead.head_of_repeat_plus_one"><span class="id" title="definition">head_of_repeat_plus_one</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a><span class="id" title="notation">;;</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="definition">Core.tmDefinition</span> "Prog" <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#p"><span class="id" title="variable">p</span></a>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Compute</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#SafeHead.Prog"><span class="id" title="definition">Prog</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Example</span> <a name="SafeHead.test"><span class="id" title="definition">test</span></a> : <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#extract"><span class="id" title="definition">extract</span></a> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#SafeHead.Prog"><span class="id" title="definition">Prog</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Extraction.ResultMonad.html#Ok"><span class="id" title="constructor">Ok</span></a> <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">&lt;$</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Nat&lt;'a&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  O(PhantomData&lt;&amp;'a ()&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  S(PhantomData&lt;&amp;'a ()&gt;, &amp;'a Nat&lt;'a&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum Sig&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  exist(PhantomData&lt;&amp;'a A&gt;, A)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"#[derive(Debug, Clone)]"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"pub enum List&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  nil(PhantomData&lt;&amp;'a A&gt;),"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  cons(PhantomData&lt;&amp;'a A&gt;, A, &amp;'a List&lt;'a, A&gt;)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn proj1_sig&lt;A: Copy&gt;(&amp;'a self, e: &amp;'a Sig&lt;'a, A&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  match e {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Sig::exist(_, a) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      a"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn proj1_sig__curried&lt;A: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Sig&lt;'a, A&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |e| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.proj1_sig("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      e)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn False_rect&lt;P: Copy&gt;(&amp;'a self, P: ()) -&gt; P {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  panic!(""Absurd case!"")"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn False_rect__curried&lt;P: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(()) -&gt; P {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |P| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.False_rect("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      P)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn safe_head&lt;A: Copy&gt;(&amp;'a self, non_empty_list: &amp;'a Sig&lt;'a, &amp;'a List&lt;'a, A&gt;&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  hint_app(match self.proj1_sig("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                   non_empty_list) {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"             &amp;List::nil(_) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"               self.closure(move |x| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                 self.False_rect("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                   ())"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"               })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"             },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"             &amp;List::cons(_, hd, tl) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"               self.closure(move |x| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"                 hd"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"               })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"             },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"           })(())"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn safe_head__curried&lt;A: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Sig&lt;'a, &amp;'a List&lt;'a, A&gt;&gt;) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |non_empty_list| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.safe_head("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      non_empty_list)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn repeat&lt;A: Copy&gt;(&amp;'a self, x: A, n: &amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a List&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  match n {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Nat::O(_) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        List::nil("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          PhantomData))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    &amp;Nat::S(_, k) =&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        List::cons("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          x,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          self.repeat("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            x,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            k)))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    },"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  }"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn repeat__curried&lt;A: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(A) -&gt; &amp;'a dyn Fn(&amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a List&lt;'a, A&gt; {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |x| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.closure(move |n| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.repeat("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        x,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        n)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+""<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn head_of_repeat_plus_one&lt;A: Copy&gt;(&amp;'a self, n: &amp;'a Nat&lt;'a&gt;, a: A) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.safe_head("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      Sig::exist("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        self.repeat("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          a,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"          self.alloc("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"            Nat::S("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"              PhantomData,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"              n))))))"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"fn head_of_repeat_plus_one__curried&lt;A: Copy&gt;(&amp;'a self) -&gt; &amp;'a dyn Fn(&amp;'a Nat&lt;'a&gt;) -&gt; &amp;'a dyn Fn(A) -&gt; A {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  self.closure(move |n| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    self.closure(move |a| {"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"      self.head_of_repeat_plus_one("<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        n,"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"        a)"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"    })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"  })"<a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">;</span></a><br/>
+"}" <a class="idref" href="ConCert.Utils.StringExtra.html#643f17f14d4f83cbde988c19a0ee7379"><span class="id" title="notation">$&gt;</span></a>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="keyword">vm_compute</span>. <span class="id" title="tactic">reflexivity</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Extraction.Examples.RustExtractTests.html#SafeHead"><span class="id" title="module">SafeHead</span></a>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

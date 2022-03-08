@@ -1,0 +1,1254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<div id="toc">
+<a href="ConCert.Embedding.Wf.html"><h2>Library ConCert.Embedding.Wf</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Wf.html#lab1">Well-formedness conditions</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Wf.html#lab2">Well-formed global environment (In the paper: (WF.i))</a>
+
+</li>
+<li><a href="ConCert.Embedding.Wf.html#lab3">Well-formedness condition on evaluation environments wrt. an expression (In the paper : (WF.ii) )</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.EvalE.html"><h2>Library ConCert.Embedding.EvalE</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.EvalE.html#lab4">Interpreter for the λsmart langage</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.TranslationUtils.html"><h2>Library ConCert.Embedding.TranslationUtils</h2></a>
+<a href="ConCert.Embedding.CustomTactics.html"><h2>Library ConCert.Embedding.CustomTactics</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.CustomTactics.html#lab5">A place for various tactic used for the development</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.CustomTactics.html#lab6">Tactics taken from the Software Foundations' LibTactics.v</a>
+
+</li>
+<li><a href="ConCert.Embedding.CustomTactics.html#lab7">Converting between bool and Prop</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.EnvSubst.html"><h2>Library ConCert.Embedding.EnvSubst</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.EnvSubst.html#lab8">Convertion from values back to expressions through the environment substitution</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.EnvSubst.html#lab9">Substitution for the nameless representation</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.EnvSubst.html#lab10">Notations for the environment substitution</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Embedding.EnvSubst.html#lab11">Substitution for the named representation</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Ast.html"><h2>Library ConCert.Embedding.Ast</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Ast.html#lab12">λsmart language definition</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Ast.html#lab13">λsmart AST</a>
+
+</li>
+<li><a href="ConCert.Embedding.Ast.html#lab14">Convertion from named representation to De Bruijn indices</a>
+
+</li>
+<li><a href="ConCert.Embedding.Ast.html#lab15">Merging type and term De Bruijn indices</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Prelude.html"><h2>Library ConCert.Embedding.Prelude</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Prelude.html#lab16">Prelude -- definitions of basic of data types</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Tests.html"><h2>Library ConCert.Embedding.Tests</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Tests.html#lab17">Various examples of using notations and conversion to the shallow embedding</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.pcuic.PCUICCorrectnessAux.html"><h2>Library ConCert.Embedding.pcuic.PCUICCorrectnessAux</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICCorrectnessAux.html#lab18">Auxillary lemmas for the soundness proof.</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICCorrectnessAux.html#lab19">Environment substitution commutes with PCUIC substitution (In the paper: Lemma 1.)</a>
+
+</li>
+<li><a href="ConCert.Embedding.pcuic.PCUICCorrectnessAux.html#lab20">Evaluation gives well-formed values (In the paper: Lemma 2)</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.pcuic.PCUICTranslate.html"><h2>Library ConCert.Embedding.pcuic.PCUICTranslate</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICTranslate.html#lab21">Translation from λsmart expressions to PCUIC terms</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICTranslate.html#lab22">Translation of types</a>
+
+</li>
+<li><a href="ConCert.Embedding.pcuic.PCUICTranslate.html#lab23">Translation of expressions</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Embedding.pcuic.PCUICTranslate.html#lab24">Translation of inductives</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.pcuic.PCUICCorrectness.html"><h2>Library ConCert.Embedding.pcuic.PCUICCorrectness</h2></a>
+<ul class="doclist">
+<li><ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICCorrectness.html#lab25">Soundness for closed epxressions (In the paper: Corollary 2)</a>
+
+</li>
+<li><a href="ConCert.Embedding.pcuic.PCUICCorrectness.html#lab26">Adequacy for terminating programs (In the paper: Theorem 3)</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.pcuic.PCUICtoTemplate.html"><h2>Library ConCert.Embedding.pcuic.PCUICtoTemplate</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICtoTemplate.html#lab27">Almost one-to-one tranlsation of PCUIC to Template Coq kernel AST</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.pcuic.PCUICFacts.html"><h2>Library ConCert.Embedding.pcuic.PCUICFacts</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.pcuic.PCUICFacts.html#lab28">Lemmas about the environment substitutions, closedness, etc. on expressions</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Misc.html"><h2>Library ConCert.Embedding.Misc</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Misc.html#lab29">Some facts not found in the standard library</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.SimpleBlockchain.html"><h2>Library ConCert.Embedding.SimpleBlockchain</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.SimpleBlockchain.html#lab30">A simply-typed version of the blockchain execution environment</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.CertifyingTranslate.html"><h2>Library ConCert.Embedding.CertifyingTranslate</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.CertifyingTranslate.html#lab31">Certifying translation</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.CertifyingTranslate.html#lab32">Negation on booleans</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.MyEnv.html"><h2>Library ConCert.Embedding.MyEnv</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.MyEnv.html#lab33">Evaluation environments</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Utils.html"><h2>Library ConCert.Embedding.Utils</h2></a>
+<a href="ConCert.Embedding.Notations.html"><h2>Library ConCert.Embedding.Notations</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Notations.html#lab34">Notations for the deep embeding</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Examples.Demo.html"><h2>Library ConCert.Embedding.Examples.Demo</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.Demo.html#lab35">Simple examples on how to use our framework</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Examples.FinMap.html"><h2>Library ConCert.Embedding.Examples.FinMap</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.FinMap.html#lab36">Finite maps</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.FinMap.html#lab37">The deep embedding of data structures for finite maps</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.FinMap.html#lab38">Functions on finite maps</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.FinMap.html#lab39">Correctness</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.FinMap.html#lab40">Computing with the interpreter</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Examples.AcornExamples.html"><h2>Library ConCert.Embedding.Examples.AcornExamples</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab41">Examples of library code and contracts originating from the actual Acorn implementation</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab42"><span class="inlinecode"><span class="id" title="var">Bool</span></span> module from the standard library of Acorn</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab43"><span class="inlinecode"><span class="id" title="var">Maybe</span></span> module from the standard library of Acorn</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab44">Acorn pairs</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab45">Acorn <span class="inlinecode"><span class="id" title="var">List</span></span> module</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab46">Acorn blockchain-related data types</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.AcornExamples.html#lab47">A simple <span class="inlinecode"><span class="id" title="var">Counter</span></span> contract</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Examples.crowdfunding.Crowdfunding.html"><h2>Library ConCert.Embedding.Examples.crowdfunding.Crowdfunding</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.crowdfunding.Crowdfunding.html#lab48">The crowdfunding contract</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.crowdfunding.Crowdfunding.html#lab49">AST of the <span class="inlinecode"><span class="id" title="var">init</span></span> function</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.crowdfunding.Crowdfunding.html#lab50">AST of the <span class="inlinecode"><span class="id" title="var">receive</span></span> function</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.crowdfunding.Crowdfunding.html#lab51">Properties of the crowdfunding contract</a>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Examples.crowdfunding.CrowdfundingData.html"><h2>Library ConCert.Embedding.Examples.crowdfunding.CrowdfundingData</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.crowdfunding.CrowdfundingData.html#lab52">Data types for the crowdfunding contract</a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.crowdfunding.CrowdfundingData.html#lab53">Definitions of data structures for the contract</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html"><h2>Library ConCert.Embedding.Examples.ExecFrameworkIntegration</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#lab54">Integration with the execution framework, properties of <span class="inlinecode"><span class="id" title="var">crowdfunding</span></span></a>
+<ul class="doclist">
+<li><a href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#lab55">Wrappers</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#lab56">Contract balance in the local state consistent with the sum of individual contributions</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#lab57">The actual contract balance is consistent with the local state</a>
+
+</li>
+<li><a href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#lab58">The actual contract balance is consistent with the sum of individual contributions</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="Loader.html"><h2>Library Loader</h2></a>
+<a href="ExtrRustUncheckedArith.html"><h2>Library ExtrRustUncheckedArith</h2></a>
+<a href="BernsteinYangTermination.html"><h2>Library BernsteinYangTermination</h2></a>
+<a href="ExtrRustBasic.html"><h2>Library ExtrRustBasic</h2></a>
+<a href="ExtrRustCheckedArith.html"><h2>Library ExtrRustCheckedArith</h2></a>
+<a href="ConCert.Extraction.Common.html"><h2>Library ConCert.Extraction.Common</h2></a>
+<a href="ConCert.Extraction.ResultMonad.html"><h2>Library ConCert.Extraction.ResultMonad</h2></a>
+<a href="ConCert.Extraction.Optimize.html"><h2>Library ConCert.Extraction.Optimize</h2></a>
+<a href="ConCert.Extraction.SpecializeChainBase.html"><h2>Library ConCert.Extraction.SpecializeChainBase</h2></a>
+<a href="ConCert.Extraction.ExAst.html"><h2>Library ConCert.Extraction.ExAst</h2></a>
+<a href="ConCert.Extraction.WcbvEvalAux.html"><h2>Library ConCert.Extraction.WcbvEvalAux</h2></a>
+<a href="ConCert.Extraction.CertifyingEta.html"><h2>Library ConCert.Extraction.CertifyingEta</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.CertifyingEta.html#lab59">Eta-expansion and proof generation</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.OptimizePropDiscr.html"><h2>Library ConCert.Extraction.OptimizePropDiscr</h2></a>
+<a href="ConCert.Extraction.Extraction.html"><h2>Library ConCert.Extraction.Extraction</h2></a>
+<a href="ConCert.Extraction.TypeAnnotations.html"><h2>Library ConCert.Extraction.TypeAnnotations</h2></a>
+<a href="ConCert.Extraction.RustExtract.html"><h2>Library ConCert.Extraction.RustExtract</h2></a>
+<a href="ConCert.Extraction.Transform.html"><h2>Library ConCert.Extraction.Transform</h2></a>
+<a href="ConCert.Extraction.Inlining.html"><h2>Library ConCert.Extraction.Inlining</h2></a>
+<a href="ConCert.Extraction.Printing.html"><h2>Library ConCert.Extraction.Printing</h2></a>
+<a href="ConCert.Extraction.CertifyingBeta.html"><h2>Library ConCert.Extraction.CertifyingBeta</h2></a>
+<a href="ConCert.Extraction.OptimizeCorrectness.html"><h2>Library ConCert.Extraction.OptimizeCorrectness</h2></a>
+<a href="ConCert.Extraction.ElmExtract.html"><h2>Library ConCert.Extraction.ElmExtract</h2></a>
+<a href="ConCert.Extraction.CameLIGOExtract.html"><h2>Library ConCert.Extraction.CameLIGOExtract</h2></a>
+<a href="ConCert.Extraction.ErasureCorrectness.html"><h2>Library ConCert.Extraction.ErasureCorrectness</h2></a>
+<a href="ConCert.Extraction.ClosedAux.html"><h2>Library ConCert.Extraction.ClosedAux</h2></a>
+<a href="ConCert.Extraction.PrettyPrinterMonad.html"><h2>Library ConCert.Extraction.PrettyPrinterMonad</h2></a>
+<a href="ConCert.Extraction.PluginExtract.html"><h2>Library ConCert.Extraction.PluginExtract</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.PluginExtract.html#lab60">Definitions below are used in the extracted plugin</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.LiquidityExtract.html"><h2>Library ConCert.Extraction.LiquidityExtract</h2></a>
+<a href="ConCert.Extraction.ConcordiumExtract.html"><h2>Library ConCert.Extraction.ConcordiumExtract</h2></a>
+<a href="ConCert.Extraction.NumLiteralTests.html"><h2>Library ConCert.Extraction.NumLiteralTests</h2></a>
+<a href="ConCert.Extraction.Certifying.html"><h2>Library ConCert.Extraction.Certifying</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Certifying.html#lab61">Term and proof generation for the certifying transforms</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.ExpandBranches.html"><h2>Library ConCert.Extraction.ExpandBranches</h2></a>
+<a href="ConCert.Extraction.TopLevelFixes.html"><h2>Library ConCert.Extraction.TopLevelFixes</h2></a>
+<a href="ConCert.Extraction.Utils.html"><h2>Library ConCert.Extraction.Utils</h2></a>
+<a href="ConCert.Extraction.Annotations.html"><h2>Library ConCert.Extraction.Annotations</h2></a>
+<a href="ConCert.Extraction.ExtractionCorrectness.html"><h2>Library ConCert.Extraction.ExtractionCorrectness</h2></a>
+<a href="ConCert.Extraction.LPretty.html"><h2>Library ConCert.Extraction.LPretty</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.LPretty.html#lab62">Pretty-printing Liquidity code</a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.LPretty.html#lab63">Features/limitations</a>
+
+</li>
+<li><a href="ConCert.Extraction.LPretty.html#lab64">The pretty-printer</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.ExtractExtraction.html"><h2>Library ConCert.Extraction.ExtractExtraction</h2></a>
+<a href="ConCert.Extraction.CertifyingInlining.html"><h2>Library ConCert.Extraction.CertifyingInlining</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.CertifyingInlining.html#lab65">Inlining pass on the Template Coq representation</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Erasure.html"><h2>Library ConCert.Extraction.Erasure</h2></a>
+<a href="ConCert.Extraction.CameLIGOPretty.html"><h2>Library ConCert.Extraction.CameLIGOPretty</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.CameLIGOPretty.html#lab66">Pretty-printing CameLIGO code</a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.CameLIGOPretty.html#lab67">Features/limitations</a>
+
+</li>
+<li><a href="ConCert.Extraction.CameLIGOPretty.html#lab68">The pretty-printer</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.BoardroomVotingExtractionLiquidity.html"><h2>Library ConCert.Extraction.Examples.BoardroomVotingExtractionLiquidity</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.BoardroomVotingExtractionLiquidity.html#lab69">Extraction of the Boardroom voting contract Liquidity</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.CrowdfundingCertifiedExtraction.html"><h2>Library ConCert.Extraction.Examples.CrowdfundingCertifiedExtraction</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.CrowdfundingCertifiedExtraction.html#lab70">Extraction of a crowdfunding contract</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.RecordExtractionLiquidityTests.html"><h2>Library ConCert.Extraction.Examples.RecordExtractionLiquidityTests</h2></a>
+<a href="ConCert.Extraction.Examples.Ack.html"><h2>Library ConCert.Extraction.Examples.Ack</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.Ack.html#lab71">Ackermann function</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.RustExtractTests.html"><h2>Library ConCert.Extraction.Examples.RustExtractTests</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.RustExtractTests.html#lab72">Tests for extraction to Rust</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.MidlangEscrow.html"><h2>Library ConCert.Extraction.Examples.MidlangEscrow</h2></a>
+<a href="ConCert.Extraction.Examples.EscrowExtract.html"><h2>Library ConCert.Extraction.Examples.EscrowExtract</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.EscrowExtract.html#lab73">Extraction of Escrow to CameLIGO and liquidity</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.RustInterp.html"><h2>Library ConCert.Extraction.Examples.RustInterp</h2></a>
+<a href="ConCert.Extraction.Examples.ErasureTests.html"><h2>Library ConCert.Extraction.Examples.ErasureTests</h2></a>
+<a href="ConCert.Extraction.Examples.MidlangCounterRefTypes.html"><h2>Library ConCert.Extraction.Examples.MidlangCounterRefTypes</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.MidlangCounterRefTypes.html#lab74">Extraction of a counter contract with refinement types to Midllang</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.ElmExtractTests.html"><h2>Library ConCert.Extraction.Examples.ElmExtractTests</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.ElmExtractTests.html#lab75">Tests for extraction to Elm</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.RustCounter.html"><h2>Library ConCert.Extraction.Examples.RustCounter</h2></a>
+<a href="ConCert.Extraction.Examples.StackInterpreter.html"><h2>Library ConCert.Extraction.Examples.StackInterpreter</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.StackInterpreter.html#lab76">Extraction of an interpreter for a stack based DSL</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.ElmExtractExamples.html"><h2>Library ConCert.Extraction.Examples.ElmExtractExamples</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.ElmExtractExamples.html#lab77">Examples for extraction to Elm</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.CounterDepCertifiedExtraction.html"><h2>Library ConCert.Extraction.Examples.CounterDepCertifiedExtraction</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.CounterDepCertifiedExtraction.html#lab78">Extraction of a counter contract with dependent types (propositions)</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.RustEscrow.html"><h2>Library ConCert.Extraction.Examples.RustEscrow</h2></a>
+<a href="ConCert.Extraction.Examples.CounterSubsetTypes.html"><h2>Library ConCert.Extraction.Examples.CounterSubsetTypes</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.CounterSubsetTypes.html#lab79">Extraction of a counter contract with subset types to Liquidity and CameLIGO</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.ElmForms.html"><h2>Library ConCert.Extraction.Examples.ElmForms</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.ElmForms.html#lab80">Elm web app example</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.Dexter2Extract.html"><h2>Library ConCert.Extraction.Examples.Dexter2Extract</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.Dexter2Extract.html#lab81">Common extraction setup</a>
+
+</li>
+<li><a href="ConCert.Extraction.Examples.Dexter2Extract.html#lab82">Extracting Liquidity Token</a>
+
+</li>
+<li><a href="ConCert.Extraction.Examples.Dexter2Extract.html#lab83">Extracting the Main Contract</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.CameLIGOExtractionTests.html"><h2>Library ConCert.Extraction.Examples.CameLIGOExtractionTests</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.CameLIGOExtractionTests.html#lab84">Extraction of various contracts to CameLIGO</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.ERC20LiquidityExtraction.html"><h2>Library ConCert.Extraction.Examples.ERC20LiquidityExtraction</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.ERC20LiquidityExtraction.html#lab85">Extraction of a simple counter contract</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.TypeAnnotationTests.html"><h2>Library ConCert.Extraction.Examples.TypeAnnotationTests</h2></a>
+<a href="ConCert.Extraction.Examples.CounterCertifiedExtraction.html"><h2>Library ConCert.Extraction.Examples.CounterCertifiedExtraction</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.CounterCertifiedExtraction.html#lab86">Extraction of a simple counter contract</a>
+
+</li>
+</ul>
+<a href="ConCert.Extraction.Examples.BoardroomVotingExtractionCameLIGO.html"><h2>Library ConCert.Extraction.Examples.BoardroomVotingExtractionCameLIGO</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Extraction.Examples.BoardroomVotingExtractionCameLIGO.html#lab87">Extraction of the Boardroom voting contract CameLIGO</a>
+
+</li>
+</ul>
+<a href="ConCert.Utils.Automation.html"><h2>Library ConCert.Utils.Automation</h2></a>
+<a href="ConCert.Utils.StringExtra.html"><h2>Library ConCert.Utils.StringExtra</h2></a>
+<a href="ConCert.Utils.RecordSet.html"><h2>Library ConCert.Utils.RecordSet</h2></a>
+<a href="ConCert.Utils.RecordUpdate.html"><h2>Library ConCert.Utils.RecordUpdate</h2></a>
+<a href="ConCert.Execution.ResultMonad.html"><h2>Library ConCert.Execution.ResultMonad</h2></a>
+<a href="ConCert.Execution.LocalBlockchain.html"><h2>Library ConCert.Execution.LocalBlockchain</h2></a>
+<a href="ConCert.Execution.BuildUtils.html"><h2>Library ConCert.Execution.BuildUtils</h2></a>
+<a href="ConCert.Execution.ChainedList.html"><h2>Library ConCert.Execution.ChainedList</h2></a>
+<a href="ConCert.Execution.Serializable.html"><h2>Library ConCert.Execution.Serializable</h2></a>
+<a href="ConCert.Execution.Extras.html"><h2>Library ConCert.Execution.Extras</h2></a>
+<a href="ConCert.Execution.InterContractCommunication.html"><h2>Library ConCert.Execution.InterContractCommunication</h2></a>
+<a href="ConCert.Execution.Containers.html"><h2>Library ConCert.Execution.Containers</h2></a>
+<a href="ConCert.Execution.ContractMonads.html"><h2>Library ConCert.Execution.ContractMonads</h2></a>
+<a href="ConCert.Execution.BoundedN.html"><h2>Library ConCert.Execution.BoundedN</h2></a>
+<a href="ConCert.Execution.Finite.html"><h2>Library ConCert.Execution.Finite</h2></a>
+<a href="ConCert.Execution.Monads.html"><h2>Library ConCert.Execution.Monads</h2></a>
+<a href="ConCert.Execution.Circulation.html"><h2>Library ConCert.Execution.Circulation</h2></a>
+<a href="ConCert.Execution.Blockchain.html"><h2>Library ConCert.Execution.Blockchain</h2></a>
+<a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html"><h2>Library ConCert.Execution.Standards.CIS1.cis1.CIS1Spec</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab88">Concordium's CIS1</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab89">General types</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab90">Views</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab91">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab92">Transfer</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab93">Parameter</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab94">Requirements</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab95">updateOperator</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab96">Parameter</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab97">Requirements</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab98">balanceOf</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab99">Parameter</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab100">Requirements</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab101">Full specification of <span class="inlinecode"><span class="id" title="var">receive</span></span></a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab102">CIS1 properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab103">Operator updates</a>
+
+</li>
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab104">Balances</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Spec.html#lab105">Main result</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Standards.CIS1.cis1.CIS1Utils.html"><h2>Library ConCert.Execution.Standards.CIS1.cis1.CIS1Utils</h2></a>
+<a href="ConCert.Execution.Examples.FA2Token.html"><h2>Library ConCert.Execution.Examples.FA2Token</h2></a>
+<a href="ConCert.Execution.Examples.Common.html"><h2>Library ConCert.Execution.Examples.Common</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.Common.html#lab106">Definitions shared among the examples</a>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.Euler.html"><h2>Library ConCert.Execution.Examples.Euler</h2></a>
+<a href="ConCert.Execution.Examples.BATCommon.html"><h2>Library ConCert.Execution.Examples.BATCommon</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BATCommon.html#lab107">Basic Attention Token</a>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.EIP20Token.html"><h2>Library ConCert.Execution.Examples.EIP20Token</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab108">EIP20 Token Implementation</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab109">Contract types</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab110">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab111">init</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab112">transfer</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab113">transfer_from</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab114">approve</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab115">receive</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab116">Properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab117">EIP20 functions not payable</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab118">EIP20 functions produce no acts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab119">Expected behvaiour of EIP20 functions</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab120">Transfer correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab121">Transfer_from correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab122">Approve correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab123">EIP20 functions preserve sum of balances</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab124">Contract never produces any actions</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab125">Total supply always equals inial supply</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.EIP20Token.html#lab126">Sum of balances always equals total supply</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.BAT.html"><h2>Library ConCert.Execution.Examples.BAT</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT.html#lab127">Basic Attention Token contract</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab128">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT.html#lab129">Init</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab130">Create Tokens</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab131">Refund</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab132">Finalize</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab133">Receive</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab134">Contract properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT.html#lab135">Transfer correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab136">Transfer_from correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab137">Approve correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab138">EIP20 functions only changes token_state</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab139">EIP20 functions not payable</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab140">EIP20 functions produces no acts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab141">Create_tokens correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab142">Finalize correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab143">Refund correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab144">Init correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab145">Functions preserve sum of balances</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab146">Sum of balances always equals total supply</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab147">Total supply can only grow before funding fails</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab148">Constants are constant</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab149">Finalize cannot be undone</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab150">Cannot finalize if goal not hit</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab151">It is always possible to finalize</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT.html#lab152">Refund guarantee</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.Escrow.html"><h2>Library ConCert.Execution.Examples.Escrow</h2></a>
+<a href="ConCert.Execution.Examples.BoardroomVoting.html"><h2>Library ConCert.Execution.Examples.BoardroomVoting</h2></a>
+<a href="ConCert.Execution.Examples.Counter.html"><h2>Library ConCert.Execution.Examples.Counter</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.Counter.html#lab153">Counter</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.Counter.html#lab154">Definition</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Counter.html#lab155">Functional properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.Counter.html#lab156">Specification</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Counter.html#lab157">Safety properties</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.BoardroomMath.html"><h2>Library ConCert.Execution.Examples.BoardroomMath</h2></a>
+<a href="ConCert.Execution.Examples.Cis1wccd.html"><h2>Library ConCert.Execution.Examples.Cis1wccd</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab158">Entry points</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab159">Contract's state</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab160">Transfer</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab161">balanceOf</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab162">updateOperator</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab163">wccd receive</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab164">wccd complies with CIS1</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.Cis1wccd.html#lab165">Receive specification</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.BoardroomVotingTest.html"><h2>Library ConCert.Execution.Examples.BoardroomVotingTest</h2></a>
+<a href="ConCert.Execution.Examples.LocalBlockchainTests.html"><h2>Library ConCert.Execution.Examples.LocalBlockchainTests</h2></a>
+<a href="ConCert.Execution.Examples.Congress_Buggy.html"><h2>Library ConCert.Execution.Examples.Congress_Buggy</h2></a>
+<a href="ConCert.Execution.Examples.StackInterpreter.html"><h2>Library ConCert.Execution.Examples.StackInterpreter</h2></a>
+<a href="ConCert.Execution.Examples.BoardroomVotingZ.html"><h2>Library ConCert.Execution.Examples.BoardroomVotingZ</h2></a>
+<a href="ConCert.Execution.Examples.Congress.html"><h2>Library ConCert.Execution.Examples.Congress</h2></a>
+<a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html"><h2>Library ConCert.Execution.Examples.dexter2.Dexter2CPMM</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab166">Dexter 2 CPMM contract</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab167">Contract types</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab168">Type synonyms</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab169">Entrypoint types</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab170">Storage types</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab171">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab172">Helper functions</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab173">Add liquidity</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab174">Remove liquidity</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab175">XTZ to tokens</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab176">Tokes to XTZ</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab177">Default entrypoint</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab178">Set baker</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab179">Set manager</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab180">Set liquidity address</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab181">Update token pool</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab182">Update token pool internal</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab183">Tokens to tokens</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab184">Receive</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab185">Init</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab186">Properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab187">Set baker correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab188">Set manager correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab189">Set liquidity address correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab190">Default entrypoint correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab191">Update token pool correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab192">Update token pool internal correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab193">Add liquidity correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab194">Remove liquidity correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab195">XTZ to token correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab196">Token to xtz correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab197">Token to token correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab198">Init correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab199">Outgoing acts facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab200">Contract balance facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab201">Total supply correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2CPMM.html#lab202">lqtTotal/total_supply invariant</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html"><h2>Library ConCert.Execution.Examples.dexter2.Dexter2FA12</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab203">Dexter 2 FA1.2 Liquidity token contract</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab204">Contract types</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab205">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab206">Transfer</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab207">Approve</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab208">Mint or burn</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab209">Get allowance</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab210">Get balance</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab211">Get total supply</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab212">Init</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab213">Receive</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab214">Properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab215">Contract rejects money</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab216">Default entrypoint correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab217">Transfer correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab218">Approve correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab219">Mint or burn correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab220">Get allowance correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab221">Get balance correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab222">Get total supply correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab223">Init correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab224">Outgoing acts facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab225">Contract balance facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab226">Total supply / token balance facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab227">Empty map entries removed</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#lab228">Total supply correct</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.BAT_Fixed.html"><h2>Library ConCert.Execution.Examples.BAT_Fixed</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab229">Basic Attention Token contract</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab230">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab231">Init</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab232">Create Tokens</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab233">Refund</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab234">Finalize</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab235">Receive</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab236">Contract properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab237">Transfer correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab238">Transfer_from correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab239">Approve correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab240">EIP20 functions only changes token_state</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab241">EIP20 functions not payable</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab242">EIP20 functions produces no acts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab243">Create_tokens correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab244">Finalize correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab245">Refund correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab246">Init correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab247">EIP20 functions preserve sum of balances</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab248">Init validation</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab249">Sum of balances always equals total supply</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab250">Total supply can only grow before funding fails</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab251">Constants are constant</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab252">Finalize cannot be undone</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab253">Cannot finalize if goal not hit</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab254">It is always possible to finalize</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab255">BAToken outgoing acts facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab256">batFundDeposit cannot refund</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab257">Total balance lower bound</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab258">No outgoing acts produces while funding</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab259">Token balances divisible by exchange rate</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab260">Contract balance bound</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_Fixed.html#lab261">outgoing acts are valid</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.BAT_AltFix.html"><h2>Library ConCert.Execution.Examples.BAT_AltFix</h2></a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab262">Basic Attention Token contract</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab263">Contract functions</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab264">Init</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab265">Create Tokens</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab266">Refund</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab267">Finalize</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab268">Receive</a>
+
+</li>
+</ul>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab269">Contract properties</a>
+<ul class="doclist">
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab270">Transfer correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab271">Transfer_from correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab272">Approve correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab273">EIP20 functions only changes token_state</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab274">EIP20 functions not payable</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab275">EIP20 functions produces no acts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab276">Create_tokens correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab277">Finalize correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab278">Refund correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab279">Init correct</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab280">EIP20 functions preserve sum of balances</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab281">Init validation</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab282">Sum of balances always equals total supply</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab283">Total supply can only grow before funding fails</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab284">Constants are constant</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab285">Finalize cannot be undone</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab286">Cannot finalize if goal not hit</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab287">It is always possible to finalize</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab288">BAToken outgoing acts facts</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab289">No outgoing acts produces while funding</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab290">Contract balance bound</a>
+
+</li>
+<li><a href="ConCert.Execution.Examples.BAT_AltFix.html#lab291">Outgoing acts are valid</a>
+
+</li>
+</ul>
+
+</li>
+</ul>
+<a href="ConCert.Execution.Examples.Egcd.html"><h2>Library ConCert.Execution.Examples.Egcd</h2></a>
+<a href="ConCert.Execution.Examples.FA2Interface.html"><h2>Library ConCert.Execution.Examples.FA2Interface</h2></a>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

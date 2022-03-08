@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Execution.Examples.Counter</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab153"></a><h1 class="section">Counter</h1>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Classes.Morphisms.html#"><span class="id" title="library">Morphisms</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.ZArith.html#"><span class="id" title="library">ZArith</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#"><span class="id" title="library">List</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Program.Basics.html#"><span class="id" title="library">Basics</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Utils</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Utils.Automation.html#"><span class="id" title="library">Automation</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Extras.html#"><span class="id" title="library">Extras</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Serializable.html#"><span class="id" title="library">Serializable</span></a>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="ConCert.Execution.Blockchain.html#"><span class="id" title="library">Blockchain</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">Z</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab154"></a><h2 class="section">Definition</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <a name="Counter"><span class="id" title="section">Counter</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Enabling recursors for records allows for deriving <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="record">Serializable</span></a></span> instances. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Set</span> <span class="id" title="var">Nonrecursive</span> <span class="id" title="var">Elimination</span> <span class="id" title="var">Schemes</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The definitions in this section are generalized over the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#ChainBase"><span class="id" title="record">ChainBase</span></a></span> that specifies the type of addresses and which properties such a type must have 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ChainBase"><span class="id" title="class">ChainBase</span></a>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The state is a current counter value and the owner's address 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <a name="State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a name="build_state"><span class="id" title="constructor">build_state</span></a> { <a name="count"><span class="id" title="projection">count</span></a> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> ;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="owner"><span class="id" title="projection">owner</span></a> : <a class="idref" href="ConCert.Execution.Blockchain.html#Address"><span class="id" title="method">Address</span></a> }.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The contract accepts two kinds of messages: increment or decrement by some number 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <a name="Msg"><span class="id" title="inductive">Msg</span></a> :=<br/>
+&nbsp;&nbsp;| <a name="Inc"><span class="id" title="constructor">Inc</span></a> (<span class="id" title="var">i</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>)<br/>
+&nbsp;&nbsp;| <a name="Dec"><span class="id" title="constructor">Dec</span></a> (<span class="id" title="var">i</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Since a contract is essentially a state transition function, we isolate
+      the functionality corresponding to each kind of message into step functions 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="increment"><span class="id" title="definition">increment</span></a> (<span class="id" title="var">n</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) (<span class="id" title="var">st</span> : <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a>) : <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">count</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">st</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">.(</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">count</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">)</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">+</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">n</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">owner</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">st</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">.(</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">owner</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">)</span></a> |}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="decrement"><span class="id" title="definition">decrement</span></a> (<span class="id" title="var">n</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>) (<span class="id" title="var">st</span> : <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a>) : <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{| <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">count</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">st</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">.(</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">count</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">)</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">-</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">n</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">owner</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">st</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">.(</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">owner</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">)</span></a> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The main functionality of the contract.
+      Dispatches on a message, validates the input and calls the step functions 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="counter"><span class="id" title="definition">counter</span></a> (<span class="id" title="var">st</span> : <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a>) (<span class="id" title="var">msg</span> : <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#msg"><span class="id" title="variable">msg</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Execution.Examples.Counter.html#Inc"><span class="id" title="constructor">Inc</span></a> <span class="id" title="var">i</span> =&gt; <span class="id" title="keyword">if</span> (0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#f1746f02f141d025b1e53605943919bf"><span class="id" title="notation">&lt;?</span></a> <span class="id" title="var">i</span>) <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#increment"><span class="id" title="definition">increment</span></a> <span class="id" title="var">i</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#st"><span class="id" title="variable">st</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="ConCert.Execution.Examples.Counter.html#Dec"><span class="id" title="constructor">Dec</span></a> <span class="id" title="var">i</span> =&gt; <span class="id" title="keyword">if</span> (0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#f1746f02f141d025b1e53605943919bf"><span class="id" title="notation">&lt;?</span></a> <span class="id" title="var">i</span>) <span class="id" title="keyword">then</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#decrement"><span class="id" title="definition">decrement</span></a> <span class="id" title="var">i</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#st"><span class="id" title="variable">st</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The "entry point" of the contract. Dispatches on a message and calls <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.Counter.html#counter"><span class="id" title="definition">counter</span></a></span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="counter_receive"><span class="id" title="definition">counter_receive</span></a> (<span class="id" title="var">chain</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#Chain"><span class="id" title="record">Chain</span></a>) (<span class="id" title="var">ctx</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ContractCallContext"><span class="id" title="record">ContractCallContext</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">state</span> : <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a>) (<span class="id" title="var">msg</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a>) : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#11c698c8685bb8ab1cf725545c085ac4"><span class="id" title="notation">*</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#ActionBody"><span class="id" title="inductive">ActionBody</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;:= <span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#msg"><span class="id" title="variable">msg</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <span class="id" title="var">m</span> =&gt; <span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter"><span class="id" title="definition">counter</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#state"><span class="id" title="variable">state</span></a> <span class="id" title="var">m</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <span class="id" title="var">res</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><span class="id" title="var">res</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We initialize the contract state with <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.Counter.html#init_value"><span class="id" title="variable">init_value</span></a></span> and set <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#owner"><span class="id" title="projection">owner</span></a></span> to the address from which the contract was deployed 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="counter_init"><span class="id" title="definition">counter_init</span></a> (<span class="id" title="var">chain</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#Chain"><span class="id" title="record">Chain</span></a>) (<span class="id" title="var">ctx</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ContractCallContext"><span class="id" title="record">ContractCallContext</span></a>) (<span class="id" title="var">init_value</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> {| <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">count</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">init_value</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">;</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">owner</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">:=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">ctx</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">.(</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">ctx_from</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">)</span></a> |}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Deriving the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="record">Serializable</span></a></span> instances for the state and for the messages 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <a name="State_serializable"><span class="id" title="instance">State_serializable</span></a> : <a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="class">Serializable</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">Derive</span></a> <a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">Serializable</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#State_rect"><span class="id" title="definition">State_rect</span></a><a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">&lt;</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#build_state"><span class="id" title="constructor">build_state</span></a><a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">&gt;</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Global Instance</span> <a name="Msg_serializable"><span class="id" title="instance">Msg_serializable</span></a> : <a class="idref" href="ConCert.Execution.Serializable.html#Serializable"><span class="id" title="class">Serializable</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">Derive</span></a> <a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">Serializable</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg_rect"><span class="id" title="definition">Msg_rect</span></a><a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">&lt;</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#Inc"><span class="id" title="constructor">Inc</span></a><a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">,</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Dec"><span class="id" title="constructor">Dec</span></a><a class="idref" href="ConCert.Execution.Serializable.html#70b92666138db7c4a5e7f9f8911f246a"><span class="id" title="notation">&gt;</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The counter contract 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <a name="counter_contract"><span class="id" title="definition">counter_contract</span></a> : <a class="idref" href="ConCert.Execution.Blockchain.html#Contract"><span class="id" title="record">Contract</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Numbers.BinNums.html#Z"><span class="id" title="inductive">Z</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#State"><span class="id" title="record">State</span></a> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Blockchain.html#build_contract"><span class="id" title="constructor">build_contract</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_init"><span class="id" title="definition">counter_init</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_receive"><span class="id" title="definition">counter_receive</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Counter"><span class="id" title="section">Counter</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab155"></a><h2 class="section">Functional properties</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <a name="FunctionalProperties"><span class="id" title="section">FunctionalProperties</span></a>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ChainBase"><span class="id" title="class">ChainBase</span></a>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab156"></a><h3 class="section">Specification</h3>
+
+<div class="paragraph"> </div>
+
+ If the counter call succeeds and returns <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.Counter.html#next_state"><span class="id" title="variable">next_state</span></a></span> then,
+      depending on a message, it either increments or decrements
+      by the number sent in the corresponding message 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <a name="counter_correct"><span class="id" title="lemma">counter_correct</span></a> {<span class="id" title="var">prev_state</span> <span class="id" title="var">next_state</span> <span class="id" title="var">msg</span>} :<br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#counter"><span class="id" title="definition">counter</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#prev_state"><span class="id" title="variable">prev_state</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#msg"><span class="id" title="variable">msg</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#next_state"><span class="id" title="variable">next_state</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#msg"><span class="id" title="variable">msg</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="ConCert.Execution.Examples.Counter.html#Inc"><span class="id" title="constructor">Inc</span></a> <span class="id" title="var">n</span> =&gt; <a class="idref" href="ConCert.Execution.Examples.Counter.html#prev_state"><span class="id" title="variable">prev_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#143d73f5a64447681988da92e84a3de5"><span class="id" title="notation">&lt;</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#next_state"><span class="id" title="variable">next_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">/\</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#next_state"><span class="id" title="variable">next_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#prev_state"><span class="id" title="variable">prev_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="ConCert.Execution.Examples.Counter.html#Dec"><span class="id" title="constructor">Dec</span></a> <span class="id" title="var">n</span> =&gt; <a class="idref" href="ConCert.Execution.Examples.Counter.html#prev_state"><span class="id" title="variable">prev_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#fbfa8c9e9a9b6d99f956a3a565fa7c7b"><span class="id" title="notation">&gt;</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#next_state"><span class="id" title="variable">next_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">/\</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#next_state"><span class="id" title="variable">next_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#prev_state"><span class="id" title="variable">prev_state</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#fa12f60d56cf7225f009c889c0622139"><span class="id" title="notation">-</span></a> <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span> : <span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#increment"><span class="id" title="definition">increment</span></a>,<a class="idref" href="ConCert.Execution.Examples.Counter.html#decrement"><span class="id" title="definition">decrement</span></a> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span> : <span class="id" title="tactic">destruct</span> (0 <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#f1746f02f141d025b1e53605943919bf"><span class="id" title="notation">&lt;?</span></a> <span class="id" title="var">i</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hz</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span> : <span class="id" title="tactic">rewrite</span> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#Z.ltb_lt"><span class="id" title="lemma">Z.ltb_lt</span></a> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">split</span>;<span class="id" title="tactic">auto</span>;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#FunctionalProperties"><span class="id" title="section">FunctionalProperties</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab157"></a><h2 class="section">Safety properties</h2>
+
+<div class="paragraph"> </div>
+
+ Safety properties are stated for all states reachable from the initial state. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <a name="SafetyProperties"><span class="id" title="section">SafetyProperties</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Context</span> {<span class="id" title="var">BaseTypes</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ChainBase"><span class="id" title="class">ChainBase</span></a>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Converting a message to a number. Note that the decrements are negative. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="opt_msg_to_number"><span class="id" title="definition">opt_msg_to_number</span></a> (<span class="id" title="var">msg</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">match</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#msg"><span class="id" title="variable">msg</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#Inc"><span class="id" title="constructor">Inc</span></a> <span class="id" title="var">i</span>) =&gt; <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;| <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#Dec"><span class="id" title="constructor">Dec</span></a> <span class="id" title="var">i</span>) =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#84c6e304dcb36f79add2a7dcc558eca1"><span class="id" title="notation">-</span></a> <span class="id" title="var">i</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">_</span> =&gt; 0<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">program_scope</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <a name="receive_produces_no_calls"><span class="id" title="lemma">receive_produces_no_calls</span></a> {<span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">cstate</span> <span class="id" title="var">msg</span> <span class="id" title="var">new_cstate</span>} <span class="id" title="var">acts</span> :<br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_receive"><span class="id" title="definition">counter_receive</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#chain"><span class="id" title="variable">chain</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#ctx"><span class="id" title="variable">ctx</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#cstate"><span class="id" title="variable">cstate</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#msg"><span class="id" title="variable">msg</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">(</span></a><a class="idref" href="ConCert.Execution.Examples.Counter.html#new_cstate"><span class="id" title="variable">new_cstate</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">,</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#acts"><span class="id" title="variable">acts</span></a><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#e6756e10c36f149b18b4a8741ed83079"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#acts"><span class="id" title="variable">acts</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">receive_some</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">msg</span> | ];<span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#counter"><span class="id" title="definition">counter</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="keyword">as</span> [[? ?] | ] <span class="id" title="var">eqn</span>:<span class="id" title="var">Hreceive</span>;<span class="id" title="tactic">try</span> <span class="id" title="tactic">inversion</span> <span class="id" title="var">receive_some</span>;<span class="id" title="tactic">subst</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">auto</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The sum of all increment/decrement messages sent to the contract. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <a name="sum_inc_dec"><span class="id" title="definition">sum_inc_dec</span></a> (<span class="id" title="var">l</span> : <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#list"><span class="id" title="inductive">list</span></a> (<a class="idref" href="ConCert.Execution.Blockchain.html#ContractCallInfo"><span class="id" title="record">ContractCallInfo</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a>)) :=<br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Extras.html#sumZ"><span class="id" title="definition">sumZ</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#opt_msg_to_number"><span class="id" title="definition">opt_msg_to_number</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Program.Basics.html#2e889d5867d2bfffb9f8d04b7b23cbd7"><span class="id" title="notation">∘</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#call_msg"><span class="id" title="projection">call_msg</span></a>) <a class="idref" href="ConCert.Execution.Examples.Counter.html#l"><span class="id" title="variable">l</span></a>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We state the following safety property: for all reachable states (i.e. at any point in time after deployment), the state of the counter is equal to the initial value plus the sum of all successful increment and decrement messages sent to the contract.
+
+<div class="paragraph"> </div>
+
+ We use a special induction principle <span class="inlinecode"><a class="idref" href="ConCert.Execution.Blockchain.html#contract_induction"><span class="id" title="lemma">contract_induction</span></a></span> that takes care of the boilerplate and exposes the cases in the convenient form. The <span class="inlinecode"><a class="idref" href="ConCert.Execution.Serializable.html#tag"><span class="id" title="variable">tag</span></a></span> variable in the context contains a hint what is expected to be done in each case. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Lemma</span> <a name="counter_safe"><span class="id" title="lemma">counter_safe</span></a> <span class="id" title="var">block_state</span> <span class="id" title="var">counter_addr</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">trace</span> : <a class="idref" href="ConCert.Execution.Blockchain.html#ChainTrace"><span class="id" title="definition">ChainTrace</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#empty_state"><span class="id" title="definition">empty_state</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#block_state"><span class="id" title="variable">block_state</span></a>) :<br/>
+&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Blockchain.html#env_contracts"><span class="id" title="projection">env_contracts</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#block_state"><span class="id" title="variable">block_state</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_addr"><span class="id" title="variable">counter_addr</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_contract"><span class="id" title="definition">counter_contract</span></a> : <a class="idref" href="ConCert.Execution.Blockchain.html#WeakContract"><span class="id" title="inductive">WeakContract</span></a>) <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#1c93e43e07fbeaeb6a625cb6614beb5d"><span class="id" title="notation">-&gt;</span></a><br/>
+&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"><span class="id" title="notation">exists</span></a> <span class="id" title="var">cstate</span> <span class="id" title="var">call_info</span> <span class="id" title="var">deploy_info</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#a883bdd010993579f99d60b3775bcf54"><span class="id" title="notation">,</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Blockchain.html#incoming_calls"><span class="id" title="definition">incoming_calls</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#Msg"><span class="id" title="inductive">Msg</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#trace"><span class="id" title="variable">trace</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_addr"><span class="id" title="variable">counter_addr</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#call_info"><span class="id" title="variable">call_info</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">/\</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#contract_state"><span class="id" title="definition">contract_state</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#block_state"><span class="id" title="variable">block_state</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_addr"><span class="id" title="variable">counter_addr</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#cstate"><span class="id" title="variable">cstate</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">/\</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#deployment_info"><span class="id" title="definition">deployment_info</span></a> <span class="id" title="var">_</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#trace"><span class="id" title="variable">trace</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_addr"><span class="id" title="variable">counter_addr</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#Some"><span class="id" title="constructor">Some</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#deploy_info"><span class="id" title="variable">deploy_info</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#ba2b0e492d2b4675a0acf3ea92aabadd"><span class="id" title="notation">/\</span></a> <span class="id" title="keyword">let</span> <span class="id" title="var">init_val</span> := <a class="idref" href="ConCert.Execution.Examples.Counter.html#deploy_info"><span class="id" title="variable">deploy_info</span></a>.(<a class="idref" href="ConCert.Execution.Blockchain.html#deployment_setup"><span class="id" title="projection">deployment_setup</span></a>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="idref" href="ConCert.Execution.Examples.Counter.html#init_val"><span class="id" title="variable">init_val</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.ZArith.BinInt.html#46584eddd5fdb16176a10a2843177d3a"><span class="id" title="notation">+</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#sum_inc_dec"><span class="id" title="definition">sum_inc_dec</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#call_info"><span class="id" title="variable">call_info</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#cstate"><span class="id" title="variable">cstate</span></a>.(<a class="idref" href="ConCert.Execution.Examples.Counter.html#count"><span class="id" title="projection">count</span></a>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">contract_induction</span>; <span class="id" title="tactic">intros</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;deployment&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">init_some</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">init_some</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;contract&nbsp;call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">msg</span>|];<span class="id" title="tactic">try</span> <span class="id" title="tactic">discriminate</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#counter"><span class="id" title="definition">counter</span></a> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">cstate</span>|] <span class="id" title="var">eqn</span>:<span class="id" title="var">counter_some</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">receive_some</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;we&nbsp;use&nbsp;the&nbsp;functional&nbsp;correctness&nbsp;here&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_correct"><span class="id" title="lemma">counter_correct</span></a> <span class="id" title="var">counter_some</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Cspec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">msg</span>;<span class="id" title="tactic">intuition</span>;<span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#sum_inc_dec"><span class="id" title="definition">sum_inc_dec</span></a> <span class="id" title="tactic">in</span> *;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;contract&nbsp;self-call&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;we&nbsp;know&nbsp;that&nbsp;the&nbsp;self-call&nbsp;is&nbsp;not&nbsp;possible&nbsp;because&nbsp;<span class="inlinecode"><span class="id" title="var">counter_receive</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;always&nbsp;returns&nbsp;an&nbsp;empty&nbsp;list&nbsp;of&nbsp;actions.&nbsp;We&nbsp;instantiate&nbsp;the&nbsp;<span class="inlinecode"><span class="id" title="var">CallFacts</span></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;predicate&nbsp;with&nbsp;the&nbsp;assumption&nbsp;that&nbsp;the&nbsp;from-address&nbsp;is&nbsp;not&nbsp;equal&nbsp;to&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;contract&nbsp;address.&nbsp;We&nbsp;will&nbsp;be&nbsp;asked&nbsp;to&nbsp;prove&nbsp;this&nbsp;goal&nbsp;later.&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">instantiate</span> (<span class="id" title="var">CallFacts</span> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">ctx</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="ConCert.Execution.Blockchain.html#ctx_from"><span class="id" title="projection">ctx_from</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#ctx"><span class="id" title="variable">ctx</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#a0a5068f83a704fcfbda8cd473a6cfea"><span class="id" title="notation">&lt;&gt;</span></a> <a class="idref" href="ConCert.Execution.Blockchain.html#ctx_contract_address"><span class="id" title="projection">ctx_contract_address</span></a> <a class="idref" href="ConCert.Execution.Examples.Counter.html#ctx"><span class="id" title="variable">ctx</span></a>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">CallFacts</span>; <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;+ <span class="comment">(*&nbsp;we&nbsp;asked&nbsp;to&nbsp;prove&nbsp;additional&nbsp;assumptions&nbsp;we&nbsp;might&nbsp;have&nbsp;made.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Since&nbsp;we&nbsp;instantiated&nbsp;only&nbsp;<span class="inlinecode"><span class="id" title="var">CallFacts</span></span>,&nbsp;we&nbsp;instantiate&nbsp;other&nbsp;assumptions<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;a&nbsp;trivial&nbsp;proposition&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">instantiate</span> (<span class="id" title="var">AddBlockFacts</span> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#True"><span class="id" title="inductive">True</span></a>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">instantiate</span> (<span class="id" title="var">DeployFacts</span> := <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#True"><span class="id" title="inductive">True</span></a>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">unset_all</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_chain_step</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">destruct_action_eval</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>. <span class="id" title="tactic">intros</span> <span class="id" title="var">cstate</span> <span class="id" title="var">Hc</span> <span class="id" title="var">Hstate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;we&nbsp;use&nbsp;the&nbsp;fact&nbsp;that&nbsp;<span class="inlinecode"><span class="id" title="var">counter_receive</span></span>&nbsp;doesn't&nbsp;return&nbsp;any&nbsp;actions&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">(</span></a><a class="idref" href="ConCert.Execution.Blockchain.html#outgoing_acts"><span class="id" title="definition">outgoing_acts</span></a> <span class="id" title="var">bstate_from</span> <span class="id" title="var">to_addr</span><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">)</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Logic.html#6cd0f7b28b6092304087c7049437bb1a"><span class="id" title="notation">=</span></a> <a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Lists.List.html#ae9a5e1034e143b218b09d8e454472bd"><span class="id" title="notation">[]</span></a>) <span class="id" title="keyword">as</span> <span class="id" title="var">Hempty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">apply</span> <a class="idref" href="ConCert.Execution.Blockchain.html#lift_outgoing_acts_nil"><span class="id" title="lemma">lift_outgoing_acts_nil</span></a> <span class="id" title="keyword">with</span> (<span class="id" title="var">contract</span> := <a class="idref" href="ConCert.Execution.Examples.Counter.html#counter_contract"><span class="id" title="definition">counter_contract</span></a>);<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">eapply</span> (<a class="idref" href="ConCert.Execution.Examples.Counter.html#receive_produces_no_calls"><span class="id" title="lemma">receive_produces_no_calls</span></a> (<span class="id" title="var">chain</span>:=<span class="id" title="var">chain</span>) (<span class="id" title="var">ctx</span>:=<span class="id" title="var">ctx</span>));<span class="id" title="tactic">eauto</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <a class="idref" href="ConCert.Execution.Blockchain.html#outgoing_acts"><span class="id" title="definition">outgoing_acts</span></a> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">queue_prev</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">act</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hempty</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="var">destruct_address_eq</span>.<br/>
+<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <a class="idref" href="ConCert.Execution.Examples.Counter.html#SafetyProperties"><span class="id" title="section">SafetyProperties</span></a>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>

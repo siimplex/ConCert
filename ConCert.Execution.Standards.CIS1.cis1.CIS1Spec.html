@@ -1,0 +1,1447 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<link href="coqdocjs.css" rel="stylesheet" type="text/css"/>
+<link href="toc.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="config.js"></script>
+<script type="text/javascript" src="coqdocjs.js"></script>
+</head>
+
+<body onload="document.getElementById('content').focus()">
+  <div id="header">
+    <span class="left">
+      <span class="modulename"> <script> document.write(document.title) </script> </span>
+    </span>
+
+    <span class="button" id="toggle-proofs"></span>
+
+    <span class="right">
+      <a href="toc.html">Table of contents</a>
+      <a href="https://github.com/AU-COBRA/ConCert" target="_balnk">Project Page</a>
+    </span>
+</div>
+  <div id="content" tabindex="-1" onblur="document.getElementById('content').focus()">
+    <div id="js-toc-header" class="toc-header">Contents:</div>
+    <div id="js-toc" class="toc" data-toc="h1,h2,h3,h4" data-toc-container="doc">
+    </div>
+    <div id="main">
+<h1 class="libtitle">Library ConCert.Execution.Standards.CIS1.cis1.CIS1Spec</h1>
+
+<div class="code">
+</div>
+
+<div class="doc">
+<a name="lab88"></a><h1 class="section">Concordium's CIS1</h1>
+
+<div class="paragraph"> </div>
+
+ See the original CIS1 standard: http://proposals.concordium.software/CIS/cis-1.html 
+<div class="paragraph"> </div>
+
+
+<div class="paragraph"> </div>
+
+ The formalisation defines module types that specify what functionality should be
+ provided by a function that implements the standard.
+
+<div class="paragraph"> </div>
+
+Covered by the formalisation:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Specifications of <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#transfer"><span class="id" title="record">transfer</span></a></span>, <span class="inlinecode"><span class="id" title="var">balanceOf</span></span> and <span class="inlinecode"><span class="id" title="var">operatorUpdate</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Simple properties of <span class="inlinecode"><span class="id" title="var">operatorUpdate</span></span>.
+
+<div class="paragraph"> </div>
+
+
+</li>
+<li> Our main result: we prove that <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#transfer"><span class="id" title="record">transfer</span></a></span>, <span class="inlinecode"><span class="id" title="var">balanceOf</span></span> and <span class="inlinecode"><span class="id" title="var">operatorUpdate</span></span> preserve the sum of all balances for all token ids. The properties hold for any contract that satisfies the CIS1 specification defined in this formalisation.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+Not covered by the formalisation:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> Concordium serialisation.
+
+</li>
+<li> The spec of <span class="inlinecode"><span class="id" title="var">operatorOf</span></span>.
+
+</li>
+<li> Logging the events (logs are currently not supported by ConCert).
+
+</li>
+<li> Metadata.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+Other differences:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> updateOperator is a bit more strict than in the actual standard: it does not allow for updating non-existing accounts.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+The approach to formalisation is inspired by Murdoch Gabbay, Arvid Jakobsson, Kristina Sojakova. "Money grows on (proof-)trees: the formal FA1.2 ledger standard."
+
+<div class="paragraph"> </div>
+
+The CIS1 standard is, however, more general:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> the standard allows for multiple tokens on a single contract, which makes it possible to define both fungible and non-fungible tokens;
+
+</li>
+<li> the transfers happen in batch mode.
+
+</li>
+</ul>
+
+<div class="paragraph"> </div>
+
+Notation:
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> definitions that correspond to the standard directly are prefixed with "CIS1:"
+
+</li>
+<li> important remarks are prefixed with "NOTE:"
+
+<div class="paragraph"> </div>
+
+ 
+</li>
+</ul>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Blockchain</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Serializable</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Monads</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Examples</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Common</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">ConCert.Execution.Standards.CIS1</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">CIS1Utils</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Basics</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">List</span>.<br/>
+<span class="id" title="keyword">From</span> <span class="id" title="var">Coq</span> <span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ZArith</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">ListNotations</span>.<br/>
+<span class="id" title="keyword">Import</span> <span class="id" title="var">RemoveProperties</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab89"></a><h1 class="section">General types</h1>
+
+<div class="paragraph"> </div>
+
+ NOTE: In CIS1 it's an unsigned 64 bit integer. We model it as an unbounded number <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#nat"><span class="id" title="inductive">nat</span></a></span> 
+</div>
+<div class="code">
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">TokenAmount</span> := <span class="id" title="var">nat</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Open</span> <span class="id" title="keyword">Scope</span> <span class="id" title="var">program_scope</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+CIS1:
+<pre>
+ReceiveHookParameter ::= (id: TokenID) (amount: TokenAmount) (from: Address)
+                         (contract: ContractName) (data: AdditionalData).
+</pre>
+ 
+<div class="paragraph"> </div>
+
+ Abstract types of messages, storage (the contract's state) and token ids 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">CIS1Types</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">Msg</span> : <span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>}, <span class="id" title="keyword">Type</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">Storage</span> : <span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>}, <span class="id" title="keyword">Type</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+NOTE: In CIS1 it's an n-byte sequence, where 0 ≤ n ≤ 256.
+      We model it as an arbitrary serializable type with decidable equality 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">TokenID</span> : <span class="id" title="keyword">Type</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">serializable_token_id</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">TokenID</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">token_id_eqb</span> : <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">bool</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">token_id_eqb_spec</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> (<span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">TokenID</span>), <span class="id" title="var">Bool.reflect</span> (<span class="id" title="var">a</span> = <span class="id" title="var">b</span>) (<span class="id" title="var">token_id_eqb</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>).<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1Types</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">ReceiveHook</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">serializable_token_id</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+NOTE: there is no notion of the contract name in ConCert; <span class="inlinecode"><span class="id" title="var">AdditionalData</span></span> is not
+      handled at the moment 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">receive_hook_params</span> `{<span class="id" title="var">ChainBase</span>} : <span class="id" title="keyword">Type</span> := <span class="id" title="var">TokenID</span> * <span class="id" title="var">TokenAmount</span> * <span class="id" title="var">Address</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+All addresses owning tokens must support the following interface, since all receiving
+      addresses are notified with a receive hook. The rest of the functionality is captured
+      by the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#other_msg"><span class="id" title="constructor">other_msg</span></a></span> constructor 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">CIS1ReceiverMsg</span> (<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>) `{<span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span>} `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">CIS1_receiver_receive_hook</span> : <span class="id" title="var">receive_hook_params</span> -&gt; <span class="id" title="var">CIS1ReceiverMsg</span> <span class="id" title="var">Msg</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">CIS1_receiver_other_msg</span> : <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">CIS1ReceiverMsg</span> <span class="id" title="var">Msg</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">ReceiveHook</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab90"></a><h1 class="section">Views</h1>
+
+<div class="paragraph"> </div>
+
+ A module type that defines a view interface. The interface specifies functions for
+    observing the contract's state. These functions are used to define the specification.  
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">CIS1View</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">CISViewDefs</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Context</span> `{<span class="id" title="var">ChainBase</span>}.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">get_balance_opt</span> : <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">option</span> <span class="id" title="var">TokenAmount</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">get_operators</span> : <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">Address</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">get_owners</span> :  <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">list</span> <span class="id" title="var">Address</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">get_owners_no_dup</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>, <span class="id" title="var">NoDup</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Owners are determined by their balances 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">get_owners_balances</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">st</span> <span class="id" title="var">owner</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">owner</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">balance</span>, <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span> = <span class="id" title="var">Some</span> <span class="id" title="var">balance</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">token_id_exists</span> : <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">bool</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">CISViewDefs</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1View</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Definition of extra functions, based on <span class="inlinecode"><span class="id" title="module">CIS1View</span></span> 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CIS1ViewExtra</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>) (<span class="id" title="var">cis1_view</span> : <span class="id" title="var">CIS1View</span> <span class="id" title="var">cis1_types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_view</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_balance</span> `{<span class="id" title="var">ChainBase</span>} : <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">option</span> <span class="id" title="var">TokenAmount</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> =&gt; <span class="id" title="keyword">if</span> <span class="id" title="var">token_id_exists</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">bal</span> =&gt; <span class="id" title="var">Some</span> <span class="id" title="var">bal</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">Some</span> 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="var">None</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_balance_total</span> `{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">token_id</span> : <span class="id" title="var">TokenID</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">addr</span> : <span class="id" title="var">Address</span>) : <span class="id" title="var">TokenAmount</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">o</span> := <span class="id" title="var">get_balance</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">o</span> <span class="id" title="keyword">as</span> <span class="id" title="var">o'</span> <span class="id" title="keyword">return</span> (<span class="id" title="var">o'</span> = <span class="id" title="var">o</span> -&gt; <span class="id" title="var">_</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">bal</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">bal</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">heq</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">False_rect</span> <span class="id" title="var">_</span> (<span class="id" title="keyword">ltac</span>:(<span class="id" title="tactic">intros</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">o</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">get_balance</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">p</span> <span class="id" title="tactic">in</span> *;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>);<span class="id" title="tactic">congruence</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="var">eq_refl</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1ViewExtra</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The module below specifies an abstract interface of the CIS1 token along with the
+    properties that must be satisfied by each entry point required by the standard. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CIS1Axioms</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>) (<span class="id" title="var">cis1_view</span> : <span class="id" title="var">CIS1View</span> <span class="id" title="var">cis1_types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_view</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">VExtra</span> := <span class="id" title="var">CIS1ViewExtra</span> <span class="id" title="var">cis1_types</span> <span class="id" title="var">cis1_view</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">VExtra</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">RH</span> := <span class="id" title="var">ReceiveHook</span> <span class="id" title="var">cis1_types</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">RH</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab91"></a><h1 class="section">Contract functions</h1>
+
+<div class="paragraph"> </div>
+
+ First, we specify data types that represent input parameters for all entry points  
+<div class="paragraph"> </div>
+
+ NOTE: not handling additional data at the moment 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">CIS1_transfer_data</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">cis1_td_token_id</span> : <span class="id" title="var">TokenID</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_td_amount</span>   : <span class="id" title="var">TokenAmount</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_td_from</span>     : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_td_to</span>       : <span class="id" title="var">Address</span> }.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">CIS1_transfer_params</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">cis_tr_transfers</span> : <span class="id" title="var">list</span> <span class="id" title="var">CIS1_transfer_data</span> }.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">CIS1_updateOperator_kind</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_remove_operator</span><br/>
+&nbsp;&nbsp;| <span class="id" title="var">cis1_ou_add_operator</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">CIS1_updateOperator_update</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">cis1_ou_update_kind</span> : <span class="id" title="var">CIS1_updateOperator_kind</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> : <span class="id" title="var">Address</span> }.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">CIS1_updateOperator_params</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">cis1_ou_params</span> : <span class="id" title="var">list</span> <span class="id" title="var">CIS1_updateOperator_update</span> }.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">CIS1_balanceOf_query</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">cis1_bo_query_token_id</span> : <span class="id" title="var">TokenID</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_bo_query_address</span>  : <span class="id" title="var">Address</span> }.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">CIS1_balanceOf_params</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">cis1_bo_query</span> : <span class="id" title="var">list</span> <span class="id" title="var">CIS1_balanceOf_query</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_bo_result_address</span> : <span class="id" title="var">Address</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_bo_result_address_is_contract</span> : <span class="id" title="var">address_is_contract</span> <span class="id" title="var">cis1_bo_result_address</span> = <span class="id" title="var">true</span>}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+CIS1: A smart contract implementing CIS1 MUST export three functions <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#transfer"><span class="id" title="record">transfer</span></a></span>, <span class="inlinecode"><span class="id" title="var">updateOperator</span></span> and <span class="inlinecode"><span class="id" title="var">balanceOf</span></span>. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Inductive</span> <span class="id" title="var">CIS1_entry_points</span> `{<span class="id" title="var">ChainBase</span>} :=<br/>
+&nbsp;&nbsp;| <span class="id" title="var">CIS1_transfer</span> (<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_transfer_params</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">CIS1_updateOperator</span> (<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_updateOperator_params</span>)<br/>
+&nbsp;&nbsp;| <span class="id" title="var">CIS1_balanceOf</span> (<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_balanceOf_params</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab92"></a><h2 class="section">Transfer</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab93"></a><h3 class="section">Parameter</h3>
+
+<div class="paragraph"> </div>
+
+ The parameters for <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#transfer"><span class="id" title="record">transfer</span></a></span> are specified by <span class="inlinecode"><span class="id" title="record">CIS1_transfer_params</span></span> 
+<div class="paragraph"> </div>
+
+ Some utils for getting data from the parameters. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">transfer_to</span> `{<span class="id" title="var">ChainBase</span>} : <span class="id" title="var">CIS1_transfer_params</span> -&gt; <span class="id" title="var">list</span> (<span class="id" title="var">TokenID</span> * <span class="id" title="var">Address</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; (<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_token_id</span>), <span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_to</span>))) <span class="id" title="var">params</span>.(<span class="id" title="var">cis_tr_transfers</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">transfer_from</span> `{<span class="id" title="var">ChainBase</span>} : <span class="id" title="var">CIS1_transfer_params</span> -&gt; <span class="id" title="var">list</span> (<span class="id" title="var">TokenID</span> * <span class="id" title="var">Address</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; (<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_token_id</span>), <span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_from</span>))) <span class="id" title="var">params</span>.(<span class="id" title="var">cis_tr_transfers</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_receive_hook_params</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">params</span> : <span class="id" title="var">list</span> <span class="id" title="var">CIS1_transfer_data</span>)<br/>
+&nbsp;&nbsp;: <span class="id" title="var">list</span> (<span class="id" title="var">Address</span> * <span class="id" title="var">receive_hook_params</span>) :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; (<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_to</span>), (<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_token_id</span>), <span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_amount</span>), <span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_from</span>)))) <span class="id" title="var">params</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab94"></a><h3 class="section">Requirements</h3>
+
+<div class="paragraph"> </div>
+
+ A specification for a single transfer of a particular token id between <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#from"><span class="id" title="projection">from</span></a></span> and <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#to"><span class="id" title="projection">to</span></a></span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">transfer_single_spec</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">token_id</span> : <span class="id" title="var">TokenID</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">q</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">from</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">to</span> : <span class="id" title="var">Address</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">amount</span> : <span class="id" title="var">TokenAmount</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">prev_from</span> := <span class="id" title="var">get_balance_total</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">from</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">next_from</span> := <span class="id" title="var">get_balance_total</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">q</span> <span class="id" title="var">from</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">prev_to</span> := <span class="id" title="var">get_balance_total</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">to</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">next_to</span> := <span class="id" title="var">get_balance_total</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">q</span> <span class="id" title="var">to</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+The balances that are not <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#to"><span class="id" title="projection">to</span></a></span> and <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#from"><span class="id" title="projection">from</span></a></span> (for the token with <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#token_id"><span class="id" title="definition">token_id</span></a></span>) remain unchanged 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span>, <span class="id" title="var">addr</span> &lt;&gt; <span class="id" title="var">from</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">addr</span> &lt;&gt; <span class="id" title="var">to</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+The balances of all other tokens that are not equal to <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#token_id"><span class="id" title="definition">token_id</span></a></span> remain unchanged for all addresses 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span> <span class="id" title="var">other_token_id</span>, <span class="id" title="var">other_token_id</span> &lt;&gt; <span class="id" title="var">token_id</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">other_token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">other_token_id</span> <span class="id" title="var">addr</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+Token ids are preserved by a single transfer 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> =  <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+CIS1: Let operator be an operator of the address owner. A transfer of any amount
+        of a token type from an address owner sent by an address operator MUST be
+        executed as if the transfer was sent by owner. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">from</span> = <span class="id" title="var">owner</span> \/ <span class="id" title="var">In</span> <span class="id" title="var">from</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">owner</span>)) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+CIS1: A transfer MUST non-strictly decrease the balance of the from address and
+        non-strictly increase the balance of the to address.
+
+<div class="paragraph"> </div>
+
+CIS1: A transfer of some amount of a token type MUST only transfer the exact amount of
+the given token type between balances. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">from</span> &lt;&gt; <span class="id" title="var">to</span> -&gt; <span class="id" title="var">prev_from</span> = <span class="id" title="var">next_from</span> + <span class="id" title="var">amount</span> /\ <span class="id" title="var">next_to</span> = <span class="id" title="var">prev_to</span> + <span class="id" title="var">amount</span>) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+if the <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#from"><span class="id" title="projection">from</span></a></span> and <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#to"><span class="id" title="projection">to</span></a></span> addresses coincide, the transfer does not change the balance for this address 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">from</span> = <span class="id" title="var">to</span> -&gt; <span class="id" title="var">amount</span> &lt;= <span class="id" title="var">prev_from</span> /\ <span class="id" title="var">prev_from</span> = <span class="id" title="var">next_from</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+CIS1: The list of transfers MUST be executed in order. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">compose_transfers</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">init_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">final_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">list</span> <span class="id" title="var">CIS1_transfer_data</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">single_transfer</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> (<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_transfer_data</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">params</span>.(<span class="id" title="var">cis1_td_token_id</span>) = <span class="id" title="var">true</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">params</span>.(<span class="id" title="var">cis1_td_token_id</span>) = <span class="id" title="var">true</span> -&gt; <span class="id" title="keyword">Prop</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">params</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">init_st</span> = <span class="id" title="var">final_st</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">pr</span> :: <span class="id" title="var">ps</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+NOTE: we require that for each transfer, the updated state <span class="inlinecode"><a class="idref" href="ConCert.Embedding.Examples.crowdfunding.Crowdfunding.html#st"><span class="id" title="variable">st</span></a></span> becomes the initial state for the next transfer 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span>: <span class="id" title="var">token_id_exists</span> <span class="id" title="var">init_st</span> <span class="id" title="var">pr</span>.(<span class="id" title="var">cis1_td_token_id</span>) = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">q</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">st</span> <span class="id" title="var">pr</span>.(<span class="id" title="var">cis1_td_token_id</span>) = <span class="id" title="var">true</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">single_transfer</span> <span class="id" title="var">init_st</span> <span class="id" title="var">st</span> <span class="id" title="var">pr</span> <span class="id" title="var">p</span> <span class="id" title="var">q</span> /\ <span class="id" title="var">compose_transfers</span> <span class="id" title="var">st</span> <span class="id" title="var">final_st</span> <span class="id" title="var">ps</span> <span class="id" title="var">single_transfer</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A receive hook call is valid if the call parameters are deserialised to a <span class="inlinecode"><span class="id" title="constructor">CIS1_receiver_receive_hook</span></span>
+      constructor with appropriate data 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">is_valid_receive_hook</span> `{<span class="id" title="var">cb</span> : <span class="id" title="var">ChainBase</span>} (<span class="id" title="var">p</span> : <span class="id" title="var">receive_hook_params</span>) (<span class="id" title="var">serialized_params</span> : <span class="id" title="var">SerializedValue</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">Msg</span> : <span class="id" title="keyword">Type</span>) (<span class="id" title="var">sMsg</span> : <span class="id" title="var">Serializable</span> <span class="id" title="var">Msg</span>) (<span class="id" title="var">f</span> : <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">receive_hook_params</span>) (<span class="id" title="var">msg</span> : <span class="id" title="var">Msg</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">deserialize</span> <span class="id" title="var">serialized_params</span> = <span class="id" title="var">Some</span> <span class="id" title="var">msg</span> /\ <span class="id" title="var">f</span> <span class="id" title="var">msg</span> = <span class="id" title="var">p</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A specification for the batch transfer 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">transfer_spec</span> `{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_transfer_params</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ret_ops</span> : <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_dec_inc</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">compose_transfers</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">params</span>.(<span class="id" title="var">cis_tr_transfers</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">st1</span> <span class="id" title="var">st2</span> <span class="id" title="var">x</span> <span class="id" title="var">p</span> <span class="id" title="var">q</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_single_spec</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">st1</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">st2</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_token_id</span>) <span class="id" title="var">p</span> <span class="id" title="var">q</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_from</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_to</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_amount</span>));<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+CIS1: A transfer of any amount of a token type to a contract address MUST call receive
+                hook function on the receiving smart contract with a receive hook parameter. 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_receive_hook_calls</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+We consider only transfers to addresses that are contracts 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">transfers_to_contracts</span> := <span class="id" title="var">filter</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; <span class="id" title="var">address_is_contract</span> <span class="id" title="var">x</span>.(<span class="id" title="var">cis1_td_to</span>)) <span class="id" title="var">params</span>.(<span class="id" title="var">cis_tr_transfers</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Forall2</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">op</span> '(<span class="id" title="var">to_addr</span>, <span class="id" title="var">params</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">val</span>, <span class="id" title="var">op</span> = <span class="id" title="var">act_call</span> <span class="id" title="var">to_addr</span> 0%<span class="id" title="var">Z</span> <span class="id" title="var">val</span> /\ <span class="id" title="var">is_valid_receive_hook</span> <span class="id" title="var">params</span> <span class="id" title="var">val</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ret_ops</span> (<span class="id" title="var">get_receive_hook_params</span> <span class="id" title="var">transfers_to_contracts</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab95"></a><h2 class="section">updateOperator</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab96"></a><h3 class="section">Parameter</h3>
+
+<div class="paragraph"> </div>
+
+ The parameters for <span class="inlinecode"><span class="id" title="var">updateOperator</span></span> are specified by <span class="inlinecode"><span class="id" title="record">CIS1_updateOperator_params</span></span> 
+<div class="paragraph"> </div>
+
+<a name="lab97"></a><h3 class="section">Requirements</h3>
+
+<div class="paragraph"> </div>
+
+ A specification for the update of a single operator 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">updateOperator_single_spec</span>  `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">p</span> : <span class="id" title="var">CIS1_updateOperator_update</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">p</span>.(<span class="id" title="var">cis1_ou_update_kind</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">cis1_ou_remove_operator</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">addr</span> := <span class="id" title="var">p</span>.(<span class="id" title="var">cis1_ou_operator_address</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+All operators, apart from <span class="inlinecode"><a class="idref" href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#addr"><span class="id" title="variable">addr</span></a></span> remain the same in both states 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr0</span>, <span class="id" title="var">addr0</span> &lt;&gt; <span class="id" title="var">addr</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">addr0</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>)) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">addr0</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>))) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+An operator "to remove" is removed (not present) for the caller 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id" title="var">In</span> <span class="id" title="var">addr</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">cis1_ou_add_operator</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">addr</span> := <span class="id" title="var">p</span>.(<span class="id" title="var">cis1_ou_operator_address</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+All operators, apart from <span class="inlinecode"><a class="idref" href="ConCert.Embedding.Examples.ExecFrameworkIntegration.html#addr"><span class="id" title="variable">addr</span></a></span> remain the same in both states 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr0</span>, <span class="id" title="var">addr0</span> &lt;&gt; <span class="id" title="var">addr</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">addr0</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>)) &lt;-&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">addr0</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>))) /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;an&nbsp;operator&nbsp;"to&nbsp;add"&nbsp;is&nbsp;recorded&nbsp;for&nbsp;the&nbsp;caller&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">addr</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+CIS1: The list of updates MUST be executed in order. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">compose_uptadeOperator_specs</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>) (<span class="id" title="var">st</span> <span class="id" title="var">final_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">updates</span> : <span class="id" title="var">list</span> <span class="id" title="var">CIS1_updateOperator_update</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">updates</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| [] =&gt; <span class="id" title="var">st</span> = <span class="id" title="var">final_st</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">p</span> :: <span class="id" title="var">ps</span> =&gt; <span class="id" title="tactic">exists</span> <span class="id" title="var">next_st</span>, <span class="id" title="var">updateOperator_single_spec</span> <span class="id" title="var">ctx</span> <span class="id" title="var">st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">p</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">compose_uptadeOperator_specs</span> <span class="id" title="var">ctx</span> <span class="id" title="var">next_st</span> <span class="id" title="var">final_st</span> <span class="id" title="var">ps</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+A specification of the batch operatior update 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">updateOperator_spec</span> `{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_updateOperator_params</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ret_ops</span> : <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">updateOperator_token_ids_preserved</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> =  <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">updateOperator_balances_preserved</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">updateOperator_add_remove</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">compose_uptadeOperator_specs</span> <span class="id" title="var">ctx</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">params</span>.(<span class="id" title="var">cis1_ou_params</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab98"></a><h2 class="section">balanceOf</h2>
+
+<div class="paragraph"> </div>
+
+<a name="lab99"></a><h3 class="section">Parameter</h3>
+
+<div class="paragraph"> </div>
+
+ The parameters for <span class="inlinecode"><span class="id" title="var">balanceOf</span></span> are specified by <span class="inlinecode"><span class="id" title="record">CIS1_balanceOf_params</span></span> 
+<div class="paragraph"> </div>
+
+ CIS1: The parameter for the callback receive function is a list of pairs, where each pair is a query and an amount of tokens.
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">balanceOf_callback_type</span> `{<span class="id" title="var">ChainBase</span>} : <span class="id" title="keyword">Type</span> := <span class="id" title="var">list</span> (<span class="id" title="var">TokenID</span> * <span class="id" title="var">Address</span> * <span class="id" title="var">TokenAmount</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab100"></a><h3 class="section">Requirements</h3>
+
+<div class="paragraph"> </div>
+
+ CIS1: The contract function MUST reject if any of the queries fail.
+
+<div class="paragraph"> </div>
+
+  The <span class="inlinecode"><span class="id" title="definition">get_balance</span></span> function returns <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a></span> (fails) if the token id is unknown.
+  We combine the calls to <span class="inlinecode"><span class="id" title="definition">get_balance</span></span> using <span class="inlinecode"><a class="idref" href="ConCert.Execution.Monads.html#monad_map"><span class="id" title="definition">monad_map</span></a></span> where the monad is the <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#option"><span class="id" title="inductive">option</span></a></span> monad.
+   
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_balances</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_balanceOf_params</span>) : <span class="id" title="var">option</span> <span class="id" title="var">balanceOf_callback_type</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">monad_map</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">q</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">addr</span> := <span class="id" title="var">q</span>.(<span class="id" title="var">cis1_bo_query_address</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">token_id</span> := <span class="id" title="var">q</span>.(<span class="id" title="var">cis1_bo_query_token_id</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> <span class="id" title="var">balance</span> &lt;- <span class="id" title="var">get_balance</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span> (<span class="id" title="var">token_id</span>, <span class="id" title="var">addr</span>, <span class="id" title="var">balance</span>)) <span class="id" title="var">params</span>.(<span class="id" title="var">cis1_bo_query</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">balanceOf_spec</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">params</span> : <span class="id" title="var">CIS1_balanceOf_params</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ret_ops</span> : <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="var">balanceOf_operators_preserved</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span>, <span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_operators</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">addr</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">balanceOf_token_ids_preserved</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> =  <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">balanceOf_balances_preserved</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>, <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+
+<div class="doc">
+NOTE: It's assumed that the receiving contract accepts messages of type <span class="inlinecode"><span class="id" title="definition">balanceOf_callback_type</span></span> 
+</div>
+<div class="code">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">balanceOf_callback</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">get_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">params</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">query_results</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">serialized_query_results</span> := <span class="id" title="var">serialize</span> <span class="id" title="var">query_results</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">op</span> := <span class="id" title="var">act_call</span> <span class="id" title="var">params</span>.(<span class="id" title="var">cis1_bo_result_address</span>) 0%<span class="id" title="var">Z</span> <span class="id" title="var">serialized_query_results</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ret_ops</span> = [<span class="id" title="var">op</span>]<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; <span class="id" title="var">False</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1Axioms</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab101"></a><h2 class="section">Full specification of <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.BAT_AltFix.html#receive"><span class="id" title="definition">receive</span></a></span></h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Type</span> <span class="id" title="var">CIS1ReceiveSpec</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>) (<span class="id" title="var">cis1_view</span> : <span class="id" title="var">CIS1View</span> <span class="id" title="var">cis1_types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_view</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">cis1_axioms</span> := <span class="id" title="var">CIS1Axioms</span> <span class="id" title="var">cis1_types</span> <span class="id" title="var">cis1_view</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_axioms</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We require that it is possible to convert betwee the entry point and the input data specified
+      by the standard and the actual type of messages accepted by a particular contract 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">get_CIS1_entry_point</span> : <span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>}, <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">option</span> <span class="id" title="var">CIS1_entry_points</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">get_contract_msg</span> : <span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>}, <span class="id" title="var">CIS1_entry_points</span> -&gt; <span class="id" title="var">Msg</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This axiom captures the intuition that a contact that implements CIS1 can handle <i>at least</i>
+      <span class="inlinecode"><span class="id" title="inductive">CIS1_entry_points</span></span>.  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">left_inverse_get_CIS1_entry_point</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">entry_point</span> : <span class="id" title="var">CIS1_entry_points</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_CIS1_entry_point</span> (<span class="id" title="var">get_contract_msg</span> <span class="id" title="var">entry_point</span>) = <span class="id" title="var">Some</span> <span class="id" title="var">entry_point</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Parameter</span> <span class="id" title="var">contract_receive</span> : <span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>}, <span class="id" title="var">Chain</span> -&gt; <span class="id" title="var">ContractCallContext</span> -&gt; <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">option</span> <span class="id" title="var">Msg</span> -&gt; <span class="id" title="var">option</span> (<span class="id" title="var">Storage</span> * <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>).<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The contract's <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.BAT_AltFix.html#receive"><span class="id" title="definition">receive</span></a></span> function satisfies the CIS1 standard if for each entry points it
+      satisfies the corresponding specification. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Axiom</span> <span class="id" title="var">receive_spec</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">chain</span> : <span class="id" title="var">Chain</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">entry</span> : <span class="id" title="var">CIS1_entry_points</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">msg</span> : <span class="id" title="var">Msg</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">ops</span> : <span class="id" title="var">list</span> <span class="id" title="var">ActionBody</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_CIS1_entry_point</span> <span class="id" title="var">msg</span> = <span class="id" title="var">Some</span> <span class="id" title="var">entry</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">contract_receive</span> <span class="id" title="var">chain</span> <span class="id" title="var">ctx</span> <span class="id" title="var">prev_st</span> (<span class="id" title="var">Some</span> <span class="id" title="var">msg</span>) = <span class="id" title="var">Some</span> (<span class="id" title="var">next_st</span>, <span class="id" title="var">ops</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">entry</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">CIS1_transfer</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">transfer_spec</span> <span class="id" title="var">ctx</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">CIS1_updateOperator</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">updateOperator_spec</span> <span class="id" title="var">ctx</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">CIS1_balanceOf</span> <span class="id" title="var">params</span> =&gt; <span class="id" title="var">balanceOf_spec</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1ReceiveSpec</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab102"></a><h1 class="section">CIS1 properties</h1>
+
+<div class="paragraph"> </div>
+
+<a name="lab103"></a><h2 class="section">Operator updates</h2>
+
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CIS1Operators</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>) (<span class="id" title="var">cis1_view</span> : <span class="id" title="var">CIS1View</span> <span class="id" title="var">cis1_types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">cis1_axioms</span> := <span class="id" title="var">CIS1Axioms</span> <span class="id" title="var">cis1_types</span> <span class="id" title="var">cis1_view</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_axioms</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Sanity checks for the batch operator update spec 
+<div class="paragraph"> </div>
+
+ NOTE: the properties could be extended further, if more guarantees about operator updates are
+      required from the standard 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span> <span class="id" title="var">cis1_view</span> <span class="id" title="var">cis1_axioms</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">compose_updateOperator_add_add</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">addr1</span> <span class="id" title="var">addr2</span> : <span class="id" title="var">Address</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">add_addr1</span> := {| <span class="id" title="var">cis1_ou_update_kind</span> := <span class="id" title="var">cis1_ou_add_operator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> := <span class="id" title="var">addr1</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">add_addr2</span> := {| <span class="id" title="var">cis1_ou_update_kind</span> := <span class="id" title="var">cis1_ou_add_operator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> := <span class="id" title="var">addr2</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">compose_uptadeOperator_specs</span> <span class="id" title="var">ctx</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> [<span class="id" title="var">add_addr1</span>; <span class="id" title="var">add_addr2</span>] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">addr1</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>)).<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ? ? ? ? ? ? ? ? <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">st1</span> [<span class="id" title="var">Hst1</span> [<span class="id" title="var">st2</span> [<span class="id" title="var">Hst2</span> <span class="id" title="var">Heq</span>]]]]. <span class="id" title="tactic">subst</span>. <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hst1</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hst2</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H2</span> ?].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr1</span> <span class="id" title="var">addr2</span>);<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H2</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">compose_updateOperator_add_remove_same</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">addr</span> : <span class="id" title="var">Address</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">add_addr</span> := {| <span class="id" title="var">cis1_ou_update_kind</span> := <span class="id" title="var">cis1_ou_add_operator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> := <span class="id" title="var">addr</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">remove_addr</span> := {| <span class="id" title="var">cis1_ou_update_kind</span> := <span class="id" title="var">cis1_ou_remove_operator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> := <span class="id" title="var">addr</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">compose_uptadeOperator_specs</span> <span class="id" title="var">ctx</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> [<span class="id" title="var">add_addr</span>; <span class="id" title="var">remove_addr</span>] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id" title="var">In</span> <span class="id" title="var">addr</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>)).<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ? ? ? ? ? ? ? <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">st1</span> [<span class="id" title="var">Hst1</span> [<span class="id" title="var">st2</span> [<span class="id" title="var">Hst2</span> <span class="id" title="var">Heq</span>]]]]. <span class="id" title="tactic">subst</span>. <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hst2</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">compose_updateOperator_remove_one_remove_another</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">ctx</span> : <span class="id" title="var">ContractCallContext</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">prev_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">next_st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">addr1</span> <span class="id" title="var">addr2</span> : <span class="id" title="var">Address</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">addr1</span> &lt;&gt; <span class="id" title="var">addr2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">remove_addr</span> := {| <span class="id" title="var">cis1_ou_update_kind</span> := <span class="id" title="var">cis1_ou_remove_operator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> := <span class="id" title="var">addr1</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">add_addr</span> := {| <span class="id" title="var">cis1_ou_update_kind</span> := <span class="id" title="var">cis1_ou_add_operator</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cis1_ou_operator_address</span> := <span class="id" title="var">addr2</span> |} <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">compose_uptadeOperator_specs</span> <span class="id" title="var">ctx</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> [<span class="id" title="var">remove_addr</span>; <span class="id" title="var">add_addr</span>] -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id" title="var">In</span> <span class="id" title="var">addr1</span> (<span class="id" title="var">get_operators</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ctx</span>.(<span class="id" title="var">ctx_from</span>)).<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ? ? ? ? ? ? <span class="id" title="var">Hneq</span> ? ? <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">st1</span> [<span class="id" title="var">Hst1</span> [<span class="id" title="var">st2</span> [<span class="id" title="var">Hst2</span> <span class="id" title="var">Heq</span>]]]]. <span class="id" title="tactic">subst</span>. <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hst1</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hst2</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H2</span> ?].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intro</span>. <span class="id" title="tactic">specialize</span> (<span class="id" title="var">H2</span> <span class="id" title="var">_</span> <span class="id" title="var">Hneq</span>). <span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1Operators</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab104"></a><h2 class="section">Balances</h2>
+
+</div>
+<div class="code">
+<span class="id" title="keyword">Module</span> <span class="id" title="var">CIS1Balances</span> (<span class="id" title="var">cis1_types</span> : <span class="id" title="var">CIS1Types</span>) (<span class="id" title="var">cis1_view</span> : <span class="id" title="var">CIS1View</span> <span class="id" title="var">cis1_types</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">cis1_axioms</span> := <span class="id" title="var">CIS1Axioms</span> <span class="id" title="var">cis1_types</span> <span class="id" title="var">cis1_view</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_axioms</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+In this module we prove properties related to the preservation of the sum of all balances for
+      all token ids.
+
+<div class="paragraph"> </div>
+
+      These properties follow directly from the specification. That means, in particular, that all
+      the contracts that satisfy the specification will automatically satisfy all the properties we
+      prove here. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">cis1_types</span> <span class="id" title="var">cis1_view</span> <span class="id" title="var">cis1_axioms</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">VExtra</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">Lia</span>.<br/>
+
+<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Get the balance and return zero if <span class="inlinecode"><span class="id" title="definition">get_balance</span></span> returns <span class="inlinecode"><a class="idref" href="http://coq.inria.fr/distrib/V8.11.2/stdlib//Coq.Init.Datatypes.html#None"><span class="id" title="constructor">None</span></a></span> 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">get_balance_default</span> `{<span class="id" title="var">ChainBase</span>} : <span class="id" title="var">Storage</span> -&gt; <span class="id" title="var">TokenID</span> -&gt; <span class="id" title="var">Address</span> -&gt; <span class="id" title="var">TokenAmount</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> =&gt; <span class="id" title="keyword">match</span> <span class="id" title="var">get_balance</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">Some</span> <span class="id" title="var">amount</span> =&gt; <span class="id" title="var">amount</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">None</span> =&gt; 0<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We sum up all the balances for a given <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#token_id"><span class="id" title="definition">token_id</span></a></span> for a list of <span class="inlinecode"><span class="id" title="variable">owners</span></span>  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">sum_balances</span> `{<span class="id" title="var">ChainBase</span>} (<span class="id" title="var">st</span> : <span class="id" title="var">Storage</span>) (<span class="id" title="var">token_id</span> : <span class="id" title="var">TokenID</span>) (<span class="id" title="var">owners</span> : <span class="id" title="var">list</span> <span class="id" title="var">Address</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">fold_right</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">addr</span> <span class="id" title="var">s</span> =&gt; <span class="id" title="var">get_balance_default</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> + <span class="id" title="var">s</span>) 0 <span class="id" title="var">owners</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+This is an important lemma that is used to prove the main result about the sum of balances.
+      The lemma states that we can split the sum of all balances into two parts: the balance of a particular <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#owner"><span class="id" title="projection">owner</span></a></span> (which can be zero) and the sum of all <i>other</i> balances (with <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#owner"><span class="id" title="projection">owner</span></a></span> removed). 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">remove_owner</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">owners</span> : <span class="id" title="var">list</span> <span class="id" title="var">Address</span>) (<span class="id" title="var">owner</span> : <span class="id" title="var">Address</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">owner</span> <span class="id" title="var">owners</span> \/ <span class="id" title="var">get_balance_default</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span> = 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">NoDup</span> <span class="id" title="var">owners</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners</span> = <span class="id" title="var">get_balance_default</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span> + <span class="id" title="var">sum_balances</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">owner</span> <span class="id" title="var">owners</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin</span> | <span class="id" title="var">Hbal</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">owner</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;-<span class="id" title="tactic">induction</span> <span class="id" title="var">owners</span>;<span class="id" title="tactic">intros</span> <span class="id" title="var">owner</span> <span class="id" title="var">Hin</span> <span class="id" title="var">Hnodup</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">owner</span> <span class="id" title="var">owner</span>);<span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hnodup</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">Hnodup</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">not_in_remove_same</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hnodup</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">Hnodup</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">owner</span> <span class="id" title="var">a</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> (<span class="id" title="var">IHowners</span> <span class="id" title="var">owner</span>);<span class="id" title="tactic">auto</span>;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hbal</span>;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">owners</span>; <span class="id" title="tactic">intros</span> <span class="id" title="var">Hnodup</span>;<span class="id" title="tactic">auto</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hnodup</span>;<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">clear</span> <span class="id" title="var">Hnodup</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">owner</span> <span class="id" title="var">a</span>);<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">simpl</span>;<span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">remove_In</span> <span class="id" title="var">not_in_remove_same</span> <span class="id" title="var">not_in_remove</span> <span class="id" title="var">remove_remove</span> <span class="id" title="var">neq_not_removed</span> : <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">remove_extensional</span> : <span class="id" title="var">hints</span>.<br/>
+
+<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+An important lemma stating that the sum of balances in two states is the same for the same owners, if the balances in the two states agree.
+   This lemma is used to make a connection between the sum of balances and the properties of <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#transfer"><span class="id" title="record">transfer</span></a></span> given by the specification 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">sum_of_balances_eq_extensional</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">owners1</span> <span class="id" title="var">owners2</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">NoDup</span> <span class="id" title="var">owners1</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">NoDup</span> <span class="id" title="var">owners2</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span>, <span class="id" title="var">In</span> <span class="id" title="var">addr</span> <span class="id" title="var">owners1</span> &lt;-&gt; <span class="id" title="var">In</span> <span class="id" title="var">addr</span> <span class="id" title="var">owners2</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span>, <span class="id" title="var">In</span> <span class="id" title="var">addr</span> <span class="id" title="var">owners1</span> -&gt; <span class="id" title="var">get_balance_default</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_default</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners1</span> = <span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners2</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">sum_of_balances_eq</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">sum_balances_extensional</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">get_balance_opt_default</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">next_st</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_default</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_default</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">Hids</span> <span class="id" title="var">Hopt</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">get_balance_default</span>,<span class="id" title="var">get_balance</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hids</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>);<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Heq1</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Heq2</span>;<span class="id" title="tactic">auto</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>;<span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The owners are the same in two states if the balances agree. We generalise the statement to cover the case when we ignore certain addresses given by <span class="inlinecode"><span class="id" title="variable">ignore_addrs</span></span>.  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">same_owners_remove_all</span>  `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">token_id</span> <span class="id" title="var">ignore_addrs</span> <span class="id" title="var">next_st</span> <span class="id" title="var">prev_st</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr1</span>, ~ <span class="id" title="var">In</span> <span class="id" title="var">addr1</span> <span class="id" title="var">ignore_addrs</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr1</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr1</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">forall</span> <span class="id" title="var">addr1</span>, <span class="id" title="var">In</span> <span class="id" title="var">addr1</span> (<span class="id" title="var">remove_all</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">ignore_addrs</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&gt; <span class="id" title="var">In</span> <span class="id" title="var">addr1</span> (<span class="id" title="var">remove_all</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">ignore_addrs</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span>))).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">H0</span> <span class="id" title="var">addr1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hdec</span> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Address</span>), <span class="id" title="var">a1</span> = <span class="id" title="var">a2</span> \/ <span class="id" title="var">a1</span> &lt;&gt; <span class="id" title="var">a2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>);<span class="id" title="tactic">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">ListDec.In_decidable</span> <span class="id" title="var">Hdec</span> <span class="id" title="var">addr1</span> <span class="id" title="var">ignore_addrs</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin_addrs</span> | <span class="id" title="var">Hnotin_addrs</span>];<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hall</span> : <span class="id" title="var">Forall</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt;~<span class="id" title="var">In</span> <span class="id" title="var">x</span> (<span class="id" title="var">remove_all</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">ignore_addrs</span> ((<span class="id" title="var">get_owners</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>)))) <span class="id" title="var">ignore_addrs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">remove_all_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Forall_forall</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hall</span>;<span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">specialize</span> (<span class="id" title="var">H0</span> <span class="id" title="var">_</span> <span class="id" title="var">Hnotin_addrs</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr1</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hnext</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hnext</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">remove_all_not_in_to_remove</span>;<span class="id" title="tactic">auto</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">get_owners_balances</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">In_remove_all</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">get_owners_balances</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">intros</span> <span class="id" title="var">Hin</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">ListDec.In_decidable</span> <span class="id" title="var">Hdec</span> <span class="id" title="var">addr1</span> <span class="id" title="var">ignore_addrs</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin_addrs</span> | <span class="id" title="var">Hnotin_addrs</span>];<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">exfalso</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hall</span> : <span class="id" title="var">Forall</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt;~<span class="id" title="var">In</span> <span class="id" title="var">x</span> (<span class="id" title="var">remove_all</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">ignore_addrs</span> ((<span class="id" title="var">get_owners</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span>)))) <span class="id" title="var">ignore_addrs</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">remove_all_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Forall_forall</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hall</span>;<span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">specialize</span> (<span class="id" title="var">H0</span> <span class="id" title="var">_</span> <span class="id" title="var">Hnotin_addrs</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr1</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Hnext</span>;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hnext</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">remove_all_not_in_to_remove</span>;<span class="id" title="tactic">auto</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">get_owners_balances</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">apply</span> <span class="id" title="var">In_remove_all</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">get_owners_balances</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Hin</span>;<span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Any address either in the list of owners, or owns zero tokens. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">in_owners_or_zero_balance_default</span>  `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">In</span> <span class="id" title="var">owner</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>) \/ <span class="id" title="var">get_balance_default</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span> = 0.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">Hdec</span> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">a1</span> <span class="id" title="var">a2</span> : <span class="id" title="var">Address</span>), <span class="id" title="var">a1</span> = <span class="id" title="var">a2</span> \/ <span class="id" title="var">a1</span> &lt;&gt; <span class="id" title="var">a2</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> (<span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">a1</span> <span class="id" title="var">a2</span>);<span class="id" title="tactic">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">ListDec.In_decidable</span> <span class="id" title="var">Hdec</span> <span class="id" title="var">owner</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>)) <span class="id" title="keyword">as</span> [<span class="id" title="var">Hin_addrs</span> | <span class="id" title="var">Hnotin_addrs</span>];<span class="id" title="tactic">subst</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">get_balance_default</span>,<span class="id" title="var">get_balance</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">token_id_exists</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>);<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span>) <span class="id" title="var">eqn</span>:<span class="id" title="var">Heq</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">In</span> <span class="id" title="var">owner</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>)) <span class="id" title="tactic">by</span> (<span class="id" title="tactic">apply</span> <span class="id" title="var">get_owners_balances</span>;<span class="id" title="tactic">eauto</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">easy</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">in_owners_or_zero_balance_default</span> <span class="id" title="var">get_owners_no_dup</span> : <span class="id" title="var">hints</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">get_balance_total_get_balance_default</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">owner</span>:<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_total</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">owner</span> = <span class="id" title="var">get_balance_default</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">get_balance_total</span>, <span class="id" title="var">get_balance_default</span>, <span class="id" title="var">get_balance</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">p</span>. <span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">destruct</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Constructors</span> <span class="id" title="var">transfer_spec</span> : <span class="id" title="var">hints</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+We can recover a statement for the whole "batch" of transfers from the transfers spec where
+      the same property is assumed for each transfer in the batch 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">transfer_token_ids_preserved</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">ctx</span> <span class="id" title="var">transfers</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">params</span> := <span class="id" title="var">Build_CIS1_transfer_params</span> <span class="id" title="var">_</span> <span class="id" title="var">transfers</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_spec</span> <span class="id" title="var">ctx</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> =  <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">prev_st</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">ops</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">transfers</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">ops</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">spec</span> <span class="id" title="var">token_id</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span>. <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="var">now</span> <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">ops</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">spec</span> <span class="id" title="var">token_id</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Htrans</span> <span class="id" title="var">Hcalls</span>]. <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Htrans</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">st</span> [? [? [<span class="id" title="var">Hsingle</span> ?]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">transitivity</span> (<span class="id" title="var">token_id_exists</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">now</span> <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hsingle</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_is_contract</span> (<span class="id" title="var">cis1_td_to</span> <span class="id" title="var">a</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">inversion</span> <span class="id" title="var">Hcalls</span>;<span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">IHtransfers</span>;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">eapply</span> <span class="id" title="var">IHtransfers</span>;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+The balances of all token-address pairs NOT mentioned in the transfer batch remain unchanged
+  
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">transfer_other_balances_preserved</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">ctx</span> <span class="id" title="var">transfers</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">params</span> := <span class="id" title="var">Build_CIS1_transfer_params</span> <span class="id" title="var">_</span> <span class="id" title="var">transfers</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">transfer_spec</span> <span class="id" title="var">ctx</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">addr</span> <span class="id" title="var">token_id</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id" title="var">In</span> (<span class="id" title="var">token_id</span>, <span class="id" title="var">addr</span>) (<span class="id" title="var">transfer_from</span> <span class="id" title="var">params</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~ <span class="id" title="var">In</span> (<span class="id" title="var">token_id</span>, <span class="id" title="var">addr</span>) (<span class="id" title="var">transfer_to</span> <span class="id" title="var">params</span>)   -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span> = <span class="id" title="var">get_balance_opt</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">next_st</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">prev_st</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">ops</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">transfers</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">cbn</span>;<span class="id" title="tactic">intros</span> <span class="id" title="var">ops</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">spec</span> <span class="id" title="var">addr</span> <span class="id" title="var">token_id</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span>. <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="var">now</span> <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">intros</span> <span class="id" title="var">ops</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> ? <span class="id" title="var">spec</span> <span class="id" title="var">addr</span> <span class="id" title="var">token_id</span> <span class="id" title="var">Hfrom</span> <span class="id" title="var">Hto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Htr</span> <span class="id" title="var">Hcalls</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Htr</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">st</span> [<span class="id" title="var">p</span> [<span class="id" title="var">q</span> [<span class="id" title="var">Hsingle</span> <span class="id" title="var">Htrs</span>]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> ((<span class="id" title="var">token_id</span>, <span class="id" title="var">addr</span>) &lt;&gt; (<span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_token_id</span>), <span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_from</span>)) /\ ~ (<span class="id" title="var">In</span> (<span class="id" title="var">token_id</span>,<span class="id" title="var">addr</span>) (<span class="id" title="var">transfer_from</span> <span class="id" title="var">params</span>))) <span class="id" title="tactic">by</span> <span class="id" title="tactic">firstorder</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> ((<span class="id" title="var">token_id</span>, <span class="id" title="var">addr</span>) &lt;&gt; (<span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_token_id</span>), <span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_to</span>)) /\ ~ (<span class="id" title="var">In</span> (<span class="id" title="var">token_id</span>,<span class="id" title="var">addr</span>) (<span class="id" title="var">transfer_to</span> <span class="id" title="var">params</span>))) <span class="id" title="tactic">by</span> <span class="id" title="tactic">firstorder</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">clear</span> <span class="id" title="var">Hto</span>. <span class="id" title="tactic">clear</span> <span class="id" title="var">Hfrom</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">transitivity</span> (<span class="id" title="var">get_balance_opt</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">addr</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hsingle</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hbal_not_addr</span> [<span class="id" title="var">Hbal_other_tokens</span> [? ?]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">token_id_eqb_spec</span> <span class="id" title="var">token_id</span> <span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_token_id</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">assert</span> (<span class="id" title="var">addr</span> &lt;&gt; <span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_to</span>)) <span class="id" title="tactic">by</span> <span class="id" title="tactic">firstorder</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">addr</span> &lt;&gt; <span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_from</span>)) <span class="id" title="tactic">by</span> <span class="id" title="tactic">firstorder</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>. <span class="id" title="tactic">symmetry</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">Hbal_not_addr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="var">now</span> <span class="id" title="tactic">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_is_contract</span> (<span class="id" title="var">cis1_td_to</span> <span class="id" title="var">a</span>));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hcalls</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">IHtransfers</span>;<span class="id" title="tactic">firstorder</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+If the properties of the single transfer holds (the transfer succeeds), then
+      we can conclude that if has been enough tokens for the transfer. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">transfer_single_spec_sufficient_funds</span> `{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span> <span class="id" title="var">owner</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">q</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">spec</span> : <span class="id" title="var">transfer_single_spec</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">q</span> <span class="id" title="var">owner</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">get_balance_total</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">from</span> &gt;= <span class="id" title="var">amount</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [? [? [? [? [<span class="id" title="var">Htransfer</span> <span class="id" title="var">Hself_transfer</span>]]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) <span class="id" title="keyword">as</span> [| <span class="id" title="var">Hneq</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hself_transfer</span> <span class="id" title="var">eq_refl</span>). <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">specialize</span> (<span class="id" title="var">Htransfer</span> <span class="id" title="var">Hneq</span>). <span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+An important lemma for the main result. The spec for a single transfer ensures that for a
+      particular <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#token_id"><span class="id" title="definition">token_id</span></a></span> the sum of balances is preserved for all owners for one transfer
+      of an <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.FA2Interface.html#amount"><span class="id" title="projection">amount</span></a></span> between <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#from"><span class="id" title="projection">from</span></a></span> and <span class="inlinecode"><a class="idref" href="ConCert.Execution.Examples.dexter2.Dexter2FA12.html#to"><span class="id" title="projection">to</span></a></span>. 
+</div>
+<div class="code">
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">transfer_single_spec_preserves_balances</span> `{<span class="id" title="var">ChainBase</span>}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owner0</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">p</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">q</span> : <span class="id" title="var">token_id_exists</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">spec</span> : <span class="id" title="var">transfer_single_spec</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">p</span> <span class="id" title="var">q</span> <span class="id" title="var">owner0</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> <span class="id" title="var">amount</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners1</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners2</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners2</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners1</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hother_balances</span> [? [? [<span class="id" title="var">_</span> [<span class="id" title="var">Htransfer</span> <span class="id" title="var">Hself_transfer</span>]]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">transfer_single_spec</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>) <span class="id" title="keyword">as</span> [<span class="id" title="var">Haddr</span> | <span class="id" title="var">Haddr</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">remove_owner</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">st</span> := <span class="id" title="var">prev_st</span>) (<span class="id" title="var">owner</span> := <span class="id" title="var">to</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">remove_owner</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">st</span> := <span class="id" title="var">next_st</span>) (<span class="id" title="var">owner</span> := <span class="id" title="var">to</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">HH</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">to</span> <span class="id" title="var">owners2</span>) =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">to</span> <span class="id" title="var">owners1</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_of_balances_eq_extensional</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span>;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">addr</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">same_owners_remove_all</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">ignore_addrs</span>:=[<span class="id" title="var">to</span>]);<span class="id" title="tactic">intros</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">intuition</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">addr</span> <span class="id" title="var">Haddr</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">get_balance_opt_default</span>;<span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr</span> <span class="id" title="var">to</span>);<span class="id" title="tactic">subst</span>. <span class="id" title="var">exfalso</span>;<span class="id" title="tactic">apply</span> (<span class="id" title="var">remove_In</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">Haddr</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">get_balance_total_get_balance_default</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Htransfer</span>, <span class="id" title="var">Hself_transfer</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Hself_transfer</span> <span class="id" title="var">eq_refl</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">remove_owner</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">st</span> := <span class="id" title="var">prev_st</span>) (<span class="id" title="var">owner</span> := <span class="id" title="var">from</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">remove_owner</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">st</span> := <span class="id" title="var">prev_st</span>) (<span class="id" title="var">owner</span> := <span class="id" title="var">to</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="tactic">assert</span> (<span class="id" title="var">In</span> <span class="id" title="var">to</span> <span class="id" title="var">owners1</span> \/ <span class="id" title="var">get_balance_default</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">to</span> = 0); <span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>;<span class="id" title="tactic">intuition</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">remove_owner</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">st</span> := <span class="id" title="var">next_st</span>) (<span class="id" title="var">owner</span> := <span class="id" title="var">from</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="tactic">subst</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">remove_owner</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">st</span> := <span class="id" title="var">next_st</span>) (<span class="id" title="var">owner</span> := <span class="id" title="var">to</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">by</span> (<span class="id" title="tactic">assert</span> (<span class="id" title="var">In</span> <span class="id" title="var">to</span> <span class="id" title="var">owners2</span> \/ <span class="id" title="var">get_balance_default</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">to</span> = 0);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>;<span class="id" title="tactic">intuition</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">specialize</span> (<span class="id" title="var">Htransfer</span> <span class="id" title="var">Haddr</span>). <span class="id" title="tactic">destruct</span> <span class="id" title="var">Htransfer</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Hfrom</span> <span class="id" title="var">Hto</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">get_balance_total_get_balance_default</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Hfrom</span>,<span class="id" title="var">Hto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hfrom</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">Hto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (<span class="id" title="var">HH</span> :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">to</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">from</span> <span class="id" title="var">owners2</span>)) =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">to</span> (<span class="id" title="var">remove</span> <span class="id" title="var">addr_eq_dec</span> <span class="id" title="var">from</span> <span class="id" title="var">owners1</span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">apply</span> <span class="id" title="var">sum_of_balances_eq_extensional</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span>;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">same_owners_remove_all</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">ignore_addrs</span>:=[<span class="id" title="var">to</span>;<span class="id" title="var">from</span>]);<span class="id" title="tactic">intros</span>;<span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *;<span class="id" title="tactic">intuition</span>;<span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> <span class="id" title="var">addr</span> <span class="id" title="var">Haddr0</span>. <span class="id" title="tactic">unfold</span> <span class="id" title="var">is_true</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">get_balance_opt_default</span>;<span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr</span> <span class="id" title="var">to</span>);<span class="id" title="tactic">subst</span>. <span class="id" title="var">exfalso</span>;<span class="id" title="tactic">apply</span> (<span class="id" title="var">remove_In</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">Haddr0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_eqb_spec</span> <span class="id" title="var">addr</span> <span class="id" title="var">from</span>);<span class="id" title="tactic">subst</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">In_remove</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Haddr0</span>; <span class="id" title="tactic">auto</span>. <span class="id" title="var">exfalso</span>;<span class="id" title="tactic">apply</span> (<span class="id" title="var">remove_In</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">Haddr0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">lia</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+<a name="lab105"></a><h3 class="section">Main result</h3>
+
+<div class="paragraph"> </div>
+
+ The prove our main result about the CIS1 standard with relation to the token balances.
+      Namely, we prove that all the supported entry points preserve the sum of balances for all
+      token types. The results hold for any contract that complies with the abstract interface
+      of the CIS1 standard. 
+</div>
+<div class="code">
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">transfer_preserves_sum_of_balances</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">ctx</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span> <span class="id" title="var">transfers</span> <span class="id" title="var">token_id</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">spec</span> : <span class="id" title="var">transfer_spec</span> <span class="id" title="var">ctx</span> (<span class="id" title="var">Build_CIS1_transfer_params</span> <span class="id" title="var">_</span> <span class="id" title="var">transfers</span>) <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners1</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners2</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners1</span> = <span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners2</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">Htr</span> <span class="id" title="var">Hcalls</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">prev_st</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">next_st</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="tactic">dependent</span> <span class="id" title="var">ops</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">transfers</span>;<span class="id" title="tactic">intros</span> <span class="id" title="var">ops</span> ? <span class="id" title="var">next_st</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">Htr</span> ? ?.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *. <span class="id" title="var">now</span> <span class="id" title="tactic">subst</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">Htr</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">st</span> [<span class="id" title="var">p</span> [<span class="id" title="var">q</span> [<span class="id" title="var">Hsingle</span> <span class="id" title="var">Htrs</span>]]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">transitivity</span> (<span class="id" title="var">sum_balances</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span> (<span class="id" title="var">get_owners</span> <span class="id" title="var">st</span> <span class="id" title="var">token_id</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">token_id_eqb_spec</span> <span class="id" title="var">token_id</span> <span class="id" title="var">a</span>.(<span class="id" title="var">cis1_td_token_id</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">eapply</span> <span class="id" title="var">transfer_single_spec_preserves_balances</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">next_st0</span> := <span class="id" title="var">st</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* <span class="id" title="tactic">destruct</span> <span class="id" title="var">Hsingle</span> <span class="id" title="keyword">as</span> [? [<span class="id" title="var">HH</span> [? ?]]].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">sum_of_balances_eq_extensional</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span>;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">get_owners_balances</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">now</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">HH</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;** <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">get_balance_opt_default</span>;<span class="id" title="tactic">symmetry</span>;<span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span class="id" title="var">cbn</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">address_is_contract</span> (<span class="id" title="var">cis1_td_to</span> <span class="id" title="var">a</span>));<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">inversion</span> <span class="id" title="var">Hcalls</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">IHtransfers</span>;<span class="id" title="tactic">firstorder</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">balanceOf_preserves_sum_of_balances</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">ops</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">spec</span> : <span class="id" title="var">balanceOf_spec</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners1</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners2</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners2</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners1</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H1</span> <span class="id" title="var">H2</span> <span class="id" title="var">H3</span> <span class="id" title="var">H4</span>]. <span class="id" title="tactic">clear</span> <span class="id" title="var">H4</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">sum_of_balances_eq_extensional</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">same_owners_remove_all</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">ignore_addrs</span> := []).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">get_balance_opt_default</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">updateOperator_preserves_sum_of_balances</span> `{<span class="id" title="var">ChainBase</span>} <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">ops</span> <span class="id" title="var">ctx</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">spec</span> : <span class="id" title="var">updateOperator_spec</span> <span class="id" title="var">ctx</span> <span class="id" title="var">params</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">next_st</span> <span class="id" title="var">ops</span>) :<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners1</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">owners2</span> := <span class="id" title="var">get_owners</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">next_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners2</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sum_balances</span> <span class="id" title="var">prev_st</span> <span class="id" title="var">token_id</span> <span class="id" title="var">owners1</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span> ??.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">spec</span> <span class="id" title="keyword">as</span> [<span class="id" title="var">H1</span> <span class="id" title="var">H2</span> <span class="id" title="var">H3</span>].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">sum_of_balances_eq_extensional</span>;<span class="id" title="tactic">subst</span> <span class="id" title="var">owners1</span> <span class="id" title="var">owners2</span>;<span class="id" title="tactic">auto</span> <span class="id" title="keyword">with</span> <span class="id" title="var">hints</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">same_owners_remove_all</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">ignore_addrs</span> := []).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="var">now</span> <span class="id" title="tactic">apply</span> <span class="id" title="var">get_balance_opt_default</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">CIS1Balances</span>.<br/>
+</div>
+</div>
+<div id="footer">
+  Generated by <a href="http://coq.inria.fr/">coqdoc</a> and improved with <a href="https://github.com/tebbi/coqdocjs">CoqdocJS</a> and <a href="https://github.com/jgallen23/toc">TOC</a>
+</div>
+</div>
+<script>
+  const elements = document.getElementsByClassName("libtitle");
+  while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+  }
+  if (window.location.pathname.endsWith("/toc.html")) {
+      const jstocDiv = document.getElementById("js-toc");
+      jstocDiv.classList.remove("toc");
+      jstocDiv.classList.add("jstoc-hidden");
+      const jstocHeaderDiv = document.getElementById("js-toc-header");
+      jstocHeaderDiv.classList.add("jstoc-hidden");
+  }
+  console.log(window.location.pathname);
+</script>
+<script type="text/javascript" src="toc.js"></script>
+</body>
+
+</html>
