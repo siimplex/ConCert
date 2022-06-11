@@ -1,12 +1,19 @@
 From ConCert.Execution.Examples Require Counter.
 From ConCert.Extraction Require Import Common.
 From ConCert.Extraction Require Import ConcordiumExtract.
+From ConCert.Extraction Require Import SolanaExtract.
 From ConCert.Extraction Require Import RustExtract.
 From Coq Require Import Bool.
 From Coq Require Import String.
 From MetaCoq.Template Require Import All.
 
 Open Scope string.
+
+Definition COUNTER_MODULE1 : SolanaMod _ _ :=
+  {| solana_contract_name := "counter";
+     solana_init := @ConCert.Execution.Examples.Counter.counter_init;
+     solana_receive := @ConCert.Execution.Examples.Counter.counter_receive;
+     solana_extra := []; |}.
 
 Definition COUNTER_MODULE : ConcordiumMod _ _ :=
   {| concmd_contract_name := "counter";
@@ -21,8 +28,19 @@ Instance RustConfig : RustPrintConfig :=
        any_type_symbol := "()";
        print_full_names := false |}.
 
-Redirect "examples/extracted-code/concordium-extract/counter.rs"
-MetaCoq Run (concordium_extraction
+Redirect "/home/johnny/Documents/Tese/ConCert/extraction/examples/extracted-code/concordium-extract/counterv2.rs"
+
+MetaCoq Run (solana_extraction
+               COUNTER_MODULE1
+               (SolanaRemap.build_remaps
+                  (SolanaRemap.remap_arith ++ SolanaRemap.remap_blockchain_consts)
+                  []
+                  (SolanaRemap.remap_blockchain_inductives
+                     ++ SolanaRemap.remap_std_types))
+               (fun kn => eq_kername <%% bool_rec %%> kn
+                          || eq_kername <%% bool_rect %%> kn)).
+
+(* MetaCoq Run (concordium_extraction
                COUNTER_MODULE
                (ConcordiumRemap.build_remaps
                   (ConcordiumRemap.remap_arith ++ ConcordiumRemap.remap_blockchain_consts)
@@ -30,4 +48,4 @@ MetaCoq Run (concordium_extraction
                   (ConcordiumRemap.remap_blockchain_inductives
                      ++ ConcordiumRemap.remap_std_types))
                (fun kn => eq_kername <%% bool_rec %%> kn
-                          || eq_kername <%% bool_rect %%> kn)).
+                          || eq_kername <%% bool_rect %%> kn)). *)

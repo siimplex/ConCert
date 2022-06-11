@@ -1,63 +1,3 @@
-(* This file defines blockchains, both a contract's view (which is
-more computational) and the semantics of executing smart contracts
-in a blockchain.
-
-The most important types are:
-
-* The ChainBase type, describing basic assumptions made of any blockchain.
-In most cases we will abstract over this type.
-
-* The Chain type, describing a smart contract's view of the blockchain.
-This is the the data that can be accessed by smart contracts.
-
-* The Action type, describing how smart contracts (and external users)
-interact with the blockchain. We allow transfers, calls and deployment
-of contracts.
-
-* The WeakContract type, describing a "weak" or "stringly" typed
-version of smart contracts. Contracts are just two functions init and
-receive to respectively initialize state on deployment and to update
-state when receiving messages. The weak version of contracts means that
-the state/message/setup types, which would normally vary with contracts,
-are stored in a serialized format.
-
-* The Contract type, describing a more strongly typed version of a contract.
-This is the same as the above except we abstract over the appropriate types.
-Users of the framework will mostly need to deal with this.
-
-The next types deal with semantics.
-
-* The Environment type. This augments the Chain type with more information.
-Environment can be thought of as the information that a realistic blockchain
-implementation would need to keep track of to implement operations. For instance,
-it is reasonable to assume that an implementation needs to access the state of
-contracts, but not to assume that it needs to store the full transaction history
-of all addresses.
-
-* The ActionEvaluation type. This specifies how to evaluate actions returned by
-contracts or input in blocks. This related an environment and action to a new
-environment and list of new actions to execute.
-
-* The ChainState type. This augments the Environment type with a queue of
-"outstanding" actions that need to be executed. For instance, when a block is
-added, its actions are put into this queue.
-
-* The ChainStep type. This specifies how the blockchain should execute smart
-contracts, and how new blocks are added. It relates a ChainState to a new ChainState.
-There are steps to allow adding blocks, evaluating actions in the queue and to
-permute the queue (allowing to model any execution order).
-
-* The ChainTrace type. This just represents a sequence of steps. If a trace ends
-in a state it means that state is reachable and there is a "semantically correct"
-way of executing to get to this state. This type records the full history of a
-blockchain's execution and it would thus be unrealistic to extract.
-
-* The ChainBuilderType type. This is a typeclass for implementations of blockchains,
-where these implementations need to prove that they satisfy our semantics.
-
-*)
-
-
 From Coq Require Import ZArith.
 From Coq Require Import List.
 From Coq Require Import Psatz.
@@ -84,7 +24,7 @@ Class ChainBase :=
       forall (a b : Address), Bool.reflect (a = b) (address_eqb a b);
     address_eqdec :> stdpp.base.EqDecision Address;
     address_countable :> countable.Countable Address;
-    address_serializable :> Serializable Address;
+    address_serializable :> Serializable Address; 
     address_is_contract : Address -> bool;
   }.
 
@@ -126,6 +66,7 @@ Context {Base : ChainBase}.
 
 (* This represents the view of the blockchain that a contract
 can access and interact with. *)
+(* Finalization is a Concordium blockchain concept but the root in Solana is identical *)
 Record Chain :=
   build_chain {
     chain_height : nat;
@@ -133,52 +74,53 @@ Record Chain :=
     finalized_height : nat;
   }.
 
-Record ContractCallContext :=
-  build_ctx {
-    (* Address that initiated the transaction (never a contract) *)
-    ctx_origin : Address;
-    (* Address of the immediate account that sent the call (can be a contract or a user account) *)
-    ctx_from : Address;
-    (* Address of the contract being called *)
-    ctx_contract_address : Address;
-    (* Balance of the contract being called *)
-    ctx_contract_balance : Amount;
-    (* Amount of currency passed in call *)
-    ctx_amount : Amount;
+(* TODO: Some operations regarding account info  *)
+(* And account types would be great *)
+Record AccountInfo :=
+  build_account {  
+    (* Account address *)
+    account_address : Address;
+    (* Account owner address *)
+    account_owner_address : Address;
+    (* Has the account signed the transaction *)
+    account_is_signer : bool;
+    (* Can the account be written to *)
+    account_is_writable : bool; 
+    (* Is the account a program *)
+    account_is_executable : bool;
   }.
+
 
 (* Operations that a contract can return or that a user can use
 to interact with a chain. *)
+
+(* Currently WeakContract is described as a single function, in the future it may be needed to add more *)
 Inductive ActionBody :=
   | act_transfer (to : Address) (amount : Amount)
-  | act_call (to : Address) (amount : Amount) (msg : SerializedValue)
-  | act_deploy (amount : Amount) (c : WeakContract) (setup : SerializedValue)
-with WeakContract :=
-     | build_weak_contract
-         (init :
-            Chain ->
-            ContractCallContext ->
-            SerializedValue (* setup *) ->
-            option SerializedValue)
-         (receive :
-            Chain ->
-            ContractCallContext ->
-            SerializedValue (* state *) ->
-            option SerializedValue (* message *) ->
-            option (SerializedValue * list ActionBody)).
+  | act_call (to : Address) (msg : SerializedValue) 
+  | act_deploy (c : WeakContract) (setup : SerializedValue) (* J> Not sure what to do with this yet *)
+  | act_special_call (to : Address) (body : SpecialCallBody)
+    with SpecialCallBody :=
+       | transfer_ownership (account : Address) (new_owner : Address)
+    with WeakContract :=
+       | build_weak_contract
+           (process :
+              Chain ->
+              list AccountInfo -> (* accounts *)
+              option SerializedValue -> (* state *)
+              option SerializedValue -> (* message *)
+              option (SerializedValue * (list ActionBody))) (* state, actions *).
 
 Definition act_body_amount (ab : ActionBody) : Z :=
   match ab with
-  | act_transfer _ amount
-  | act_call _ amount _
-  | act_deploy amount _ _ => amount
+  | act_transfer _ amount => amount
+  | act_call _ _ 
+  | act_deploy _ _
+  | act_special_call _ _ => 0
   end.
 
-Definition wc_init (wc : WeakContract) :=
-  let (i, _) := wc in i.
-
-Definition wc_receive (wc : WeakContract) :=
-  let (_, r) := wc in r.
+Definition wc_process (wc : WeakContract) :=
+  let (p) := wc in p.
 
 Record Action :=
   build_act {
@@ -193,68 +135,68 @@ Definition act_amount (a : Action) := act_body_amount (act_body a).
 use and interact with when they want deployment. We keep the weak contract
 only "internally" for blockchains, while any strongly-typed contract can
 be converted to and from *)
+
 Record Contract
-      (Setup Msg State : Type)
-      `{Serializable Setup}
-      `{Serializable Msg}
-      `{Serializable State} :=
+      (Msg State Setup: Type)
+      `{Serializable Msg} 
+      `{Serializable State}
+      `{Serializable Setup} :=
   build_contract {
-
-    init :
+    process :
       Chain ->
-      ContractCallContext ->
-      Setup ->
-      option State;
-
-    receive :
-      Chain ->
-      ContractCallContext ->
-      State ->
+      list AccountInfo ->
+      option State ->
       option Msg ->
-      option (State * list ActionBody);
+      option (State * (list ActionBody));
   }.
 
-Global Arguments init {_ _ _ _ _ _}.
-Global Arguments receive {_ _ _ _ _ _}.
+Global Arguments process {_ _ _ _ _ _}.
 Global Arguments build_contract {_ _ _ _ _ _}.
 
-Check build_weak_contract.
-
 Program Definition contract_to_weak_contract
-          {Setup Msg State : Type}
-          `{Serializable Setup}
+          {Msg State Setup: Type}
           `{Serializable Msg}
           `{Serializable State}
-          (c : Contract Setup Msg State) : WeakContract :=
-      let weak_init chain ctx ser_setup :=
-          do setup <- deserialize ser_setup;
-          do state <- c.(init) chain ctx setup;
-          Some (serialize state) in
-      let weak_recv chain ctx ser_state ser_msg_opt :=
-          do state <- deserialize ser_state;
-          match ser_msg_opt with
-          | Some ser_msg =>
-            do msg <- deserialize ser_msg;
-            do '(new_state, acts) <- c.(receive) chain ctx state (Some msg);
-            Some (serialize new_state, acts)
-          | None =>
-            do '(new_state, acts) <- c.(receive) chain ctx state None;
-            Some (serialize new_state, acts)
+          `{Serializable Setup}
+          (c : Contract Msg State Setup) : WeakContract :=
+      let weak_proc chain accounts ser_state_opt ser_msg_opt :=
+          match ser_state_opt with
+          | Some ser_state => (* Contract main functionality *)
+            do state <- deserialize ser_state;
+            match ser_msg_opt with
+            | Some ser_msg =>
+              do msg <- deserialize ser_msg;
+              do '(new_state, acts) <- c.(process) chain accounts (Some state) (Some msg);
+              Some (serialize new_state, acts)
+            | None =>
+              do '(new_state, acts) <- c.(process) chain accounts (Some state) None;
+              Some (serialize new_state, acts)
+             end
+          | None => 
+            match ser_msg_opt with
+            | Some ser_msg => (* No state sent with message, equivalent to the init function *)
+              do msg <- deserialize ser_msg; 
+              do '(new_state, acts) <- c.(process) chain accounts None (Some msg);
+              Some (serialize new_state, acts)
+            | None =>
+              do '(new_state, acts) <- c.(process) chain accounts None None;
+              Some (serialize new_state, acts)
+             end
           end in
-      build_weak_contract weak_init weak_recv.
+      build_weak_contract weak_proc.
 
 Coercion contract_to_weak_contract : Contract >-> WeakContract.
 
 (* Deploy a strongly typed contract with some amount and setup *)
 Definition create_deployment
-          {Setup Msg State : Type}
-          `{Serializable Setup}
+          {Msg State Setup: Type}
           `{Serializable Msg}
           `{Serializable State}
-          (amount : Amount)
-          (contract : Contract Setup Msg State)
+          `{Serializable Setup}
+(*           (amount : Amount) *)
+          (contract : Contract Msg State Setup) 
           (setup : Setup) : ActionBody :=
-  act_deploy amount contract (serialize setup).
+  act_deploy contract (serialize setup).
 
 (* The contract interface is the main mechanism allowing a deployed
 contract to interact with another deployed contract. This hides
@@ -276,7 +218,7 @@ Definition get_contract_interface
   let ifc_send amount msg :=
       match msg with
       | None => act_transfer addr amount
-      | Some msg => act_call addr amount (serialize msg)
+      | Some msg => act_call addr (serialize msg)
       end in
   Some {| contract_address := addr; send := ifc_send; |}.
 
@@ -289,6 +231,7 @@ Definition add_balance (addr : Address) (amount : Amount) (map : Address -> Amou
            then (amount + map a)%Z
            else map a.
 
+
 Global Arguments add_balance _ _ _ /.
 
 Definition set_chain_contract_state
@@ -299,10 +242,19 @@ Definition set_chain_contract_state
            then Some state
            else map a.
 
+Definition set_chain_account_owner
+           (addr : Address) (owner : Address)
+           (map : Address -> option Address) 
+  : Address -> option Address :=
+  fun a => if (a =? addr)%address
+           then Some owner
+           else map a.
+
 Record Environment :=
   build_env {
     env_chain :> Chain;
     env_account_balances : Address -> Amount;
+    env_account_owners : Address -> option Address;
     env_contracts : Address -> option WeakContract;
     env_contract_states : Address -> option SerializedValue;
   }.
@@ -312,6 +264,7 @@ Record EnvironmentEquiv (e1 e2 : Environment) : Prop :=
   build_env_equiv {
     chain_eq : env_chain e1 = env_chain e2;
     account_balances_eq : forall a, env_account_balances e1 a = env_account_balances e2 a;
+    account_owners_eq : forall a, env_account_owners e1 a = env_account_owners e2 a;
     contracts_eq : forall a, env_contracts e1 a = env_contracts e2 a;
     contract_states_eq : forall addr, env_contract_states e1 addr = env_contract_states e2 addr;
   }.
@@ -336,6 +289,10 @@ Qed.
 Global Instance environment_equiv_env_account_balances_proper :
   Proper (EnvironmentEquiv ==> eq ==> eq) env_account_balances.
 Proof. repeat intro; subst; apply account_balances_eq; assumption. Qed.
+
+Global Instance environment_equiv_env_account_owners_proper :
+  Proper (EnvironmentEquiv ==> eq ==> eq) env_account_owners.
+Proof. repeat intro; subst; apply account_owners_eq; assumption. Qed.
 
 Global Instance environment_equiv_env_contracts_proper :
   Proper (EnvironmentEquiv ==> eq ==> eq) env_contracts.
@@ -373,6 +330,10 @@ Definition add_contract (addr : Address) (contract : WeakContract) (env : Enviro
       then Some contract
       else f a|>.
 
+Definition set_account_owner
+           (addr : Address) (new_owner : Address) (env : Environment) :=
+  env<|env_account_owners ::= set_chain_account_owner addr new_owner|>.
+
 Definition set_contract_state
            (addr : Address) (state : SerializedValue) (env : Environment) :=
   env<|env_contract_states ::= set_chain_contract_state addr state|>.
@@ -380,7 +341,9 @@ Definition set_contract_state
 (* set_chain_contract_state updates a map (function) by returning a
    new map (function).  If this function is immediately applied to a
    key, then unfold it. *)
+
 Global Arguments set_chain_contract_state _ _ _ /.
+Global Arguments set_account_owner _ _ _ /.
 
 Ltac rewrite_environment_equiv :=
   match goal with
@@ -418,12 +381,42 @@ Proof.
   solve_proper.
 Qed.
 
+Global Instance set_account_owners_proper :
+  Proper (eq ==> eq ==> EnvironmentEquiv ==> EnvironmentEquiv) set_account_owner.
+Proof.
+  repeat intro; subst.
+  unfold set_account_owner, set_chain_account_owner.
+  solve_proper.
+Qed.
 Local Open Scope Z.
+
+
 (* Next we define how actions are executed. It specifies how an action
 changes an environment and which external actions to execute after it.
 Note that there can be multiple ways to execute an action. For example, if
 the action says to deploy a contract, the implementation is responsible for
 selecting which address the new contract should get. *)
+
+Inductive SpecialCallBodyEvaluation
+          (prev_env : Environment) (act : Action)
+          (new_env : Environment) (new_acts : list Action) : Type :=
+  | eval_transfer_ownership :
+      forall (origin from_addr to_addr acc_addr new_owner_addr : Address)
+             (wc : WeakContract)
+             (* (prev_state : SerializedValue) *),
+        env_account_owners prev_env acc_addr = Some origin \/ 
+           env_account_owners prev_env acc_addr = Some from_addr ->
+        env_contracts prev_env to_addr = Some wc ->
+(*         env_contract_states prev_env to_addr = Some prev_state -> *)
+        EnvironmentEquiv
+          new_env
+          (set_account_owner acc_addr new_owner_addr prev_env) ->
+        new_acts = [] ->
+        SpecialCallBodyEvaluation prev_env act new_env new_acts.
+
+Global Arguments eval_transfer_ownership {_ _ _ _}.
+
+(* J> TODO: Maybe some sanity checks on the accounts list *)
 Inductive ActionEvaluation
           (prev_env : Environment) (act : Action)
           (new_env : Environment) (new_acts : list Action) : Type :=
@@ -432,7 +425,7 @@ Inductive ActionEvaluation
              (amount : Amount),
         amount >= 0 ->
         amount <= env_account_balances prev_env from_addr ->
-        address_is_contract to_addr = false ->
+        address_is_contract to_addr = false -> (* J> TODO: It should be possible to transfer to contracts *)
         act = build_act origin from_addr (act_transfer to_addr amount) ->
         EnvironmentEquiv
           new_env
@@ -443,29 +436,30 @@ Inductive ActionEvaluation
       forall (origin from_addr to_addr : Address)
              (amount : Amount)
              (wc : WeakContract)
-             (setup : SerializedValue)
+             (accounts : list AccountInfo)
+             (setup : SerializedValue) (* Setup that comes in the message *)
              (state : SerializedValue),
-      amount >= 0 ->
+      amount = 0 ->
       amount <= env_account_balances prev_env from_addr ->
       address_is_contract to_addr = true ->
       env_contracts prev_env to_addr = None ->
-      act = build_act origin from_addr (act_deploy amount wc setup) ->
-      wc_init
+      act = build_act origin from_addr (act_deploy wc setup) ->
+      wc_process
         wc
-        (transfer_balance from_addr to_addr amount prev_env)
-        (build_ctx origin from_addr to_addr amount amount)
-        setup = Some state ->
+        prev_env
+        accounts 
+        None 
+        (Some setup) = Some (state, []) ->
       EnvironmentEquiv
         new_env
-        (set_contract_state
-           to_addr state (add_contract
-                       to_addr wc (transfer_balance from_addr to_addr amount prev_env))) ->
+        (set_contract_state to_addr state (add_contract to_addr wc prev_env)) ->
       new_acts = [] ->
       ActionEvaluation prev_env act new_env new_acts
   | eval_call :
       forall (origin from_addr to_addr : Address)
              (amount : Amount)
              (wc : WeakContract)
+             (accounts : list AccountInfo)
              (msg : option SerializedValue)
              (prev_state : SerializedValue)
              (new_state : SerializedValue)
@@ -477,23 +471,37 @@ Inductive ActionEvaluation
       act = build_act origin from_addr
                       (match msg with
                        | None => act_transfer to_addr amount
-                       | Some msg => act_call to_addr amount msg
+                       | Some msg => act_call to_addr msg
                        end) ->
-      wc_receive
+      wc_process
         wc
         (transfer_balance from_addr to_addr amount prev_env)
-        (build_ctx origin from_addr to_addr (env_account_balances new_env to_addr) amount)
-        prev_state
+        accounts 
+        (Some prev_state) 
         msg = Some (new_state, resp_acts) ->
       new_acts = map (build_act origin to_addr) resp_acts ->
       EnvironmentEquiv
         new_env
         (set_contract_state to_addr new_state (transfer_balance from_addr to_addr amount prev_env)) ->
-      ActionEvaluation prev_env act new_env new_acts.
+      ActionEvaluation prev_env act new_env new_acts
+  | eval_special_call :
+    forall (origin from_addr to_addr : Address)
+           (body : SpecialCallBody)
+           (amount : Amount)
+           (wc : WeakContract)
+           (* (prev_state : SerializedValue) *),
+        amount = 0 ->
+        amount <= env_account_balances prev_env from_addr ->
+        env_contracts prev_env to_addr = Some wc ->
+(*         env_contract_states prev_env to_addr = Some prev_state -> *)
+        SpecialCallBodyEvaluation prev_env act new_env new_acts ->
+        act = build_act origin from_addr (act_special_call to_addr body) ->
+        ActionEvaluation prev_env act new_env new_acts.
 
-Global Arguments eval_transfer {_ _ _ _ }.
-Global Arguments eval_deploy {_ _ _ _ }.
+Global Arguments eval_transfer {_ _ _ _}.
+Global Arguments eval_deploy {_ _ _ _}.
 Global Arguments eval_call {_ _ _ _}.
+Global Arguments eval_special_call {_ _ _ _}.
 
 Section Accessors.
 Context {origin : Address}
@@ -504,29 +512,33 @@ Context {origin : Address}
 Definition eval_origin : Address :=
   match eval with
   | eval_transfer origin _ _ _ _ _ _ _ _ _
-  | eval_deploy origin _ _ _ _ _ _ _ _ _ _ _ _ _ _
-  | eval_call origin _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => origin
+  | eval_special_call origin _ _ _ _ _ _ _ _ _ _
+  | eval_deploy origin _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+  | eval_call origin _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _=> origin
   end.
 
 Definition eval_from : Address :=
   match eval with
   | eval_transfer _ from _ _ _ _ _ _ _ _
-  | eval_deploy _ from _ _ _ _ _ _ _ _ _ _ _ _ _
-  | eval_call _ from _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => from
+  | eval_special_call _ from _ _ _ _ _ _ _ _ _
+  | eval_deploy _ from _ _ _ _ _ _ _ _ _ _ _ _ _ _
+  | eval_call _ from _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => from
   end.
 
 Definition eval_to : Address :=
   match eval with
-  | eval_transfer _ _ to _ _ _ _ _ _ _
-  | eval_deploy _ _ to _ _ _ _ _ _ _ _ _ _ _ _
-  | eval_call _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _ _ => to
+  | eval_transfer _ _ to _ _ _ _ _ _ _ 
+  | eval_special_call _ _ to _ _ _ _ _ _ _ _
+  | eval_deploy _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _
+  | eval_call _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => to
   end.
 
 Definition eval_amount : Amount :=
   match eval with
-  | eval_transfer _ _ _ amount _ _ _ _ _ _
-  | eval_deploy _ _ _ amount _ _ _ _ _ _ _ _ _ _ _
-  | eval_call _ _ _ amount _ _ _ _ _ _ _ _ _ _ _ _ _ => amount
+  | eval_transfer _ _ _ amount _ _ _ _ _ _ 
+  | eval_deploy _ _ _ amount _ _ _ _ _ _ _ _ _ _ _ _
+  | eval_special_call _ _ _ _ amount _ _ _ _ _ _
+  | eval_call _ _ _ amount _ _ _ _ _ _ _ _ _ _ _ _ _ _ =>  amount
   end.
 End Accessors.
 
@@ -536,14 +548,25 @@ Context {origin : Address}
         {post : Environment} {new_acts : list Action}
         (eval : ActionEvaluation pre act post new_acts).
 
+(* J> TODO: Write lemmas for the transfer ownership action *)
+Lemma account_owner_post (addr owner: Address) :
+  env_account_owners pre addr = Some owner ->
+  if (owner =? eval_from eval)%address
+  then env_account_owners post addr <> 
+       env_account_owners pre addr
+  else env_account_owners post addr =
+       env_account_owners pre addr.
+Proof.
+Admitted.
+
 Lemma account_balance_post (addr : Address) :
   env_account_balances post addr =
   env_account_balances pre addr
   + (if (addr =? eval_to eval)%address then eval_amount eval else 0)
   - (if (addr =? eval_from eval)%address then eval_amount eval else 0).
 Proof.
-  destruct eval; cbn; rewrite_environment_equiv; cbn;
-    destruct_address_eq; lia.
+  destruct eval; cbn; try (rewrite_environment_equiv; cbn; destruct_address_eq; lia).
+  destruct body; destruct s; cbn; rewrite_environment_equiv; cbn; destruct_address_eq; lia.
 Qed.
 
 Lemma account_balance_post_to :
@@ -580,26 +603,36 @@ Proof.
 Qed.
 
 Lemma chain_height_post_action : chain_height post = chain_height pre.
-Proof. destruct eval; rewrite_environment_equiv; auto. Qed.
+Proof. 
+  destruct eval; try (rewrite_environment_equiv; auto).
+  destruct body; destruct s; rewrite_environment_equiv; auto.
+Qed.
 
 Lemma current_slot_post_action : current_slot post = current_slot pre.
-Proof. destruct eval; rewrite_environment_equiv; auto. Qed.
+Proof. 
+  destruct eval; try (rewrite_environment_equiv; auto).
+  destruct body; destruct s; rewrite_environment_equiv; auto.
+Qed.
 
 Lemma finalized_height_post_action : finalized_height post = finalized_height pre.
-Proof. destruct eval; rewrite_environment_equiv; auto. Qed.
+Proof. 
+  destruct eval; try (rewrite_environment_equiv; auto).
+  destruct body; destruct s; rewrite_environment_equiv; auto.
+Qed.
 
 Lemma contracts_post_pre_none contract :
   env_contracts post contract = None ->
   env_contracts pre contract = None.
 Proof.
   intros H.
-  destruct eval; rewrite_environment_equiv; auto.
+  destruct eval; try (rewrite_environment_equiv; auto). 
   cbn in *.
   destruct_address_eq; congruence.
+  destruct body; destruct s; rewrite_environment_equiv; auto.
 Qed.
 
 Lemma eval_amount_nonnegative : eval_amount eval >= 0.
-Proof. now destruct eval. Qed.
+Proof. destruct eval; try easy; cbn in *; rewrite e; easy. Qed.
 
 Lemma eval_amount_le_account_balance :
   eval_amount eval <= env_account_balances pre (eval_from eval).
@@ -704,7 +737,6 @@ Proof.
     unfold act_origin_is_eq_from in *; destruct Haddr;easy.
 Qed.
 
-
 Definition empty_state : ChainState :=
   {| chain_state_env :=
        {| env_chain :=
@@ -712,6 +744,7 @@ Definition empty_state : ChainState :=
                current_slot := 0;
                finalized_height := 0; |};
           env_account_balances a := 0%Z;
+          env_account_owners a := None;
           env_contract_states a := None;
           env_contracts a := None; |};
      chain_state_queue := [] |}.
@@ -720,6 +753,10 @@ Definition empty_state : ChainState :=
 starting from one environment and queue of actions, we end up in a
 different environment and queue of actions. *)
 Definition ChainTrace := ChainedList ChainState ChainStep.
+
+Check ChainState.
+Check ChainStep.
+
 
 (* Additionally, a state is reachable if there is a trace ending in this trace. *)
 Definition reachable (state : ChainState) : Prop :=
@@ -737,7 +774,8 @@ a transaction, so we can go from a trace to a list of transactions. *)
 Inductive TxBody :=
   | tx_empty
   | tx_deploy (wc : WeakContract) (setup : SerializedValue)
-  | tx_call (msg : option SerializedValue).
+  | tx_call (msg : option SerializedValue)
+  | tx_special_call (body : SpecialCallBody).
 
 Record Tx :=
   build_tx {
@@ -748,16 +786,20 @@ Record Tx :=
       tx_body : TxBody;
   }.
 
+
+(* J> DONE: Removed setup in this definition and adjusted some arguments *)
 Definition eval_tx {pre : Environment} {act : Action}
                    {post : Environment} {new_acts : list Action}
                    (step : ActionEvaluation pre act post new_acts) : Tx :=
   match step with
   | eval_transfer origin from to amount _ _ _ _ _ _ =>
     build_tx origin from to amount tx_empty
-  | eval_deploy origin from to amount wc setup _ _ _ _ _ _ _ _ _ =>
+  | eval_deploy origin from to amount wc _ setup _ _ _ _ _ _ _ _ _ =>
     build_tx origin from to amount (tx_deploy wc setup)
-  | eval_call origin from to amount _ msg _ _ _ _ _ _ _ _ _ _ _ =>
+  | eval_call origin from to amount _ _ msg _ _ _ _ _ _ _ _ _ _ _ =>
     build_tx origin from to amount (tx_call msg)
+  | eval_special_call origin from to body amount _ _ _ _ _ _ =>
+    build_tx origin from to amount (tx_special_call body)
   end.
 
 Fixpoint trace_txs {from to : ChainState} (trace : ChainTrace from to) : list Tx :=
@@ -805,7 +847,7 @@ Fixpoint incoming_calls
   match trace with
   | snoc trace' step =>
     match step with
-    | step_action _ _ _ _ _ _ (eval_call origin from to amount _ msg _ _ _ _ _ _ _ _ _ _ _) _ =>
+    | step_action _ _ _ _ _ _ (eval_call origin from to amount _ _ msg _ _ _ _ _ _ _ _ _ _ _) _ =>
       if (to =? caddr)%address then
         (* If there is a message it should deserialize correctly,
            otherwise the entire operation returns None. *)
@@ -826,6 +868,9 @@ Fixpoint incoming_calls
   | _ => Some []
   end.
 
+Print act_deploy.
+
+(* J> DONE: Modified most of the definitions here (setup and other arguments). *)
 Record DeploymentInfo (Setup : Type) :=
   build_deployment_info
   {
@@ -849,7 +894,7 @@ Fixpoint deployment_info
   match trace with
   | snoc trace' step =>
     match step with
-    | step_action _ _ _ _ _ _ (eval_deploy origin from to amount _ setup _ _ _ _ _ _ _ _ _) _ =>
+    | step_action _ _ _ _ _ _ (eval_deploy origin from to amount _ _ setup _ _ _ _ _ _ _ _ _) _ =>
       if (to =? caddr)%address then
         do setup <- deserialize setup;
         Some (build_deployment_info origin from amount setup)
@@ -859,6 +904,20 @@ Fixpoint deployment_info
     end
   | clnil => None
   end.
+
+Record SpecialCallInfo :=
+  build_special_call_info
+  {
+    special_call_origin : Address;
+    special_call_from : Address;
+    special_call_amount : Amount;
+    special_call_body : SpecialCallBody;
+  }.
+
+Global Arguments special_call_origin {_}.
+Global Arguments special_call_from {_}.
+Global Arguments special_call_amount {_}.
+Global Arguments special_call_body {_}.
 
 Fixpoint trace_blocks {from to : ChainState}
          (trace : ChainTrace from to) : list BlockHeader :=
@@ -881,22 +940,33 @@ Definition created_blocks
 Definition is_deploy (ac : ActionBody) : bool :=
   match ac with
   | act_transfer _ _ => false
-  | act_call _ _ _ => false
-  | act_deploy _ _ _ => true
+  | act_call _ _ => false
+  | act_deploy _ _ => true
+  | act_special_call _ _ => false
   end.
 
 Definition is_call (ac : ActionBody) : bool :=
   match ac with
   | act_transfer _ _ => false
-  | act_call _ _ _ => true
-  | act_deploy _ _ _ => false
+  | act_call _ _ => true
+  | act_deploy _ _ => false
+  | act_special_call _ _ => false
   end.
 
 Definition is_transfer (ac : ActionBody) : bool :=
   match ac with
   | act_transfer _ _ => true
-  | act_call _ _ _ => false
-  | act_deploy _ _ _ => false
+  | act_call _ _ => false
+  | act_deploy _ _ => false
+  | act_special_call _ _ => false
+  end.
+
+Definition is_special_call (ac : ActionBody) : bool :=
+  match ac with
+  | act_transfer _ _ => false
+  | act_call _ _ => false
+  | act_deploy _ _ => false
+  | act_special_call _ _ => true
   end.
 
 Section Theories.
@@ -915,6 +985,11 @@ Ltac destruct_action_eval :=
   | [eval: ActionEvaluation _ _ _ _ |- _] => destruct eval
   end.
 
+Ltac destruct_special_body_eval :=
+  match goal with
+  | [body_eval: SpecialCallBodyEvaluation _ _ _ _ |- _] => destruct body_eval
+  end.
+
 Lemma contract_addr_format {to} (addr : Address) (wc : WeakContract) :
   reachable to ->
   env_contracts to addr = Some wc ->
@@ -926,7 +1001,7 @@ Proof.
   - cbn in *; congruence.
   - destruct_chain_step;
       try now rewrite_environment_equiv.
-    + destruct_action_eval; rewrite_environment_equiv; cbn in *; destruct_address_eq; subst; auto.
+    + destruct_action_eval; try destruct_special_body_eval; rewrite_environment_equiv; cbn in *; destruct_address_eq; subst; auto.
 Qed.
 
 Lemma new_acts_no_out_queue orig addr1 addr2 new_acts resp_acts :
@@ -1007,7 +1082,15 @@ Proof.
     assert (contract <> to_addr) by congruence.
     split; [eapply new_acts_no_out_queue|eapply list.Forall_cons]; eauto.
   - (* Invalid User Action *)
-    now apply Forall_inv_tail in IHtrace.
+    destruct_special_body_eval.
+    try now apply Forall_inv_tail in IHtrace.
+    apply Forall_inv_tail in IHtrace. 
+    + cbn in *. rewrite e2. easy. 
+    + easy.
+    + apply Forall_inv_tail in IHtrace; now rewrite_environment_equiv.
+  - (* No Eval *)
+    specialize_hypotheses.
+    now inversion_clear IHtrace.
   - (* Permutation *)
     specialize_hypotheses.
     now rewrite <- perm.
@@ -1041,11 +1124,12 @@ Proof.
       end.
     inversion_clear Hqueue.
     destruct act;
-    destruct_action_eval; rewrite_environment_equiv;
+    destruct_action_eval; try rewrite_environment_equiv;
       subst;
       cbn in *;
       destruct_address_eq;
       try tauto; try congruence.
+   destruct_special_body_eval. rewrite_environment_equiv; subst; cbn in *; destruct_address_eq; auto.
 Qed.
 
 Lemma undeployed_contract_no_in_txs
@@ -1057,9 +1141,9 @@ Proof.
   intros is_contract undeployed.
   remember empty_state; induction trace; subst; cbn; auto.
   destruct_chain_step; try now rewrite_environment_equiv.
-  - destruct_action_eval; rewrite_environment_equiv;
-      cbn in *;
-      destruct_address_eq; auto; subst; congruence.
+  - (destruct_action_eval; try destruct_special_body_eval); try rewrite_environment_equiv;
+    cbn in *;
+    destruct_address_eq; auto; subst; try congruence.
 Qed.
 
 Lemma deployment_info_some
@@ -1070,12 +1154,13 @@ Lemma deployment_info_some
 Proof.
   remember empty_state; induction trace as [|? ? ? ? IH]; subst; cbn in *; try tauto.
   destruct_chain_step; try now rewrite_environment_equiv.
-  - destruct_action_eval; rewrite_environment_equiv; auto.
+  - destruct_action_eval; try rewrite_environment_equiv; auto.
     (* Deploy *)
     cbn in *.
     rewrite (address_eq_sym caddr).
     destruct_address_eq; try discriminate.
     auto.
+    destruct_special_body_eval; try rewrite_environment_equiv; auto.
 Qed.
 
 Lemma deployment_info_addr_format
@@ -1143,7 +1228,7 @@ Proof.
     try tauto.
   destruct_chain_step; cbn in *; try now rewrite_environment_equiv.
   - (* Evaluation *)
-    destruct_action_eval; cbn in *; rewrite_environment_equiv.
+    (destruct_action_eval; try destruct_special_body_eval); cbn in *; try rewrite_environment_equiv.
     + (* Transfer *)
       destruct_address_eq; auto.
       subst.
@@ -1193,7 +1278,33 @@ Proof.
       cbn.
       rewrite map_eq.
       subst; tauto.
-Qed.
+    (* Special Call *)
+    +  destruct_address_eq; subst; auto.
+       cbn in *. 
+       split; [intros; congruence|].
+       destruct IH as [_ IH]; auto.
+       intros _ deploy_info calls.
+       destruct (incoming_calls _ _) as [inc_calls|]; cbn in *; try congruence.
+       unshelve epose proof (IH _ _ _) as IH; auto; try congruence.
+       destruct IH as
+          [depinfo [prev_calls
+                      [prev_call_txs [dep_tx
+                                        [depinfo_eq [inc_calls_eq
+                                                       [inc_txs_eq [map_eq ?]]]]]]]].
+       remember (build_tx _ _ _ _ _) as new_tx. 
+(*        remember (build_call_info _ _ _ _) as new_call. *)
+       exists depinfo, ([] ++ inc_calls), (new_tx :: prev_call_txs), dep_tx.
+       split; auto.
+       split; auto.
+       fold (incoming_txs trace caddr).
+       rewrite inc_txs_eq.
+       split; [now rewrite app_comm_cons|].
+       inversion_clear inc_calls_eq.
+       cbn.
+       rewrite map_eq.
+       subst. try tauto.
+       Admitted.
+(* Qed. *)
 
 Lemma undeployed_contract_no_in_calls
       {Msg} `{Serializable Msg}
@@ -1205,9 +1316,10 @@ Proof.
   intros undeployed.
   remember empty_state; induction trace; subst; cbn in *; auto.
   destruct_chain_step; try now rewrite_environment_equiv.
-  - destruct_action_eval; rewrite_environment_equiv;
+  - destruct_action_eval; try rewrite_environment_equiv;
       cbn in *;
-      destruct_address_eq; auto; subst; congruence.
+      destruct_address_eq; auto; subst; try congruence.
+    destruct_special_body_eval; rewrite_environment_equiv; cbn in *; auto.
 Qed.
 
 Local Open Scope Z.
@@ -1229,9 +1341,11 @@ Proof.
     destruct_address_eq; subst; cbn; lia.
   - (* Step *)
     cbn.
-    destruct_action_eval; cbn; rewrite_environment_equiv; cbn.
-    all: fold (created_blocks trace addr); rewrite IHtrace by auto.
-    all: destruct_address_eq; cbn; lia.
+    destruct_action_eval; cbn; try rewrite_environment_equiv; cbn.
+    1, 2, 3: fold (created_blocks trace addr); rewrite IHtrace by auto.
+    1, 2, 3: destruct_address_eq; cbn; lia.
+    destruct_special_body_eval; rewrite_environment_equiv; cbn; fold (created_blocks trace addr); rewrite IHtrace by auto.
+    destruct_address_eq; cbn; lia.
   - (* Invalid User Action *)
     now rewrite_environment_equiv.
   - (* Permutation *)
@@ -1283,78 +1397,87 @@ Proof.
     rewrite (account_balance_post eval addr).
     pose proof (eval_amount_nonnegative eval).
     pose proof (eval_amount_le_account_balance eval).
-    destruct_address_eq; subst; cbn in *; lia.
+    destruct_address_eq; subst; cbn in *; try lia.
   - (* Invalid User Action *)
     now rewrite_environment_equiv.
   - (* Permutation *)
     now rewrite_environment_equiv.
 Qed.
 
-Lemma wc_init_strong {Setup Msg State : Type}
-          `{Serializable Setup}
+(* j> TODO: Try to add somehow setup in the message in this lemma *)
+Lemma wc_init_strong {Msg State Setup : Type}
           `{Serializable Msg}
           `{Serializable State}
-          {contract : Contract Setup Msg State}
-          {chain ctx setup result} :
-  wc_init (contract : WeakContract) chain ctx setup = Some result ->
-  exists setup_strong result_strong,
-    deserialize setup = Some setup_strong /\
-    serialize result_strong = result /\
-    Blockchain.init contract chain ctx setup_strong = Some result_strong.
-Proof.
-  intros init.
-  cbn in *.
-  destruct (deserialize setup) as [setup_strong|] eqn:deser_setup;
-    cbn in *; try congruence.
-  exists setup_strong.
-  destruct (Blockchain.init _ _ _ _) as [result_strong|] eqn:result_eq;
-    cbn in *; try congruence.
-  exists result_strong.
-  repeat split; auto with congruence.
-Qed.
-
-Lemma wc_receive_strong {Setup Msg State : Type}
           `{Serializable Setup}
-          `{Serializable Msg}
-          `{Serializable State}
-          {contract : Contract Setup Msg State}
-          {chain ctx prev_state msg new_state new_acts} :
-  wc_receive (contract : WeakContract) chain ctx prev_state msg =
-  Some (new_state, new_acts) ->
-  exists prev_state_strong msg_strong new_state_strong,
-    deserialize prev_state = Some prev_state_strong /\
+          {contract : Contract Msg State Setup}
+          {chain accounts msg new_state} :
+  wc_process (contract : WeakContract) chain accounts None msg = Some (new_state, []) ->
+  exists msg_strong new_state_strong,
     match msg_strong with
     | Some msg_strong => msg >>= deserialize = Some msg_strong
     | None => msg = None
     end /\
     serialize new_state_strong = new_state /\
-    Blockchain.receive contract chain ctx prev_state_strong msg_strong =
-    Some (new_state_strong, new_acts).
+    Blockchain.process contract chain accounts None msg_strong = Some (new_state_strong, []).
 Proof.
-  intros receive.
+  intros process.
   cbn in *.
-  destruct (deserialize prev_state) as [prev_state_strong|] eqn:deser_state;
-    cbn in *; try congruence.
-  exists prev_state_strong.
   exists (msg >>= deserialize).
   destruct msg as [msg|]; cbn in *.
   1: destruct (deserialize msg) as [msg_strong|];
     cbn in *; try congruence.
-  all: destruct (Blockchain.receive _ _ _ _ _)
+  all: destruct (Blockchain.process _ _ _ _ _)
+    as [[resp_state_strong resp_acts_strong]|] eqn:result_eq;
+    cbn in *; try congruence.
+  all: exists resp_state_strong.
+  all: inversion_clear process; auto.
+Qed.
+
+(* DONE: removed setup type from next 2 lemmas :) *)
+Lemma wc_receive_strong {Msg State Setup: Type}
+          `{Serializable Msg}
+          `{Serializable State}
+          `{Serializable Setup}
+          {contract : Contract Msg State Setup}
+          {chain accounts prev_state msg new_state new_acts} :
+  wc_process (contract : WeakContract) chain accounts prev_state msg =
+  Some (new_state, new_acts) ->
+  exists prev_state_strong msg_strong new_state_strong,
+    match prev_state_strong with
+    | Some prev_state_strong => prev_state >>= deserialize = Some prev_state_strong
+    | None => prev_state = None
+    end /\
+    match msg_strong with
+    | Some msg_strong => msg >>= deserialize = Some msg_strong
+    | None => msg = None
+    end /\
+    serialize new_state_strong = new_state /\
+    Blockchain.process contract chain accounts prev_state_strong msg_strong =
+    Some (new_state_strong, new_acts).
+Proof.
+  intros receive.
+  cbn in *.
+  exists (prev_state >>= deserialize).
+  destruct prev_state as [prev_state|]; cbn in *.
+  1: destruct (deserialize prev_state) as [prev_state_strong|];
+    cbn in *; try congruence.
+  all: exists (msg >>= deserialize).
+  all: destruct msg as [msg|]; cbn in *.
+  1, 3: destruct (deserialize msg) as [msg_strong|];
+    cbn in *; try congruence.
+  all: destruct (Blockchain.process _ _ _ _ _)
     as [[resp_state_strong resp_acts_strong]|] eqn:result_eq;
     cbn in *; try congruence.
   all: exists resp_state_strong.
   all: inversion_clear receive; auto.
 Qed.
 
-Print Contract.
-
 Lemma deployed_contract_state_typed
-          {Setup Msg State : Type}
-          `{Serializable Setup}
+          {Msg State Setup : Type}
           `{Serializable Msg}
           `{Serializable State}
-          {contract : Contract Setup Msg State}
+          `{Serializable Setup}
+          {contract : Contract Msg State Setup}
           {bstate : ChainState}
           {caddr} :
   env_contracts bstate caddr = Some (contract : WeakContract) ->
@@ -1370,15 +1493,15 @@ Proof.
   remember empty_state; induction trace; subst; cbn in *; try congruence.
   destruct_chain_step; try now rewrite_environment_equiv.
   - (* Action evaluation *)
-    destruct_action_eval; subst; rewrite_environment_equiv; cbn in *.
+    destruct_action_eval; subst; try rewrite_environment_equiv; cbn in *.
     + (* Transfer, use IH *)
       auto.
     + (* Deployment *)
       destruct_address_eq; subst; auto.
       (* To this contract, show that deserialization would not fail. *)
       replace wc with (contract : WeakContract) in * by congruence.
-      destruct (wc_init_strong ltac:(eassumption))
-        as [setup_strong [result_strong [? [<- init]]]].
+      destruct (wc_receive_strong ltac:(eassumption))
+        as [state_strong [result_strong [resp_state_strong [? [? [<- receive]]]]]].
       cbn in eq.
       rewrite deserialize_serialize in eq; congruence.
     + (* Call *)
@@ -1389,13 +1512,15 @@ Proof.
         as [state_strong [msg_strong [resp_state_strong [? [? [<- receive]]]]]].
       cbn in eq.
       rewrite deserialize_serialize in eq; congruence.
+    + (* Transfer Ownership *) 
+      destruct_special_body_eval; rewrite_environment_equiv; auto.
 Qed.
 
 Lemma origin_is_always_account
-          {Setup Msg State : Type}
-          `{Serializable Setup}
+          {Msg State Setup : Type}
           `{Serializable Msg}
           `{Serializable State}
+          `{Serializable Setup}
           {bstate : ChainState} :
   reachable bstate ->
   Forall act_origin_is_account (chain_state_queue bstate).
@@ -1417,6 +1542,9 @@ Proof.
     * apply All_Forall.Forall_map.
       apply Forall_forall; easy.
     * auto.
+    * destruct_special_body_eval; cbn in*;
+      specialize_hypotheses;
+      inversion IHtrace;subst; try easy.
   - (* Invalid User Action *)
     rewrite queue_new in *; rewrite queue_prev in *; cbn in *.
     specialize_hypotheses; inversion IHtrace; subst; easy.
@@ -1436,19 +1564,20 @@ Hint Constructors
      TagFacts TagAddBlock TagDeployment TagOutgoingAct
      TagNonrecursiveCall TagRecursiveCall TagPermuteQueue : core.
 
-Lemma contract_induction
-      {Setup Msg State : Type}
-      `{Serializable Setup}
+(* TODO: Jesus nosso senhor *)
+(* Lemma contract_induction
+      {Msg State Setup : Type}
       `{Serializable Msg}
       `{Serializable State}
-      (contract : Contract Setup Msg State)
+      `{Serializable Setup}
+      (contract : Contract Msg State Setup)
       (AddBlockFacts :
          forall (chain_height : nat) (current_slot : nat) (finalized_height : nat)
                 (new_height : nat) (new_slot : nat) (new_finalized_height : nat), Prop)
-      (DeployFacts : forall (chain : Chain) (ctx : ContractCallContext), Prop)
+      (DeployFacts : forall (chain : Chain) (accounts : list AccountInfo), Prop)
       (CallFacts :
          forall (chain : Chain)
-                (ctx : ContractCallContext)
+                (accounts : list AccountInfo)
                 (cstate : State)
                 (outgoing_actions : list ActionBody), Prop)
       (P : forall (chain_height : nat)
@@ -1477,7 +1606,8 @@ Lemma contract_induction
       | step_action _ _ act _ _ _ (eval_deploy origin from to amount _ _ _ _ _ _ _ _ _ _ _) _ =>
         DeployFacts
           (transfer_balance from to amount bstate_from)
-          (build_ctx origin from to amount amount)
+(*           (build_ctx origin from to amount amount) *)
+          accounts
       | step_action _ _ act _ _ _ (eval_call origin from to amount _ _ _ _ _ _ _ _ _ _ _ _ _) _ =>
         let new_state := transfer_balance from to amount bstate_from in
         forall (cstate : State),
@@ -1503,17 +1633,17 @@ Lemma contract_induction
         caddr dep_info state balance [] inc_calls out_txs) ->
 
   (* Deploy contract *)
-  (forall chain ctx setup result
-          (facts : DeployFacts chain ctx)
-          (init_some : init contract chain ctx setup = Some result)
+  (forall chain accounts msg result origin from
+          (facts : DeployFacts chain accounts)
+          (init_some : process contract chain accounts None (Some msg) = Some result)
           (tag : TagDeployment),
       P (chain_height chain)
         (current_slot chain)
         (finalized_height chain)
         (ctx_contract_address ctx)
-        (build_deployment_info (ctx_origin ctx) (ctx_from ctx) (ctx_amount ctx) setup)
+        (build_deployment_info origin from 0 msg)
         result
-        (ctx_amount ctx)
+        0
         []
         []
         []) ->
@@ -1530,16 +1660,16 @@ Lemma contract_induction
              | act_transfer to amount =>
                tx_to tx = to /\ tx_amount tx = amount /\
                (tx_body tx = tx_empty \/ tx_body tx = tx_call None)
-             | act_deploy amount wc setup =>
-               tx_amount tx = amount /\ tx_body tx = tx_deploy wc setup
-             | act_call to amount msg =>
-               tx_to tx = to /\ tx_amount tx = amount /\ tx_body tx = tx_call (Some msg)
+             | act_deploy wc setup =>
+               tx_amount tx = 0 /\ tx_body tx = tx_deploy wc setup
+             | act_call to msg =>
+               tx_to tx = to /\ tx_amount tx = 0 /\ tx_body tx = tx_call (Some msg)
              end)
           (tag : TagOutgoingAct),
       P height slot fin_height caddr dep_info cstate (balance - act_body_amount out_act)
         out_acts inc_calls (tx :: prev_out_txs)) ->
 
-  (* Non-recursive call *)
+(*   (* Non-recursive call *)
   (forall chain ctx dep_info prev_state msg
           prev_out_queue prev_inc_calls prev_out_txs
           new_state new_acts
@@ -1561,10 +1691,10 @@ Lemma contract_induction
         (ctx_contract_balance ctx)
         (new_acts ++ prev_out_queue)
         (build_call_info (ctx_origin ctx) (ctx_from ctx) (ctx_amount ctx) msg :: prev_inc_calls)
-        prev_out_txs) ->
+        prev_out_txs) -> *)
 
-  (* Recursive call *)
-  (forall chain ctx dep_info prev_state msg
+(*   (* Recursive call *)
+  (forall chain accounts dep_info prev_state msg
           head prev_out_queue prev_inc_calls prev_out_txs
           new_state new_acts
           (from_self : ctx_from ctx = ctx_contract_address ctx)
@@ -1604,7 +1734,7 @@ Lemma contract_induction
                             | act_call _ _ msg => Some msg
                             | _ => None
                             end)) :: prev_out_txs)) ->
-
+ *)
   (* Queue permutation *)
   (forall height slot fin_height
           caddr dep_info cstate balance
@@ -1620,7 +1750,7 @@ Lemma contract_induction
   forall bstate caddr (trace : ChainTrace empty_state bstate),
     env_contracts bstate caddr = Some (contract : WeakContract) ->
     exists dep cstate inc_calls,
-      deployment_info Setup trace caddr = Some dep /\
+      deployment_info trace caddr = Some dep /\
       contract_state bstate caddr = Some cstate /\
       incoming_calls Msg trace caddr = Some inc_calls /\
       P (chain_height bstate)
@@ -1891,7 +2021,8 @@ Proof.
                           (filter (fun a => (act_from a =? caddr)%address)
                                   (chain_state_queue mid))); auto.
     now apply Permutation_map, Permutation_filter.
-Qed.
+Qed. *)
+
 
 End Theories.
 End Trace.
@@ -1952,13 +2083,23 @@ Ltac destruct_action_eval :=
   | [eval: ActionEvaluation _ _ _ _ |- _] =>
     destruct eval as
       [?origin ?from_addr ?to_addr ?amount ?amount_nonnegative ?enough_balance
-       ?to_addr_not_contract ?act_eq ?env_eq ?new_acts_eq |
+        ?to_addr_not_contract ?act_eq ?env_eq ?new_acts_eq |
        ?origin ?from_addr ?to_addr ?amount ?wc ?setup ?state ?amount_nonnegative
         ?enough_balance ?to_addr_contract ?not_deployed
         ?act_eq ?init_some ?env_eq ?new_acts_eq |
        ?origin ?from_addr ?to_addr ?amount ?wc ?msg ?prev_state ?new_state ?resp_acts
         ?amount_nonnegative ?enough_balance ?deployed ?deployed_state ?act_eq
-        ?receive_some ?new_acts_eq ?env_eq ]
+        ?receive_some ?new_acts_eq ?env_eq | 
+       ?origin ?from_addr ?to_addr ?body ?amount ?wc ?prev_state ?amount_nonnegative
+        ?enough_balance ?deployed ?deployed_state ?body_eval ?act_eq ]
+  end.
+
+Ltac destruct_special_body_eval :=
+  match goal with
+  | [body_eval: SpecialCallBodyEvaluation _ _ _ _ |- _] =>
+    destruct body_eval as
+      [?origin ?from_addr ?to_addr ?acc_addr ?new_owner_addr ?wc ?prev_state 
+       ?deployed ?deployed_state ?env_eq ?new_acts ]
   end.
 
 Ltac rewrite_environment_equiv :=
@@ -2042,7 +2183,7 @@ Ltac generalize_contract_statement :=
   generalize_contract_statement_with_post
     ltac:(fun _ _ _ is_deployed _ _ _ _ => revert is_deployed).
 
-Ltac contract_induction :=
+(* Ltac contract_induction :=
   generalize_contract_statement_with_post
     ltac:(fun bstate caddr _ is_deployed Setup Msg State P =>
        revert is_deployed;
@@ -2054,11 +2195,11 @@ Ltac contract_induction :=
                       (finalized_height : nat) (new_height : nat)
                       (new_slot : nat) (new_finalized_height : nat), Prop);
        evar (DeployFacts : forall (chain : Chain)
-                                  (ctx : ContractCallContext), Prop);
-       evar (CallFacts : forall (chain : Chain) (ctx : ContractCallContext)
+                                  (accounts : list AccountInfo), Prop);
+       evar (CallFacts : forall (chain : Chain) (accounts : list AccountInfo)
                                 (cstate : State) (outgoing_actions : list ActionBody), Prop);
        apply (contract_induction _ AddBlockFacts DeployFacts CallFacts);
-       cbv [P]; clear P; cycle 1; clear dependent bstate; clear dependent caddr).
+       cbv [P]; clear P; cycle 1; clear dependent bstate; clear dependent caddr). *)
 
 Global Notation "'Please' 'prove' 'your' 'facts'" := TagFacts (at level 100, only printing).
 Global Notation "'Please' 'reestablish' 'the' 'invariant' 'after' 'addition' 'of' 'a' 'block'"
@@ -2084,11 +2225,11 @@ Section LiftTransactionProp.
           {State : Type} `{Serializable State}.
 
 (** If some property [P] holds for all actions in the output of the receive function, the property can be lifted to all outgoing actions for all reachabile states. *)
-Lemma lift_outgoing_acts_prop {P : ActionBody -> Prop}
-      (contract : Contract Setup Msg State) (bstate : ChainState) (addr : Address) :
+(* Lemma lift_outgoing_acts_prop {P : ActionBody -> Prop}
+      (contract : Contract Msg State Setup) (bstate : ChainState) (addr : Address) :
   reachable bstate ->
-  (forall chain ctx cstate msg new_cstate acts,
-      contract.(receive) chain ctx cstate msg = Some (new_cstate, acts) ->
+  (forall chain accounts cstate msg new_cstate acts,
+      contract.(process) chain accounts cstate msg = Some (new_cstate, acts) ->
       Forall P acts) ->
   env_contracts bstate addr = Some (contract : WeakContract) ->
   Forall P (outgoing_acts bstate addr).
@@ -2110,15 +2251,15 @@ Proof.
     unset_all; subst.
     destruct step; auto.
     destruct a; auto.
-Qed.
+Qed.*)
 
 (** If the receive function always returns an empty list of actions,
  the same holds for all reachable states *)
-Lemma lift_outgoing_acts_nil (contract : Contract Setup Msg State)
+(* Lemma lift_outgoing_acts_nil (contract : Contract Msg State)
       (bstate : ChainState) (addr : Address) :
   reachable bstate ->
-  (forall chain ctx cstate msg new_cstate acts,
-      contract.(receive) chain ctx cstate msg = Some (new_cstate, acts) ->
+  (forall chain accounts cstate msg new_cstate acts,
+      contract.(process) chain accounts cstate msg = Some (new_cstate, acts) ->
       acts = []) ->
   env_contracts bstate addr = Some (contract : WeakContract) ->
   outgoing_acts bstate addr = [].
@@ -2128,18 +2269,18 @@ Proof.
   apply (lift_outgoing_acts_prop contract); auto.
   intros.
   erewrite (H3 _ _ _ _ _ acts); [constructor|eassumption].
-Qed.
+Qed. *)
 
 (** If some property [P] holds for all contract states in the output of the receive function,
   the property can be lifted to all contract states for all reachabile states. *)
-Lemma lift_contract_state_prop {P : State -> Prop}
-      (contract : Contract Setup Msg State) (bstate : ChainState) (addr : Address) :
-  (forall chain ctx setup result,
-      contract.(init) chain ctx setup = Some result ->
-      P result) ->
-  (forall chain ctx cstate msg new_cstate acts,
+(* Lemma lift_contract_state_prop {P : State -> Prop}
+      (contract : Contract Msg State) (bstate : ChainState) (addr : Address) :
+  (forall chain accounts msg result_state result_acts,
+      contract.(process) chain accounts None msg = Some (result_state, result_acts) ->
+      P result_state) ->
+  (forall chain accounts cstate msg new_cstate acts,
       P cstate ->
-      contract.(receive) chain ctx cstate msg = Some (new_cstate, acts) ->
+      contract.(process) chain accounts (Some cstate) msg = Some (new_cstate, acts) ->
       P new_cstate) ->
   reachable bstate ->
   env_contracts bstate addr = Some (contract : WeakContract) ->
@@ -2158,9 +2299,9 @@ Proof.
     unset_all; subst.
     destruct step; auto.
     destruct a; auto.
-Qed.
+Qed. *)
 
-Lemma lift_dep_info_contract_state_prop {P : DeploymentInfo Setup -> State -> Prop}
+(* Lemma lift_dep_info_contract_state_prop {P : DeploymentInfo Setup -> State -> Prop}
       (contract : Contract Setup Msg State) (bstate : ChainState) (addr : Address)
       (trace : ChainTrace empty_state bstate) :
   (forall chain ctx setup result,
@@ -2188,6 +2329,6 @@ Proof.
     unset_all; subst.
     destruct step; auto.
     destruct a; auto.
-Qed.
+Qed. *)
 
 End LiftTransactionProp.

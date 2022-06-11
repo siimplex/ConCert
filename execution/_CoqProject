@@ -3,16 +3,23 @@
 -R ../utils/theories ConCert.Utils
 
 -R theories ConCert.Execution
+theories/BlockchainSolanav2.v
+theories/BlockchainSolana.v
 theories/Blockchain.v
 theories/BoundedN.v
+theories/BuildUtilsSolana.v
 theories/BuildUtils.v
 theories/ChainedList.v
+theories/CirculationSolana.v
 theories/Circulation.v
 theories/Containers.v
+theories/ContractMonadsSolana.v
 theories/ContractMonads.v
 theories/Extras.v
 theories/Finite.v
+theories/InterContractCommunicationSolana.v
 theories/InterContractCommunication.v
+theories/LocalBlockchainSolana.v
 theories/LocalBlockchain.v
 theories/Monads.v
 theories/ResultMonad.v
@@ -34,6 +41,7 @@ examples/BoardroomVotingTest.v
 examples/Common.v
 examples/Congress.v
 examples/Congress_Buggy.v
+examples/CounterSolana.v
 examples/Counter.v
 examples/EIP20Token.v
 examples/Egcd.v

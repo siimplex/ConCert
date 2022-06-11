@@ -40,7 +40,9 @@ theories/PrettyPrinterMonad.v
 theories/Printing.v
 theories/ResultMonad.v
 theories/RustExtract.v
+theories/SolanaExtract.v
 theories/SpecializeChainBase.v
+theories/SpecializeChainBaseSolana.v
 theories/TopLevelFixes.v
 theories/Transform.v
 theories/TypeAnnotations.v

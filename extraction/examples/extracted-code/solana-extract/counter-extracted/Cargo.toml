@@ -1,0 +1,20 @@
+[package]
+name = "counter"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+concert-std = { path = "../concert-std" }
+bumpalo = "3.5.0"
+immutable-map = "0.1.2"
+solana-program = "1.10.8"
+borsh = "0.9.3"
+borsh-derive = "0.9.3"
+
+[lib]
+crate-type = ["rlib"]
+
+# [profile.release]
+# # Tell `rustc` to optimize for small code size.
+# opt-level = 3
+
