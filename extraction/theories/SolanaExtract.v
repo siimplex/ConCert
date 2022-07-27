@@ -2,7 +2,8 @@ From MetaCoq Require Import utils.
 From MetaCoq.Template Require Import All.
 From MetaCoq.Template Require Import Kernames.
 From ConCert.Utils Require Import StringExtra.
-From ConCert.Execution Require Import BlockchainSolana.
+From ConCert.Execution Require Import BlockchainSolanav2.
+From ConCert.Execution Require Import Serializable.
 From ConCert.Extraction Require Import Common.
 From ConCert.Extraction Require Import Extraction.
 From ConCert.Extraction Require Import RustExtract.
@@ -14,6 +15,7 @@ From ConCert.Extraction Require Import ResultMonad.
 From ConCert.Extraction Require Import Utils.
 
 Module SolanaRemap.
+Import IteratorImp.
 
 Definition lookup_const (TT : list (kername * string)) (name : kername): option string :=
   match find (fun '(key, _) => eq_kername key name) TT with
@@ -37,13 +39,18 @@ Definition remap_arith : list (kername * string) := Eval compute in
    ; remap <%% Nat.leb %%> "fn ##name##(&'a self, a: u64, b: u64) -> bool { a <= b }"
    ; remap <%% Nat.ltb %%> "fn ##name##(&'a self, a: u64, b: u64) -> bool { a < b }"].
 
-(* J> DONE: Changed the address and address_eq from concordium_std to solana_program *)
 Definition remap_blockchain_consts : list (kername * string) :=
   [ remap <! @Address !> "type ##name##<'a> = solana_program::pubkey::Pubkey;"
   (* Ideally we would have two impls here for performance, but Rust does not support this.
      https://github.com/rust-lang/rust/issues/62223 *)
   ; remap <! @address_eqb !>
-          "fn ##name##(&'a self) -> impl Fn(solana_program::pubkey::Pubkey) -> &'a dyn Fn(solana_program::pubkey::Pubkey) -> bool { move |a| self.alloc(move |b| a == b) }" ].
+          "fn ##name##(&'a self) -> impl Fn(solana_program::pubkey::Pubkey) -> &'a dyn Fn(solana_program::pubkey::Pubkey) -> bool { move |a| self.alloc(move |b| a == b) }" 
+  ].
+
+Definition remap_aux_consts : list (kername * string) := 
+  [ remap <! @it_from_list !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }"
+  ; remap <! @it_next !> "fn ##name##<'b, I : Iterator<Item = &'a solana_program::account_info::AccountInfo<'b>>>(&'a self, iter: &mut I) -> std::result::Result<I::Item, ProgramError> { iter.next().ok_or(ProgramError::NotEnoughAccountKeys) }"
+  ].
 
 Definition remap_inline_bool_ops := Eval compute in
       [ remap <%% andb %%> "__andb!"
@@ -110,6 +117,12 @@ Definition remap_SerializedValue : remapped_inductive :=
      re_ind_ctors := ["__SerializedValue__Is__Opaque"];
      re_ind_match := None |}.
 
+(* TODO: Delete this *)
+Definition remap_AccountInformation : remapped_inductive :=
+  {| re_ind_name := "&'a AccountInformation<'a>";
+     re_ind_ctors := ["__AccountInformation__Is__Opaque"];
+     re_ind_match := None |}.
+
 Definition remap_ActionBody : remapped_inductive :=
   {| re_ind_name := "ActionBody<'a>";
      re_ind_ctors := ["ActionBody::Transfer"; "ActionBody::Call"; "__Deploy__Is__Not__Supported"; "ActionBody::SpecialCall"];
@@ -117,16 +130,47 @@ Definition remap_ActionBody : remapped_inductive :=
 
 Definition remap_SpecialCallBody : remapped_inductive := 
   {| re_ind_name := "SpecialCallBody<'a>";
-     re_ind_ctors := ["SpecialCallBody::TransferOwnership"];  
+     re_ind_ctors := ["SpecialCallBody::TransferOwnership"; "SpecialCallBody::CheckRentExempt"];  
+     re_ind_match := None |}.
+
+Definition remap_ProgramError : remapped_inductive :=
+  {| re_ind_name := "ProgramError";
+     re_ind_ctors := ["ProgramError::Custom"; "ProgramError::InvalidArgument"; "ProgramError::InvalidInstructionData";
+    "ProgramError::InvalidAccountData"; "ProgramError::AccountDataTooSmall"; "ProgramError::InsufficientFunds";
+    "ProgramError::IncorrectProgramId"; "ProgramError::MissingRequiredSignature"; "ProgramError::AccountAlreadyInitialized";
+    "ProgramError::UninitializedAccount"; "ProgramError::NotEnoughAccountKeys"; "ProgramError::AccountBorrowFailed";
+    "ProgramError::MaxSeedLengthExceeded"; "ProgramError::InvalidSeeds"; "ProgramError::BorshIoError";
+    "ProgramError::AccountNotRentExempt"; "ProgramError::UnsupportedSysvar"; "ProgramError::IllegalOwner";
+    "ProgramError::MaxAccountsDataSizeExceeded"; "ProgramError::InvalidRealloc" ];
+     re_ind_match := None |}.
+
+Definition remap_IteratorWrapper : remapped_inductive :=
+  {| re_ind_name := "IteratorWrapper";
+     re_ind_ctors := ["IteratorWrapper::BuildIterator"];
      re_ind_match := None |}.
 
 Definition remap_blockchain_inductives : list (inductive * remapped_inductive) :=
   [ (<! Serializable.SerializedValue !>, remap_SerializedValue);
     (<! @ActionBody !>, remap_ActionBody);
-    (<! @SpecialCallBody !>, remap_SpecialCallBody) ].
+    (<! @SpecialCallBody !>, remap_SpecialCallBody); 
+    (<! @ProgramError !>, remap_ProgramError)
+(*    ; (<! @IteratorWrapper !>, remap_IteratorWrapper) *)
+(*    ; (<! @AccountInformation !>, remap_AccountInformation) *)
+  ].
 
 Definition ignored_concert :=
-  [ <%% Monads.Monad %%>; <%% @RecordSet.SetterFromGetter %%> ].
+  Eval compute in 
+    [ <%% Monads.Monad %%>
+(*     ; <%% @AccountInformation %%> *)
+    ; <%% @ChainBase %%>
+    ; <%% @SerializedValue %%>
+    ; <%% @Execution.ResultMonad.Monad_result %%>
+    ; <%% @RecordSet.SetterFromGetter %%>
+(*     ; <%% @account_info_eqb %%> *)
+(*     ; <%% @check_account %%>    *)
+(*     ; <%% @it_content %%> *)
+(*     ; <%% @Iterator %%>  *)
+    ].
 
 Definition lookup_inductive
            (TT_inductives : list (inductive * remapped_inductive))
@@ -148,12 +192,11 @@ Definition build_remaps
 End SolanaRemap.
 
 Module SolanaPreamble.
+
 Instance solana_extract_preamble : Preamble :=
-(* J> TODO: Update: probably just need to update the errors near the end *)
 {| top_preamble := [
 "#![allow(dead_code)]";
 "#![allow(non_camel_case_types)]";
-"#![allow(unused_imports)]";
 "#![allow(non_snake_case)]";
 "#![allow(unused_variables)]";
 "";
@@ -167,13 +210,15 @@ Instance solana_extract_preamble : Preamble :=
 "  pubkey::Pubkey,";
 "  rent::Rent,";
 "  sysvar::Sysvar,";
+"  program::{invoke, invoke_signed},";
 "};";
-"use ::borsh::{BorshSerialize, BorshDeserialize};";
-"use concert_std::{ActionBody, ConCertDeserial, ConCertSerial, SerializedValue};";
+"use borsh::{BorshSerialize, BorshDeserialize};";
+"use thiserror::Error;";
+"use concert_std::{ActionBody, SpecialCallBody, ConCertDeserial, ConCertSerial, SerializedValue};";
 "use core::marker::PhantomData;";
 "use immutable_map::TreeMap;"; 
-"use spl_token::state::Account as TokenAccount;";
-"";
+"use std::slice::Iter;";
+""; 
 "fn __nat_succ(x: u64) -> u64 {";
 "  x.checked_add(1).unwrap()";
 "}";
@@ -266,20 +311,21 @@ Instance solana_extract_preamble : Preamble :=
 "  f";
 "}";
 "";
-"#[derive(Debug, PartialEq, Eq)]";
-"enum InitError {";
-"   DeserialParams,";
-"   SerialParams,";
-"   Error";
-"}";
+"";
 "";
 "#[derive(Debug, PartialEq, Eq)]";
-"enum ReceiveError {";
+"enum ProcessError {";
 "    DeserialMsg,";
 "    DeserialOldState,";
 "    SerialNewState,";
 "    ConvertActions, // Cannot convert ConCert actions to Concordium actions";
 "    Error";
+"}";
+"";
+"impl From<ProcessError> for ProgramError {";
+"    fn from(e: ProcessError) -> Self {";
+"        ProgramError::Custom(e as u32)";
+"    }";
 "}"
 ];
 program_preamble := [
@@ -295,17 +341,14 @@ End SolanaPreamble.
 
 Import SolanaRemap.
 
-(* J> TODO: Modify types *)
-Record SolanaMod (init_type receive_type : Type) :=
+Record SolanaMod (process_type : Type) :=
   { solana_contract_name : string;
-    solana_init : init_type;
-    solana_receive : receive_type;
+    solana_process : process_type;
     solana_extra : list ({T : Type & T}); }.
 
-Arguments solana_contract_name {_ _}.
-Arguments solana_init {_ _}.
-Arguments solana_receive {_ _}.
-Arguments solana_extra {_ _}.
+Arguments solana_contract_name {_}.
+Arguments solana_process {_}.
+Arguments solana_extra {_}.
 
 Definition get_fn_arg_type (Σ : Ex.global_env) (fn_name : kername) (n : nat)
   : result Ex.box_type string :=
@@ -317,6 +360,7 @@ Definition get_fn_arg_type (Σ : Ex.global_env) (fn_name : kername) (n : nat)
     end
   | _ => Err "Init declaration must be a constant in the global environment"
   end.
+
 
 Definition specialize_extract_template_env
            (params : extract_template_env_params)
@@ -339,6 +383,7 @@ Section SolanaPrinting.
              (remaps : remaps)
              (params : extract_template_env_params) : result (list string) string :=
     let should_ignore kn :=
+(*         if contains kn ignored_concert then true else *)
         if remap_inductive remaps (mkInd kn 0) then true else
         if remap_constant remaps kn then true else
         if remap_inline_constant remaps kn then true else false in
@@ -352,9 +397,15 @@ Section SolanaPrinting.
 
   (* TODO: Modify all of this *)
 
-  Definition process_instruction_wrapper (receive_name : kername) := 
-(* J> Instruction info should have NAMES and PARAMETERS *)
-(* J> This chain definition seems to be good and according to the execution model *)
+  Definition custom_errors_wrapper (contract_name : string) :=
+    <$
+      "impl From<" ++ contract_name ++ "Error<'_>> for ProgramError {";
+      "    fn from(e: " ++ contract_name ++ "Error) -> Self {";
+      "        ProgramError::Custom(e as u32)";
+      "    }";
+      "}" $>.
+
+  Definition process_instruction_wrapper (process_name : kername) := 
     <$
       "fn process_instruction (";
       "    program_id: &Pubkey,";
@@ -362,131 +413,108 @@ Section SolanaPrinting.
       "    instruction_data: &[u8],";
       ") -> ProgramResult {";
       "    let prg = Program::new();";
+      (* Probably no needed to deserialize the message like this *)
       "    let msg =";
-      "        match <_>::concert_deserial(&mut ctx.parameter_cursor(), &prg.__alloc) {";
+      "        match <_>::concert_deserial(&mut instruction_data, &prg.__alloc) {";
       "            Ok(m) => m,";
-      "            Err(_) => return Err(ReceiveError::DeserialMsg)";
-      "        };";
-      "    let old_state =";
-      "        match <_>::concert_deserial(state, &prg.__alloc) {";
-      "            Ok(s) => s,";
-      "            Err(_) => return Err(ReceiveError::DeserialOldState)";
+      "            Err(_) => return Err(ProcessError::DeserialMsg.into())";
       "        };";
       "    let cchain ="; 
       "        " ++ RustExtract.ty_const_global_ident_of_kername <%% Chain %%> ++ "::build_chain(";
       "            PhantomData,";
       "            0, // No chain height";
-      "            Clock::get().unix_timestamp,";
+      "            Clock::get().unwrap().unix_timestamp as u64,";
       "            0 // No finalized height";
       "        );";
-      "    let balance = if ctx.sender() != concordium_std::Address::Contract(ctx.self_address()) {";
-      "   // if the contract is not calling itself, we add amount to the current balance";
-      "   // as expeced by the ConCert execution model";
-      "   (ctx.self_balance().micro_ccd + amount.micro_ccd) as i64";
-      "    } else {";
-      "        ctx.self_balance().micro_ccd as i64";
-      "    };";
-      "    let cctx =";
-      "        " ++ RustExtract.ty_const_global_ident_of_kername <%% @ContractCallContext %%> ++ "::build_ctx(" $>.
-      "            PhantomData,";
-      "            Address::Account(ctx.invoker()),";
-      "            ctx.sender(),";
-      "            Address::Contract(ctx.self_address()),";
-      "            balance,";
-      "            amount.micro_ccd as i64);";
-      "    let res = prg." ++ RustExtract.const_global_ident_of_kername receive_name ++ "(&cchain, &cctx, old_state, msg);";
-      "    match res {";
-      "        Option::Some((new_state, acts)) => {";
-      "            state.truncate(0);";
-      "            match new_state.concert_serial(state) {";
-      "                Ok(_) => convert_actions(acts),";
-      "                Err(_) => Err(ReceiveError::SerialNewState)";
-      "            }";
-      "        }";
-      "        Option::None => Err(ReceiveError::Error)";
-      "    }";
+      "    let res = prg." ++ RustExtract.const_global_ident_of_kername process_name ++ "(&cchain, &accounts, msg);";
+      "    res";
       "}" ;
       "entrypoint!(process_instruction);" $>.
 
   Definition list_name : string :=
     RustExtract.ty_const_global_ident_of_kername <%% list %%>.
 
-(*J> TODO: adjust returns and return type *)
-
   Definition convert_special_action : string :=
   <$
-"fn convert_special_action(body: &SpecialCallBody) -> Result<(), ReceiveError> {";
-"  match body { ";
-"                     ";
-"                     ";
-"                     ";
-"                     ";
-"                     ";
-"                     ";
-"                     ";
-"                     ";
-"  }";
+"fn convert_special_action(to_account: &AccountInfo, body: &SpecialCallBody) -> Result<(), ProcessError> {";
+"  let cbody =";
+"      if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
+"          let (pda, _nonce) = Pubkey::find_program_address(&[b'escrow'], program_id);";
+"";
+"          let owner_change_ix = spl_token::instruction::set_authority(";
+"              to_account.key,"; (* Token Program Id *)
+"              owned_account.key,"; (* Account which ownership will be changed *)
+"              Some(&pda),";
+"              spl_token::instruction::AuthorityType::AccountOwner,";
+"              old_owner.key,"; (* Account current owner *)
+"              &[&old_owner.key],";
+"          )?;";
+"";
+"          invoke(";
+"              &owner_change_ix,";
+"              &[";
+"                  owned_account.clone(),";
+"                  old_owner.clone(),";
+"                  to_account.clone(),";
+"               ],";
+"           )?;";
+"      } else if let SpecialCallBody:: CheckRentExempt(account_checked) = act {";
+"           if !to.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
+"               return Err(ProcessError::Error)";
+"           }";
+"      } else {";
+"          return Err(ProcessError::ConvertActions)";
+"      }";
+"      Ok(())";
 "}" $>.
 
   Definition convert_actions : string :=
   <$
-"fn convert_actions(acts: &" ++ list_name ++ "<ActionBody>) -> Result<(), ReceiveError> {";
-"  match acts {";
-"    &" ++ list_name ++ "::nil(_) => Ok(()),";
-"    &" ++ list_name ++ "::cons(_, hd, tl) => {";
-"    let cact =";
-"        if let ActionBody::Transfer(donator_account, receiver_account, amount) = hd {";
-"            if **donator_account.try_borrow_mut_lamports()? >= amount {";
-"               **receiver_account.try_borrow_mut_lamports()? += amount;";
-"               **donator_account.try_borrow_mut_lamports()? -= amount;";
-"            } else {";
-"               return Err(ReceiveError::Error)";
-"            };"; 
-"        if let ActionBody::SpecialCall(to, body) = hd {";
-"            convert_special_action(body);";
-"        } else {";
-"            return Err(ReceiveError::ConvertActions)";
-"        };";
+"fn convert_action(act: &ActionBody) -> Result<(), ProcessError> {";
+"  let cact =";
+"      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
+"          if **donator_account.try_borrow_mut_lamports()? >= amount {";
+"              **receiver_account.try_borrow_mut_lamports()? += amount;";
+"              **donator_account.try_borrow_mut_lamports()? -= amount;";
+"          } else {";
+"              return Err(ProcessError::Error)";
+"          };"; 
+"      } else if let ActionBody::SpecialCall(to, body) = act {";
+"          convert_special_action(body);";
+"      } else {";
+"          return Err(ProcessError::ConvertActions)";
+"      };";
 "      Ok(())";
-"    }";
-"  }";
 "}" $>.
-
-(*   Definition print_receive_attrs (contract_name : string) (receive_name : kername) : string :=
-    "#[receive(contract = """ ++ contract_name ++ """" ++
-              ", name = """ ++ RustExtract.const_global_ident_of_kername receive_name ++ """" ++
-              ", payable, enable_logger, low_level)]". *)
 
 Definition print_lines (lines : list string) : TemplateMonad unit :=
     monad_iter tmMsg lines.
 
-(* TODO : Update this definition *)
 Definition solana_extraction
-           {init_type receive_type : Type}
-           (m : SolanaMod init_type receive_type)
+           {process_type : Type}
+           (m : SolanaMod process_type)
            (remaps : remaps)
            (should_inline : kername -> bool) : TemplateMonad _ :=
-  init_tm <- tmEval cbn m.(solana_init);;
-  recv_tm <- tmEval cbn m.(solana_receive);;
-  '(Σ,_) <- tmQuoteRecTransp (init_tm, recv_tm) false ;;
-  init_nm <- extract_def_name m.(solana_init);;
-  receive_nm <- extract_def_name m.(solana_receive);;
+  process_tm <- tmEval cbn m.(solana_process);;
+  '(Σ,_) <- tmQuoteRecTransp (process_tm) false ;;
+  process_nm <- extract_def_name m.(solana_process);;
   extra <- monad_map extract_def_name_exists m.(solana_extra);;
   let overridden_masks kn :=
-      if eq_kername kn init_nm || eq_kername kn receive_nm then
+      if eq_kername kn process_nm then
         Some []
       else
         None in
-  let seeds := KernameSetProp.of_list (init_nm :: receive_nm :: extra) in
+  let seeds := KernameSetProp.of_list (process_nm :: extra) in
   let params := extract_rust_within_coq overridden_masks should_inline in
   Σ <- run_transforms Σ params;;
   res <- tmEval lazy (extract_lines seeds Σ remaps params);;
   match res with
   | Ok lines =>
-    let process_wrapper := process_instruction_wrapper init_nm in
-    print_lines (lines ++ [""; convert_actions; ""; process_wrapper])
+    let process_wrapper := process_instruction_wrapper process_nm in
+    let custom_errors := custom_errors_wrapper m.(solana_contract_name) in
+    print_lines (lines ++ [(* ""; custom_errors; *) ""; convert_special_action; ""; convert_actions; ""; process_wrapper])
   | Err e => tmFail e
-  end.
+  end. 
 
 End SolanaPrinting.
 

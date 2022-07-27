@@ -61,22 +61,9 @@ Global Ltac destruct_address_eq :=
       try rewrite (address_eq_sym b a) in *; destruct (address_eqb_spec a b)
     end.
 
-Section Blockchain.
-Context {Base : ChainBase}.
-
-
-(* This represents the view of the blockchain that a contract
-can access and interact with. *)
-(* Finalization is a Concordium blockchain concept but the root in Solana is identical *)
-Record Chain :=
-  build_chain {
-    chain_height : nat;
-    current_slot : nat;
-    finalized_height : nat;
-  }.
-
-(* J> TODO: check these errors, copied from solana docs *)
+  (* J> TODO: check these errors, copied from solana docs *)
 Inductive ProgramError :=
+| Custom {Error : Type} (e : Error)
 | InvalidArgument
 | InvalidInstructionData
 | InvalidAccountData
@@ -97,62 +84,82 @@ Inductive ProgramError :=
 | MaxAccountsDataSizeExceeded
 | ActiveVoteAccountClose.
 
-(* TODO: Some operations regarding account info  *)
-(* And account types would be great *)
-Record AccountInfo :=
-  build_account {  
-    (* Account address *)
-    account_address : Address;
-    (* Account data *)
-    account_state : SerializedValue;
-    (* Account balance *)
-    account_balance : Amount;
-    (* Account owner address *)
-    account_owner_address : Address;
-    (* Has the account signed the transaction *)
-    account_is_signer : bool;
-    (* Can the account be written to *)
-    account_is_writable : bool; 
-    (* Is the account a program *)
-    account_is_executable : bool;
+Module IteratorImp.
+
+Record IteratorWrapper {A : Type} :=
+  build_iterator {
+    it_content : list A;
   }.
 
-MetaCoq Run (make_setters AccountInfo).
+Global Arguments IteratorWrapper {_}.
+Global Arguments build_iterator {_}.
 
-(* J> TODO: FIND ANOTHER WAY *)
-(* Nao posso usar variaveis, se conseguir usar definitions sem variables excelente *)
-(* Variable SystemProgramVar TokenProgramVar NoneAddressVar : Address. *)
+Definition it_from_list {A : Type} (l : list A) : IteratorWrapper :=
+  build_iterator l.
 
-(* Definition NoneAccount : AccountInfo :=
-  {|
-    account_address := NoneAddress;
-    account_state := serialize_product (tt, 0);
-    account_balance := 0;
-    account_owner_address := NoneAddress;
-    account_is_signer := false;
-    account_is_writable := false;
-    account_is_executable := false;
-  |}. *)
+Definition it_next {A : Type} (it : IteratorWrapper) : result A ProgramError :=
+  match it.(it_content) with
+  | a :: _ => Ok a
+  | []     => Err AccountDataTooSmall
+  end.
 
+Global Opaque it_from_list it_content it_next.
+
+(*TODO : Lemmas/Theorems that describe an iterator behaviour *)
+
+End IteratorImp.
+
+Section Blockchain.
+Context {Base : ChainBase}.
+
+
+(* This represents the view of the blockchain that a contract
+can access and interact with. *)
+(* Finalization is a Concordium blockchain concept but the root in Solana is identical *)
+Record Chain :=
+  build_chain {
+    chain_height : nat;
+    current_slot : nat;
+    finalized_height : nat;
+  }.
+
+
+
+(* And account types would be great ~~Probably not needed *)
+Record AccountInformation :=
+  build_account {  
+    account_address : Address;       (* Account address *)
+    account_state : SerializedValue; (* Account data *)
+    account_balance : Amount;        (* Account balance *)
+    account_owner_address : Address; (* Account owner address *)
+    account_is_signer : bool;        (* Has the account signed the transaction *)
+    account_is_writable : bool;      (* Can the account be written to *)
+    account_is_executable : bool;    (* Is the account a program *)
+  }.
+
+MetaCoq Run (make_setters AccountInformation).
 
 (* Operations that a contract can return or that a user can use
 to interact with a chain. *)
+
+(* Definition process_result : Type := result unit ProgramError. *)
 
 (* Currently WeakContract is described as a single function, in the future it may be needed to add more *)
 Inductive ActionBody :=
   | act_transfer (to : Address) (amount : Amount)
   | act_call (to : Address) (msg : SerializedValue) 
-  | act_deploy (c : WeakContract) (* J> Not sure what to do with this yet *)
+  | act_deploy (c : WeakContract)
   | act_special_call (to : Address) (body : SpecialCallBody)
     with SpecialCallBody :=
-       | transfer_ownership (account : Address) (new_owner : Address)
+       | transfer_ownership (old_owner : Address) (account : Address) (new_owner : Address)
+       | check_rent_exempt (account : Address)
     with WeakContract :=
        | build_weak_contract
            (process :
               Chain ->
-              list AccountInfo -> (* accounts *)
+              list AccountInformation -> (* accounts *)
               option SerializedValue -> (* message *)
-              result (list ActionBody) ProgramError).
+              result unit ProgramError).
 
 Definition act_body_amount (ab : ActionBody) : Z :=
   match ab with
@@ -186,13 +193,15 @@ Record Contract
   build_contract {
     process :
       Chain ->
-      list AccountInfo ->
+      list AccountInformation ->
       option Msg ->
-      result (list ActionBody) ProgramError;
+      result unit ProgramError;
   }.
 
 Global Arguments process {_ _ _ _}.
 Global Arguments build_contract {_ _ _ _}.
+
+(* Set Typeclasses Debug Verbosity 10. *)
 
 Program Definition contract_to_weak_contract
           {Msg State : Type}
@@ -202,12 +211,12 @@ Program Definition contract_to_weak_contract
       let weak_proc chain accounts ser_msg_opt :=
         match ser_msg_opt with
           | Some ser_msg =>
-            do msg <- deserialize ser_msg;
+            do msg <- result_of_option (deserialize ser_msg) InvalidInstructionData;
             do res <- c.(process) chain accounts (Some msg);
             Ok res
           | None =>
-            do '(result, acts) <- c.(process) chain accounts None;
-            Some (result, acts)
+            do res <- c.(process) chain accounts None;
+            Ok res
           end in
       build_weak_contract weak_proc.
 
@@ -468,7 +477,7 @@ Inductive ActionEvaluation
              (amount : Amount)
              (wc : WeakContract)
              (state : SerializedValue)
-             (accounts : list AccountInfo)
+             (accounts : list AccountInformation)
              (result : unit),
       amount = 0 ->
       amount <= env_account_balances prev_env from_addr ->
@@ -479,7 +488,7 @@ Inductive ActionEvaluation
         wc
         prev_env
         accounts 
-        None = Some (result, []) ->
+        None = Ok result ->
       EnvironmentEquiv
         new_env
         (set_contract_state to_addr state (add_contract to_addr wc prev_env)) ->
@@ -489,7 +498,7 @@ Inductive ActionEvaluation
       forall (origin from_addr to_addr : Address)
              (amount : Amount)
              (wc : WeakContract)
-             (accounts : list AccountInfo)
+             (accounts : list AccountInformation)
              (msg : option SerializedValue)
              (prev_state : SerializedValue)
              (new_state : SerializedValue)
@@ -508,7 +517,7 @@ Inductive ActionEvaluation
         wc
         prev_env
         accounts 
-        msg = Some (result, resp_acts) ->
+        msg = Ok result ->
       new_acts = map (build_act origin to_addr) resp_acts ->
       EnvironmentEquiv
         new_env
@@ -1347,13 +1356,17 @@ Proof.
       split; auto.
       fold (incoming_txs trace caddr).
       rewrite inc_txs_eq.
-      Admitted.
-(*       split; [now rewrite app_comm_cons|].
+      (* Admitted. *)
+      split; [rewrite app_comm_cons|].
       inversion_clear inc_calls_eq.
       inversion_clear inc_special_call_eq.
       cbn.
+      Admitted. 
+      (* rewrite special_calls_map_eq.
+      2: split; auto; subst.
+      2: easy. 
+      2: cbn; easy. 
       split; auto.
-      rewrite special_calls_map_eq.
       subst; tauto. *)
 (* Qed. *)
 
@@ -1490,27 +1503,27 @@ Lemma wc_process_strong {Msg State : Type}
           `{Serializable Msg}
           `{Serializable State}
           {contract : Contract Msg State}
-          {chain accounts msg result new_acts} :
+          {chain accounts msg result} :
   wc_process (contract : WeakContract) chain accounts msg =
-  Some (result, new_acts) ->
+  Ok result ->
   exists msg_strong ,
     match msg_strong with
     | Some msg_strong => msg >>= deserialize = Some msg_strong
     | None => msg = None
     end /\
   Blockchain.process contract chain accounts msg_strong =
-    Some (result, new_acts).
+    Ok result.
 Proof.
-  intros receive.
+  intros process.
   cbn in *.
   all: exists (msg >>= deserialize).
   all: destruct msg as [msg|]; cbn in *.
   1: destruct (deserialize msg) as [msg_strong|];
     cbn in *; try congruence.
   1: destruct (Blockchain.process _ _ _ _)
-    as [[resp_state_strong resp_acts_strong]|] eqn:result_eq;
+    as [[]|] eqn:result_eq;
     cbn in *; try congruence.
-  all: inversion_clear receive; auto.
+  all: inversion_clear process; auto.
   split; auto; now destruct (process contract chain accounts None).
 Qed.
 
@@ -1541,9 +1554,12 @@ Proof.
       destruct_address_eq; subst; auto.
       (* To this contract, show that deserialization would not fail. *)
       replace wc with (contract : WeakContract) in * by congruence.
-      destruct (wc_process_strong ltac:(eassumption)).
+      destruct (wc_process_strong ltac:(eassumption)) as [msg_opt [? ]].
+      destruct msg_opt; try easy.
       Admitted.
-      (* rewrite deserialize_serialize in eq; congruence.
+(*       cbn in *.
+      inversion_clear e3. inversion_clear H1. inversion_clear H2. 
+      congruence.
     + (* Call *)
       destruct (address_eqb_spec caddr to_addr); subst; auto.
       (* To this contract, show that deserialization would not fail. *)
@@ -1613,10 +1629,10 @@ Hint Constructors
       (AddBlockFacts :
          forall (chain_height : nat) (current_slot : nat) (finalized_height : nat)
                 (new_height : nat) (new_slot : nat) (new_finalized_height : nat), Prop)
-      (DeployFacts : forall (chain : Chain) (accounts : list AccountInfo), Prop)
+      (DeployFacts : forall (chain : Chain) (accounts : list AccountInformation), Prop)
       (CallFacts :
          forall (chain : Chain)
-                (accounts : list AccountInfo)
+                (accounts : list AccountInformation)
                 (cstate : State)
                 (outgoing_actions : list ActionBody), Prop)
       (P : forall (chain_height : nat)
@@ -2110,6 +2126,33 @@ Global Coercion builder_env : builder_type >-> Environment.
 
 End Blockchain.
 
+(* Module AccountInformationOps.
+
+Definition account_info_eqb `{ChainBase} (a1 a2 : AccountInformation) : bool :=
+  match (account_address a1 =? account_address a2)%address with
+  | true => true
+  | false => false
+  end.
+
+Delimit Scope accountinfo_scope with accountinfo.
+Bind Scope accountinfo_scope with AccountInformation.
+Infix "=?" := account_info_eqb (at level 70) : accountinfo_scope.
+
+Definition next_account `{ChainBase} (n : nat) (accounts : list AccountInformation) (default : AccountInformation) : AccountInformation :=
+    nth n accounts default.
+
+Definition check_account `{ChainBase} (account null_account : AccountInformation) : result bool ProgramError :=
+  if (account =? null_account)%accountinfo then Err InvalidAccountData else Ok true.
+
+Global Opaque account_info_eqb next_account check_account.
+
+Check @account_info_eqb.
+Check @next_account.
+Check @check_account.
+Check @AccountInformation.
+
+End AccountInformationOps. *)
+
 Ltac destruct_chain_step :=
   match goal with
   | [step: ChainStep _ _ |- _] =>
@@ -2120,7 +2163,7 @@ Ltac destruct_chain_step :=
          ?env_eq ?perm]
   end.
 
-Print ActionEvaluation.
+(* Print ActionEvaluation. *)
 
 Ltac destruct_action_eval :=
   match goal with
@@ -2138,7 +2181,7 @@ Ltac destruct_action_eval :=
         ?enough_balance ?deployed ?act_eq ?body_eval ]
   end.
 
-Print SpecialCallBodyEvaluation.
+(* Print SpecialCallBodyEvaluation. *)
 
 Ltac destruct_special_body_eval :=
   match goal with
@@ -2242,8 +2285,8 @@ Ltac generalize_contract_statement :=
                       (finalized_height : nat) (new_height : nat)
                       (new_slot : nat) (new_finalized_height : nat), Prop);
        evar (DeployFacts : forall (chain : Chain)
-                                  (accounts : list AccountInfo), Prop);
-       evar (CallFacts : forall (chain : Chain) (accounts : list AccountInfo)
+                                  (accounts : list AccountInformation), Prop);
+       evar (CallFacts : forall (chain : Chain) (accounts : list AccountInformation)
                                 (cstate : State) (outgoing_actions : list ActionBody), Prop);
        apply (contract_induction _ AddBlockFacts DeployFacts CallFacts);
        cbv [P]; clear P; cycle 1; clear dependent bstate; clear dependent caddr). *)

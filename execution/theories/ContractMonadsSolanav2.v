@@ -2,6 +2,7 @@ From Coq Require Import FunctionalExtensionality.
 From Coq Require Import List.
 From ConCert.Execution Require Import BlockchainSolanav2.
 From ConCert.Execution Require Import Monads.
+From ConCert.Execution Require Import ResultMonad.
 From ConCert.Execution Require Import Serializable.
 Import ListNotations.
 

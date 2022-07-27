@@ -100,7 +100,7 @@ Locate ActionEvaluationError.
              (from to : Address)
              (amount : Amount)
              (msg : option SerializedValue)
-             (accounts : list AccountInfo)
+             (accounts : list AccountInformation)
              (lc : LocalChain) : result (list Action * LocalChain) ActionEvaluationError :=
     do if amount <? 0 then Err amount_negative else Ok tt;
     do if amount >? env_account_balances lc from then Err amount_too_high else Ok tt;
@@ -147,7 +147,7 @@ Locate ActionEvaluationError.
              (amount : Amount)
              (wc : WeakContract)
              (msg : SerializedValue)
-             (accounts : list AccountInfo)
+             (accounts : list AccountInformation)
              (lc : LocalChain)
     : result (list Action * LocalChain) ActionEvaluationError :=
     do if amount <? 0 then Err amount_negative else Ok tt;
@@ -169,7 +169,7 @@ Locate ActionEvaluationError.
   Local Open Scope nat.
 
 (* J> TODO: Check this, used some 0's for the amounts and accounts as parameter *)
-  Definition execute_action (act : Action) (accounts : list AccountInfo) (lc : LocalChain) :
+  Definition execute_action (act : Action) (accounts : list AccountInformation) (lc : LocalChain) :
     result (list Action * LocalChain) ActionEvaluationError :=
     match act with
     | build_act origin from (act_transfer to amount) =>
@@ -385,7 +385,7 @@ Check special_call.
   Local Hint Resolve send_or_call_step deploy_contract_step special_call_step : core.
   Lemma execute_action_step
         (act : Action)
-        (accounts : list AccountInfo)
+        (accounts : list AccountInformation)
         (new_acts : list Action)
         (lc_before : LocalChain)
         (lc_after : LocalChain) :

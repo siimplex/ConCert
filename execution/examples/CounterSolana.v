@@ -6,10 +6,15 @@ From Coq Require Import List.
 From Coq Require Import Basics.
 From ConCert.Utils Require Import Automation.
 From ConCert.Execution Require Import Extras.
+From ConCert.Execution Require Import Monads.
+From ConCert.Execution Require Import ResultMonad.
 From ConCert.Execution Require Import Serializable.
-From ConCert.Execution Require Import BlockchainSolana.
+From ConCert.Execution Require Import BlockchainSolanav2.
+From ConCert.Utils Require Import RecordUpdate.
 
 Import ListNotations.
+Import IteratorImp.
+Import RecordSetNotations.
 
 Open Scope Z.
 
@@ -22,11 +27,20 @@ Section CounterSolana.
   (** The definitions in this section are generalized over the [ChainBase] that specifies the type of addresses and which properties such a type must have *)
   Context {BaseTypes : ChainBase}.
 
+(*   Parameter NullAccount : AccountInformation. *)
+
   (** The state is a current counter value and the owner's address *)
   Record State :=
-    build_state { count : Z ;
-                  active : bool ;
-                  owner : Address }.
+    build_state { 
+      count : Z ;
+      active : bool ;
+      owner : Address 
+    }.
+
+(*   Inductive CounterError :=
+  | Error1
+  | Error2 
+  | Error3.  *)
 
   (** The contract has 3 kinds of messages: initialize, increment or decrement by some number *)
   Inductive Msg :=
@@ -34,23 +48,46 @@ Section CounterSolana.
   | Inc (i : Z)
   | Dec (i : Z).
 
+   (** Deriving the [Serializable] instances for the state and for the messages *)
+  Global Instance State_serializable : Serializable State :=
+    Derive Serializable State_rect<build_state>.
 
-  (** Since a contract is essentially a state transition function, we isolate
+  Global Instance Msg_serializable : Serializable Msg :=
+    Derive Serializable Msg_rect<Init, Inc, Dec>.
+
+(*   Global Instance CounterError_serializable : Serializable CounterError :=
+    Derive Serializable CounterError_rect<Error1, Error2, Error3>. *)
+(** Since a contract is essentially a state transition function, we isolate
       the functionality corresponding to each kind of message into step functions *)
-  Definition counter_init (accounts : list AccountInfo) (init_value : Z)
-    : option State :=
-    let contract_owner :=
-      match accounts with
-        | first :: _ => Some (account_address first)
-        | [] => None
-      end in
-    match contract_owner with
-      | Some acc =>
-        Some {| count := init_value ;
-                active := true ;
-                owner := acc |}
-      | None => None
-    end.
+  Definition counter_init (accounts : list AccountInformation) (init_value : Z)
+    : result unit ProgramError :=
+    let it := it_from_list accounts in 
+    do counter_owner_account <- it_next it; 
+    do counter_account <- it_next it;
+ 
+(*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
+    
+    let initialized_state := (build_state init_value true (account_address counter_owner_account)) in
+(*     let counter_account := counter_account<|account_state := ((@serialize State _) initialized_state)|> in  *)
+    
+    ret tt. 
+
+
+(*   (** Since a contract is essentially a state transition function, we isolate
+      the functionality corresponding to each kind of message into step functions *)
+  Definition counter_init (accounts : list AccountInformation) (init_value : Z)
+    : result unit ProgramError :=
+    let counter_owner_account := (next_account 0 accounts NullAccount) in
+    do check_account counter_owner_account NullAccount;
+    let counter_account := (next_account 1 accounts NullAccount) in
+    do check_account counter_account NullAccount;
+    
+    let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in  
+    
+    let initialized_state := (build_state init_value true (account_address counter_owner_account)) in
+    let counter_account := counter_account<|account_state := ((@serialize State _) initialized_state)|> in 
+    
+    Ok tt.  *)
 
  Definition increment (n : Z) (st : State) : State :=
     {| count := st.(count) + n ;
@@ -64,41 +101,70 @@ Section CounterSolana.
 
   (** The main functionality of the contract.
       Dispatches on a message, validates the input and calls the step functions *)
-  Definition counter (st : option State) (accounts : list AccountInfo) (msg : Msg) : option State :=
-   match st with 
-   | Some state =>
-      match msg with
-      | Inc i => if (0 <? i) then Some (increment i state) else None
-      | Dec i => if (0 <? i) then Some (decrement i state) else None
-      | _     => Some state
-      end
-   | None =>
-      match msg with
-      | Init i => counter_init accounts i
-      | _      => None
-      end
-   end.
+  Definition counter (accounts : list AccountInformation) (msg : Msg) : result unit ProgramError :=
+    let it := it_from_list accounts in 
+    do counter_account <- it_next it;
 
+    (* let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in  
+    match counter_account_deserialize_state with 
+    | Some state =>
+       let new_state := match msg with
+                          | Inc i => if (0 <? i) then Some (increment i state) else None
+                          | Dec i => if (0 <? i) then Some (decrement i state) else None
+                          | _     => Some state
+                        end in
+       match new_state with
+       | Some st => 
+         let counter_account := counter_account<|account_state := ((@serialize State _) st)|> in 
+         Ok tt
+       | None => Err InvalidAccountData
+       end
+    | None =>
+       match msg with
+       | Init i => counter_init accounts i
+       | _      => Err InvalidInstructionData
+       end
+    end *)
+    ret tt.
+
+
+(*   (** The main functionality of the contract.
+      Dispatches on a message, validates the input and calls the step functions *)
+  Definition counter (accounts : list AccountInformation) (msg : Msg) : result unit ProgramError :=
+    let counter_account := (next_account 0 accounts NullAccount) in
+    do check_account counter_account NullAccount;
+
+    let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in  
+    match counter_account_deserialize_state with 
+    | Some state =>
+       let new_state := match msg with
+                          | Inc i => if (0 <? i) then Some (increment i state) else None
+                          | Dec i => if (0 <? i) then Some (decrement i state) else None
+                          | _     => Some state
+                        end in
+       match new_state with
+       | Some st => 
+         let counter_account := counter_account<|account_state := ((@serialize State _) st)|> in 
+         Ok tt
+       | None => Err InvalidAccountData
+       end
+    | None =>
+       match msg with
+       | Init i => counter_init accounts i
+       | _      => Err InvalidInstructionData
+       end
+    end.
+ *)
   (** The "entry point" of the contract. Dispatches on a message and calls [counter]. *)
-  Definition counter_process (chain : Chain) (accounts : list AccountInfo)
-             (state : option State) (msg : option Msg) : option (State * list ActionBody)
-    := match msg with
-       | Some m => match counter state accounts m with
-                   | Some res => Some (res, [])
-                   | None => None
-                  end
-       | None => None
-       end.
-
-  (** Deriving the [Serializable] instances for the state and for the messages *)
-  Global Instance State_serializable : Serializable State :=
-    Derive Serializable State_rect<build_state>.
-
-  Global Instance Msg_serializable : Serializable Msg :=
-    Derive Serializable Msg_rect<Init, Inc, Dec>.
+  Definition counter_process (chain : Chain) (accounts : list AccountInformation) (msg : option Msg) 
+    : result unit ProgramError :=
+     match msg with
+     | Some m => counter accounts m
+     | None => Err InvalidInstructionData
+     end.
 
   (** The counter contract *)
-  Definition counter_contract : Contract Msg State Z:=
+  Definition counter_contract : Contract Msg State :=
     build_contract counter_process.
 
 End CounterSolana.
@@ -207,8 +273,8 @@ Proof.
     { apply lift_outgoing_acts_nil with (contract := counter_contract);eauto.
       intros. eapply (receive_produces_no_calls (chain:=chain) (ctx:=ctx));eauto. apply H. }
     unfold outgoing_acts in *. rewrite queue_prev in *.
-    subst act;cbn in Hempty. *)
+    subst act;cbn in Hempty. 
     now destruct_address_eq.
 Qed.
-
 End SafetyProperties.
+*)

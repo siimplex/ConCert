@@ -20,6 +20,7 @@ From Coq Require Import ZArith.
 From Coq Require Import Permutation.
 From Coq Require Import Psatz.
 From ConCert.Execution Require Import BlockchainSolanav2.
+From ConCert.Execution Require Import CommonSolana.
 From ConCert.Execution Require Import Extras.
 From ConCert.Execution Require Import Monads.
 From ConCert.Execution Require Import ResultMonad.
@@ -29,9 +30,12 @@ From ConCert.Utils Require Import RecordUpdate.
 
 Import ListNotations.
 Import RecordSetNotations.
+Import AccountInformationEqb.
 
 Section EscrowSolana.
 Context `{Base : ChainBase}.
+
+Parameter NullAccount : AccountInformation.
 
 Set Nonrecursive Elimination Schemes.
 
@@ -74,12 +78,14 @@ Record Msg :=
     amount : option SerializedValue;
   }.
 
-Inductive EscrowError : Type :=
+Inductive EscrowError :=
 | InvalidInstruction
-| NotRentExempt
 | InvalidAmount
-| InvalidAccounts
-| ProgramError. (* TODO: Should be Program error from BlockchainSolana *) 
+| InvalidAccounts. 
+
+Definition return_test (chain : Chain) (accounts : list AccountInformation) (setup : Setup) :
+  result unit ProgramError :=
+  if true then Err AccountAlreadyInitialized else Err (Custom InvalidInstruction).
 
 MetaCoq Run (make_setters State).
 MetaCoq Run (make_setters Msg).
@@ -101,71 +107,72 @@ Global Instance Msg_serializable : Serializable Msg :=
 
 Open Scope Z.
 
-Definition escrow_init (chain : Chain) (accounts : list AccountInfo) (setup : Setup)
-  : result (list ActionBody) EscrowError :=
+Definition next_account (n : nat) (accounts : list AccountInformation) (default : AccountInformation) : AccountInformation :=
+  let seller_account := (nth n accounts default) in
+  seller_account.
+
+Definition check_account (account null_account : AccountInformation) : result bool ProgramError :=
+  if (account =? null_account)%accountinfo then Err (Custom InvalidAccounts) else Ok true.
+
+Definition escrow_init (chain : Chain) (accounts : list AccountInformation) (setup : Setup)
+  : result unit ProgramError :=
   let buyer_address := setup_buyer setup in
 
-  let seller_account_opt := (nth_error accounts 0) in
-  let temp_token_account_opt := (nth_error accounts 1) in
-  let token_to_receive_account_opt := (nth_error accounts 2) in
-  let escrow_account_opt := (nth_error accounts 3) in
-  let rent_sysvar_account_opt := (nth_error accounts 4) in
-  let token_program_account_opt := (nth_error accounts 5) in
+  let seller_account := (next_account 0 accounts NullAccount) in
+  do check_account seller_account NullAccount;
+  let temp_token_account := (next_account 1 accounts NullAccount) in
+  do check_account temp_token_account NullAccount;
+  let token_to_receive_account := (next_account 2 accounts NullAccount) in
+  do check_account token_to_receive_account NullAccount; 
+  let escrow_account := (next_account 3 accounts NullAccount) in
+  do check_account escrow_account NullAccount;
+  let rent_sysvar_account := (next_account 4 accounts NullAccount) in
+  do check_account rent_sysvar_account NullAccount;
+  let token_program_account := (next_account 5 accounts NullAccount) in
+  do check_account token_program_account NullAccount;
 
-  match seller_account_opt with
-  | Some seller_account =>
-        match temp_token_account_opt with
-        | Some temp_token_account =>
-              match token_to_receive_account_opt with
-              | Some token_to_receive_account =>
-                  match escrow_account_opt with
-                  | Some escrow_account =>
-                      match rent_sysvar_account_opt with
-                      | Some rent_sysvar_account =>
-                          match token_program_account_opt with
-                          | Some token_program_account =>
-                              do if (account_is_signer seller_account) then Ok tt else Err InvalidAccounts;
-                              do if ((account_owner_address seller_account) =? (account_address token_program_account))%address then Ok tt else Err ProgramError;
-                              (* TODO: HERE SHOULD CHECK RENT EXEMPT *)
-                              let escrow_account_deserialize_state := ((@deserialize State _) (account_state escrow_account)) in  
-                              do match escrow_account_deserialize_state with 
-                                  | Some st => if (is_initialized st) then Err ProgramError else Ok tt
-                                  | None => Ok tt
-                              end;
+  do if (account_is_signer seller_account) then Ok true else Err (Custom InvalidAccounts);
+  do if ((account_owner_address seller_account) =? (account_address token_program_account))%address then Ok true else Err IncorrectProgramId;
 
-    
-                              let initialized_state := (build_state
-                                  (current_slot chain)
-                                  buyer_commit
-                                  (account_address seller_account)
-                                  buyer_address
-                                  0 0 true)
-                                in
-                                          
-                              
-(*                               do escrow_account<|account_state := (@serialize State _) initialized_state|>; *)
+  let act1 := act_special_call (account_address rent_sysvar_account) (check_rent_exempt (account_address escrow_account)) in
+  do match simulate_action act1 with
+      | Ok _ => Ok true
+      | Err _ => Err (Custom InvalidInstruction)
+  end;
 
-                              let seller_account_balance := (account_balance temp_token_account) in
-                              do if (buyer_address =? (account_address seller_account))%address then Err InvalidAccounts else Ok tt;
-                              do if seller_account_balance =? 0 then Err InvalidAmount else Ok tt;
-                              do if Z.even seller_account_balance then Ok tt else Err InvalidAmount ;
-                            
-                              Ok ([act_special_call (account_address token_program_account)
-                                      (transfer_ownership (account_address token_to_receive_account) (account_address token_program_account))])
-                          | None => Err InvalidAccounts
-                          end
-                      | None => Err InvalidAccounts
-                    end
-                  | None => Err InvalidAccounts
-                  end
-              | None => Err InvalidAccounts
-              end
-        | None => Err InvalidAccounts
-        end
-  | None => Err InvalidAccounts
-  end.
+  let escrow_account_deserialize_state := ((@deserialize State _) (account_state escrow_account)) in  
+  do match escrow_account_deserialize_state with 
+      | Some st => if (is_initialized st) then Err AccountAlreadyInitialized else Ok true
+      | None => Ok true
+  end;
 
-Definition escrow_commit_money (chain : Chain) (accounts : list AccountInfo) (amount : Amount) : result (list ActionBody) EscrowError :=
+  let act2 := act_special_call (account_address token_program_account)
+          (transfer_ownership (account_address seller_account) (account_address token_to_receive_account) (account_address token_program_account)) in
+  do match simulate_action act2 with
+      | Ok _ => Ok true
+      | Err _ => Err (Custom InvalidInstruction)
+  end;
+
+  let initialized_state := (build_state
+      (current_slot chain)
+      buyer_commit
+      (account_address seller_account)
+      buyer_address
+      0 0 true)
+  in
+              
+  let escrow_account := escrow_account<|account_state := ((@serialize State _) initialized_state)|> in 
+
+  let seller_account_balance := (account_balance temp_token_account) in
+  do if (buyer_address =? (account_address seller_account))%address then Err (Custom InvalidAccounts) else Ok true;
+  do if seller_account_balance =? 0 then Err (Custom InvalidAmount) else Ok true;
+  do if Z.even seller_account_balance then Ok true else Err (Custom InvalidAmount);
+
+  Ok tt.
+
+
+
+Definition escrow_commit_money (chain : Chain) (accounts : list AccountInformation) (amount : Amount) : result (list ActionBody) EscrowError :=
   let buyer_account_opt := (nth_error accounts 0) in
   let temp_token_account_opt := (nth_error accounts 1) in
   let token_to_receive_account_opt := (nth_error accounts 2) in
@@ -215,7 +222,7 @@ Definition escrow_commit_money (chain : Chain) (accounts : list AccountInfo) (am
   | None => Err InvalidAccounts
   end.
 
-Definition escrow_confirm_item_received (chain : Chain) (accounts : list AccountInfo) (amount : Amount) : result (list ActionBody) EscrowError :=
+Definition escrow_confirm_item_received (chain : Chain) (accounts : list AccountInformation) (amount : Amount) : result (list ActionBody) EscrowError :=
   let buyer_account_opt := (nth_error accounts 0) in
   let temp_token_account_opt := (nth_error accounts 1) in
   let token_to_receive_account_opt := (nth_error accounts 2) in
@@ -263,7 +270,7 @@ Definition escrow_confirm_item_received (chain : Chain) (accounts : list Account
   | None => Err InvalidAccounts
   end.
 
-Definition escrow_withdraw (chain : Chain) (accounts : list AccountInfo) (amount : Amount) : result (list ActionBody) EscrowError :=
+Definition escrow_withdraw (chain : Chain) (accounts : list AccountInformation) (amount : Amount) : result (list ActionBody) EscrowError :=
   let participant_account_opt := (nth_error accounts 0) in
   let temp_token_account_opt := (nth_error accounts 1) in
   let token_to_receive_account_opt := (nth_error accounts 2) in
@@ -331,7 +338,7 @@ Definition escrow_withdraw (chain : Chain) (accounts : list AccountInfo) (amount
   | None => Err InvalidAccounts
   end.
 
-Definition process (chain : Chain) (accounts : list AccountInfo) (msg : option Msg) : result (list ActionBody) EscrowError :=
+Definition process (chain : Chain) (accounts : list AccountInformation) (msg : option Msg) : result (list ActionBody) EscrowError :=
     (* TODO: Setup should come inside of the MSG *)
     match msg with
     | Some message =>
