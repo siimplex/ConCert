@@ -13,7 +13,7 @@ From ConCert.Execution Require Import BlockchainSolanav2.
 From ConCert.Utils Require Import RecordUpdate.
 
 Import ListNotations.
-Import IteratorImp.
+Import BlockchainHelpers.
 Import RecordSetNotations.
 
 Open Scope Z.
@@ -64,10 +64,12 @@ Section CounterSolana.
     let it := it_from_list accounts in 
     do counter_owner_account <- it_next it; 
     do counter_account <- it_next it;
- 
+    
+    do counter_account_deserialize_state <- deserialize_data State (account_state counter_account);
 (*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
     
     let initialized_state := (build_state init_value true (account_address counter_owner_account)) in
+    do serialize_data initialized_state counter_account;
 (*     let counter_account := counter_account<|account_state := ((@serialize State _) initialized_state)|> in  *)
     
     ret tt. 
@@ -105,9 +107,11 @@ Section CounterSolana.
     let it := it_from_list accounts in 
     do counter_account <- it_next it;
 
-    (* let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in  
+    let counter_account_deserialize_state := deserialize_data State (account_state counter_account) in
+(*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
+
     match counter_account_deserialize_state with 
-    | Some state =>
+    | Ok state =>
        let new_state := match msg with
                           | Inc i => if (0 <? i) then Some (increment i state) else None
                           | Dec i => if (0 <? i) then Some (decrement i state) else None
@@ -115,17 +119,17 @@ Section CounterSolana.
                         end in
        match new_state with
        | Some st => 
-         let counter_account := counter_account<|account_state := ((@serialize State _) st)|> in 
+         do serialize_data st counter_account;
+(*          let counter_account := counter_account<|account_state := ((@serialize State _) st)|> in  *)
          Ok tt
        | None => Err InvalidAccountData
        end
-    | None =>
+    | Err _ =>
        match msg with
        | Init i => counter_init accounts i
        | _      => Err InvalidInstructionData
        end
-    end *)
-    ret tt.
+    end.
 
 
 (*   (** The main functionality of the contract.

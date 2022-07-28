@@ -61,7 +61,8 @@ Global Ltac destruct_address_eq :=
       try rewrite (address_eq_sym b a) in *; destruct (address_eqb_spec a b)
     end.
 
-  (* J> TODO: check these errors, copied from solana docs *)
+(* J> TODO: check these errors, copied from solana docs
+          Maybe could do something with the custom error *)
 Inductive ProgramError :=
 | Custom {Error : Type} (e : Error)
 | InvalidArgument
@@ -84,34 +85,8 @@ Inductive ProgramError :=
 | MaxAccountsDataSizeExceeded
 | ActiveVoteAccountClose.
 
-Module IteratorImp.
-
-Record IteratorWrapper {A : Type} :=
-  build_iterator {
-    it_content : list A;
-  }.
-
-Global Arguments IteratorWrapper {_}.
-Global Arguments build_iterator {_}.
-
-Definition it_from_list {A : Type} (l : list A) : IteratorWrapper :=
-  build_iterator l.
-
-Definition it_next {A : Type} (it : IteratorWrapper) : result A ProgramError :=
-  match it.(it_content) with
-  | a :: _ => Ok a
-  | []     => Err AccountDataTooSmall
-  end.
-
-Global Opaque it_from_list it_content it_next.
-
-(*TODO : Lemmas/Theorems that describe an iterator behaviour *)
-
-End IteratorImp.
-
 Section Blockchain.
 Context {Base : ChainBase}.
-
 
 (* This represents the view of the blockchain that a contract
 can access and interact with. *)
@@ -124,8 +99,6 @@ Record Chain :=
   }.
 
 
-
-(* And account types would be great ~~Probably not needed *)
 Record AccountInformation :=
   build_account {  
     account_address : Address;       (* Account address *)
@@ -139,11 +112,12 @@ Record AccountInformation :=
 
 MetaCoq Run (make_setters AccountInformation).
 
-(* Operations that a contract can return or that a user can use
-to interact with a chain. *)
+
 
 (* Definition process_result : Type := result unit ProgramError. *)
 
+(* Operations that a contract can return or that a user can use
+to interact with a chain. *)
 (* Currently WeakContract is described as a single function, in the future it may be needed to add more *)
 Inductive ActionBody :=
   | act_transfer (to : Address) (amount : Amount)
@@ -2125,6 +2099,45 @@ Global Coercion builder_type : ChainBuilderType >-> Sortclass.
 Global Coercion builder_env : builder_type >-> Environment.
 
 End Blockchain.
+
+Module BlockchainHelpers.
+
+Record IteratorWrapper {A : Type} :=
+  build_iterator {
+    it_content : list A;
+  }.
+
+Global Arguments IteratorWrapper {_}.
+Global Arguments build_iterator {_}.
+
+Definition it_from_list {A : Type} (l : list A) : IteratorWrapper :=
+  build_iterator l.
+
+Definition it_next {A : Type} (it : IteratorWrapper) : result A ProgramError :=
+  match it.(it_content) with
+  | a :: _ => Ok a
+  | []     => Err AccountDataTooSmall
+  end.
+
+Global Opaque it_from_list it_content it_next.
+
+(*TODO : Lemmas/Theorems that describe an iterator behaviour *)
+
+
+(*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
+Definition deserialize_data `{ChainBase} (data_type : Type) `{Serializable data_type} (data : SerializedValue) : result data_type ProgramError :=
+  let res := ((@deserialize data_type _) data) in
+  (result_of_option res InvalidAccountData).
+
+(*     let counter_account := counter_account<|account_state := ((@serialize State _) initialized_state)|> in  *)
+(*TODO : better naming and different way to store info in accounts MEANING change it in the environment also *)
+Definition serialize_data `{ChainBase} {data_type : Type} `{Serializable data_type} (data : data_type) (account : AccountInformation) : result unit ProgramError :=
+   let account := account <|account_state := ((@serialize data_type _) data)|> in
+   ret tt.
+
+Global Opaque deserialize_data serialize_data.
+
+End BlockchainHelpers.
 
 (* Module AccountInformationOps.
 
