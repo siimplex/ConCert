@@ -22,6 +22,7 @@ theories/InterContractCommunicationSolanav2.v
 #theories/LocalBlockchainSolana.v
 #theories/LocalBlockchain.v
 theories/Monads.v
+theories/ProgramError.v
 theories/ResultMonad.v
 theories/Serializable.v
 
@@ -46,7 +47,7 @@ examples/CounterSolana.v
 examples/Counter.v
 examples/EIP20Token.v
 examples/Egcd.v
-#examples/EscrowSolana.v
+examples/EscrowSolana.v
 examples/Escrow.v
 examples/Euler.v
 examples/FA2Interface.v

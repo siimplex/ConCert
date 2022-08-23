@@ -7,6 +7,7 @@ From ConCert.Execution Require Import Containers.
 From ConCert.Execution Require Import Extras.
 From ConCert.Execution Require Import Monads.
 From ConCert.Execution Require Import ResultMonad.
+From ConCert.Execution Require Import ProgramError.
 From Coq Require Import ZArith.
 
 (** A type of  finite maps (dictionaries) with addresses as keys.

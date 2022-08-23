@@ -7,6 +7,7 @@ From ConCert.Execution Require Import ChainedList.
 From ConCert.Execution Require Import Extras.
 From ConCert.Execution Require Import Monads.
 From ConCert.Execution Require Import ResultMonad.
+From ConCert.Execution Require Import ProgramError.
 From ConCert.Execution Require Import Serializable.
 From ConCert.Utils Require Import Automation.
 From ConCert.Utils Require Import RecordUpdate.
@@ -61,29 +62,7 @@ Global Ltac destruct_address_eq :=
       try rewrite (address_eq_sym b a) in *; destruct (address_eqb_spec a b)
     end.
 
-(* J> TODO: check these errors, copied from solana docs
-          Maybe could do something with the custom error *)
-Inductive ProgramError :=
-| Custom {Error : Type} (e : Error)
-| InvalidArgument
-| InvalidInstructionData
-| InvalidAccountData
-| AccountDataTooSmall
-| InsufficientFunds
-| IncorrectProgramId
-| MissingRequiredSignature
-| AccountAlreadyInitialized
-| UninitializedAccount
-| NotEnoughAccountKeys
-| AccountBorrowFailed
-| MaxSeedLengthExceeded
-| InvalidSeeds
-| BorshIoError
-| AccountNotRentExempt
-| UnsupportedSysvar
-| IllegalOwner
-| MaxAccountsDataSizeExceeded
-| ActiveVoteAccountClose.
+
 
 Section Blockchain.
 Context {Base : ChainBase}.
@@ -112,15 +91,14 @@ Record AccountInformation :=
 
 MetaCoq Run (make_setters AccountInformation).
 
-
-
-(* Definition process_result : Type := result unit ProgramError. *)
+Definition SliceAccountInformation := list AccountInformation.
+Global Opaque SliceAccountInformation.
 
 (* Operations that a contract can return or that a user can use
 to interact with a chain. *)
 (* Currently WeakContract is described as a single function, in the future it may be needed to add more *)
 Inductive ActionBody :=
-  | act_transfer (to : Address) (amount : Amount)
+  | act_transfer (from : Address) (to : Address) (amount : Amount)
   | act_call (to : Address) (msg : SerializedValue) 
   | act_deploy (c : WeakContract)
   | act_special_call (to : Address) (body : SpecialCallBody)
@@ -131,13 +109,13 @@ Inductive ActionBody :=
        | build_weak_contract
            (process :
               Chain ->
-              list AccountInformation -> (* accounts *)
+              SliceAccountInformation -> (* accounts *)
               option SerializedValue -> (* message *)
               result unit ProgramError).
 
 Definition act_body_amount (ab : ActionBody) : Z :=
   match ab with
-  | act_transfer _ amount => amount
+  | act_transfer _ _ amount => amount
   | act_call _ _ 
   | act_deploy _
   | act_special_call _ _ => 0
@@ -167,7 +145,7 @@ Record Contract
   build_contract {
     process :
       Chain ->
-      list AccountInformation ->
+      SliceAccountInformation ->
       option Msg ->
       result unit ProgramError;
   }.
@@ -213,7 +191,7 @@ Record ContractInterface {Msg : Type} :=
     (* The address of the contract being interfaced with *)
     contract_address : Address;
     (* Make an action sending money and optionally a message to the contract *)
-    send : Amount -> option Msg -> ActionBody;
+    send : Address -> Amount -> option Msg -> ActionBody; (*TODO : added address, should think more about this*)
   }.
 
 Global Arguments ContractInterface _ : clear implicits.
@@ -222,12 +200,26 @@ Definition get_contract_interface
           (chain : Chain) (addr : Address)
           (Msg : Type) `{Serializable Msg}
   : option (ContractInterface Msg) :=
-  let ifc_send amount msg :=
+  let ifc_send from amount msg :=
       match msg with
-      | None => act_transfer addr amount
+      | None => act_transfer from addr amount
       | Some msg => act_call addr (serialize msg)
       end in
   Some {| contract_address := addr; send := ifc_send; |}.
+
+Inductive WrappedActionBody :=
+  | wact_transfer (from : AccountInformation) (to : AccountInformation) (amount : Amount)
+  | wact_call (to : AccountInformation) (msg : SerializedValue) 
+  | wact_deploy (c : WeakContract)
+  | wact_special_call (to : AccountInformation) (body : SpecialCallBody).
+
+Definition WrappedActionBody_to_ActionBody (wact : WrappedActionBody) : ActionBody :=
+  match wact with
+  | wact_transfer from to amount => act_transfer (account_address from) (account_address to) amount
+  | wact_call to msg             => act_call (account_address to) msg 
+  | wact_deploy contract         => act_deploy contract
+  | wact_special_call to body    => act_special_call (account_address to) body
+  end.
 
 Section Semantics.
 MetaCoq Run (make_setters Chain).
@@ -440,7 +432,7 @@ Inductive ActionEvaluation
         amount >= 0 ->
         amount <= env_account_balances prev_env from_addr ->
         address_is_contract to_addr = false -> (* J> TODO: It should be possible to transfer to contracts *)
-        act = build_act origin from_addr (act_transfer to_addr amount) ->
+        act = build_act origin from_addr (act_transfer from_addr to_addr amount) ->
         EnvironmentEquiv
           new_env
           (transfer_balance from_addr to_addr amount prev_env) ->
@@ -451,7 +443,7 @@ Inductive ActionEvaluation
              (amount : Amount)
              (wc : WeakContract)
              (state : SerializedValue)
-             (accounts : list AccountInformation)
+             (accounts : SliceAccountInformation)
              (result : unit),
       amount = 0 ->
       amount <= env_account_balances prev_env from_addr ->
@@ -472,7 +464,7 @@ Inductive ActionEvaluation
       forall (origin from_addr to_addr : Address)
              (amount : Amount)
              (wc : WeakContract)
-             (accounts : list AccountInformation)
+             (accounts : SliceAccountInformation)
              (msg : option SerializedValue)
              (prev_state : SerializedValue)
              (new_state : SerializedValue)
@@ -484,7 +476,7 @@ Inductive ActionEvaluation
       env_contract_states prev_env to_addr = Some prev_state ->
       act = build_act origin from_addr
                       (match msg with
-                       | None => act_transfer to_addr amount
+                       | None => act_transfer from_addr to_addr amount
                        | Some msg => act_call to_addr msg
                        end) ->
       wc_process
@@ -949,7 +941,7 @@ Definition created_blocks
 
 Definition is_deploy (ac : ActionBody) : bool :=
   match ac with
-  | act_transfer _ _ => false
+  | act_transfer _ _ _ => false
   | act_call _ _ => false
   | act_deploy _ => true
   | act_special_call _ _ => false
@@ -957,7 +949,7 @@ Definition is_deploy (ac : ActionBody) : bool :=
 
 Definition is_call (ac : ActionBody) : bool :=
   match ac with
-  | act_transfer _ _ => false
+  | act_transfer _ _ _ => false
   | act_call _ _ => true
   | act_deploy _ => false
   | act_special_call _ _ => false
@@ -965,7 +957,7 @@ Definition is_call (ac : ActionBody) : bool :=
 
 Definition is_transfer (ac : ActionBody) : bool :=
   match ac with
-  | act_transfer _ _ => true
+  | act_transfer _ _ _ => true
   | act_call _ _ => false
   | act_deploy _ => false
   | act_special_call _ _ => false
@@ -973,7 +965,7 @@ Definition is_transfer (ac : ActionBody) : bool :=
 
 Definition is_special_call (ac : ActionBody) : bool :=
   match ac with
-  | act_transfer _ _ => false
+  | act_transfer _ _ _ => false
   | act_call _ _ => false
   | act_deploy _ => false
   | act_special_call _ _ => true
@@ -1603,10 +1595,10 @@ Hint Constructors
       (AddBlockFacts :
          forall (chain_height : nat) (current_slot : nat) (finalized_height : nat)
                 (new_height : nat) (new_slot : nat) (new_finalized_height : nat), Prop)
-      (DeployFacts : forall (chain : Chain) (accounts : list AccountInformation), Prop)
+      (DeployFacts : forall (chain : Chain) (accounts : SliceAccountInformation), Prop)
       (CallFacts :
          forall (chain : Chain)
-                (accounts : list AccountInformation)
+                (accounts : SliceAccountInformation)
                 (cstate : State)
                 (outgoing_actions : list ActionBody), Prop)
       (P : forall (chain_height : nat)
@@ -2098,31 +2090,41 @@ Class ChainBuilderType :=
 Global Coercion builder_type : ChainBuilderType >-> Sortclass.
 Global Coercion builder_env : builder_type >-> Environment.
 
-End Blockchain.
-
-Module BlockchainHelpers.
-
-Record IteratorWrapper {A : Type} :=
+Class IteratorWrapper :=
   build_iterator {
-    it_content : list A;
+    it_content : SliceAccountInformation;
   }.
 
-Global Arguments IteratorWrapper {_}.
-Global Arguments build_iterator {_}.
+(* Definition get_content (it : IteratorWrapper) : SliceAccountInformation :=
+  let (content) := it in content.
 
-Definition it_from_list {A : Type} (l : list A) : IteratorWrapper :=
+Definition it_from_list (l : SliceAccountInformation) : IteratorWrapper :=
   build_iterator l.
 
-Definition it_next {A : Type} (it : IteratorWrapper) : result A ProgramError :=
-  match it.(it_content) with
+Definition it_next (it : IteratorWrapper) : result AccountInformation ProgramError :=
+  match get_content it with
   | a :: _ => Ok a
   | []     => Err AccountDataTooSmall
   end.
 
-Global Opaque it_from_list it_content it_next.
+Global Opaque it_from_list it_content it_next. *)
+
+Class ChainHelpers :=
+  build_helpers {
+    new_iter : SliceAccountInformation -> IteratorWrapper;
+    iter_next : IteratorWrapper -> result AccountInformation ProgramError;
+    deser_data (A : Type) : SerializedValue -> result A ProgramError;
+    ser_data {A : Type} : A -> SerializedValue;
+    ser_data_account {A : Type} : AccountInformation -> A -> result unit ProgramError;
+  }.
+
+Global Opaque new_iter iter_next deser_data ser_data ser_data_account.
 
 (*TODO : Lemmas/Theorems that describe an iterator behaviour *)
 
+End Blockchain.
+
+(* Module BlockchainHelpers.
 
 (*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
 Definition deserialize_data `{ChainBase} (data_type : Type) `{Serializable data_type} (data : SerializedValue) : result data_type ProgramError :=
@@ -2137,34 +2139,8 @@ Definition serialize_data `{ChainBase} {data_type : Type} `{Serializable data_ty
 
 Global Opaque deserialize_data serialize_data.
 
-End BlockchainHelpers.
-
-(* Module AccountInformationOps.
-
-Definition account_info_eqb `{ChainBase} (a1 a2 : AccountInformation) : bool :=
-  match (account_address a1 =? account_address a2)%address with
-  | true => true
-  | false => false
-  end.
-
-Delimit Scope accountinfo_scope with accountinfo.
-Bind Scope accountinfo_scope with AccountInformation.
-Infix "=?" := account_info_eqb (at level 70) : accountinfo_scope.
-
-Definition next_account `{ChainBase} (n : nat) (accounts : list AccountInformation) (default : AccountInformation) : AccountInformation :=
-    nth n accounts default.
-
-Definition check_account `{ChainBase} (account null_account : AccountInformation) : result bool ProgramError :=
-  if (account =? null_account)%accountinfo then Err InvalidAccountData else Ok true.
-
-Global Opaque account_info_eqb next_account check_account.
-
-Check @account_info_eqb.
-Check @next_account.
-Check @check_account.
-Check @AccountInformation.
-
-End AccountInformationOps. *)
+(* TODO: Lemmas/Theorems thta describe each helper behaviour *)
+End BlockchainHelpers. *)
 
 Ltac destruct_chain_step :=
   match goal with
@@ -2298,8 +2274,8 @@ Ltac generalize_contract_statement :=
                       (finalized_height : nat) (new_height : nat)
                       (new_slot : nat) (new_finalized_height : nat), Prop);
        evar (DeployFacts : forall (chain : Chain)
-                                  (accounts : list AccountInformation), Prop);
-       evar (CallFacts : forall (chain : Chain) (accounts : list AccountInformation)
+                                  (accounts : SliceAccountInformation), Prop);
+       evar (CallFacts : forall (chain : Chain) (accounts : SliceAccountInformation)
                                 (cstate : State) (outgoing_actions : list ActionBody), Prop);
        apply (contract_induction _ AddBlockFacts DeployFacts CallFacts);
        cbv [P]; clear P; cycle 1; clear dependent bstate; clear dependent caddr). *)

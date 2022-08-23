@@ -8,12 +8,12 @@ From ConCert.Utils Require Import Automation.
 From ConCert.Execution Require Import Extras.
 From ConCert.Execution Require Import Monads.
 From ConCert.Execution Require Import ResultMonad.
+From ConCert.Execution Require Import ProgramError.
 From ConCert.Execution Require Import Serializable.
 From ConCert.Execution Require Import BlockchainSolanav2.
 From ConCert.Utils Require Import RecordUpdate.
 
 Import ListNotations.
-Import BlockchainHelpers.
 Import RecordSetNotations.
 
 Open Scope Z.
@@ -26,8 +26,7 @@ Section CounterSolana.
 
   (** The definitions in this section are generalized over the [ChainBase] that specifies the type of addresses and which properties such a type must have *)
   Context {BaseTypes : ChainBase}.
-
-(*   Parameter NullAccount : AccountInformation. *)
+  Context {HelperTypes : ChainHelpers}.
 
   (** The state is a current counter value and the owner's address *)
   Record State :=
@@ -36,6 +35,8 @@ Section CounterSolana.
       active : bool ;
       owner : Address 
     }.
+
+  MetaCoq Run (make_setters State).
 
 (*   Inductive CounterError :=
   | Error1
@@ -57,39 +58,22 @@ Section CounterSolana.
 
 (*   Global Instance CounterError_serializable : Serializable CounterError :=
     Derive Serializable CounterError_rect<Error1, Error2, Error3>. *)
+(* Set Typeclasses Debug Verbosity 10. *)
+
 (** Since a contract is essentially a state transition function, we isolate
       the functionality corresponding to each kind of message into step functions *)
-  Definition counter_init (accounts : list AccountInformation) (init_value : Z)
+  Definition counter_init (accounts : SliceAccountInformation) (init_value : Z)
     : result unit ProgramError :=
-    let it := it_from_list accounts in 
-    do counter_owner_account <- it_next it; 
-    do counter_account <- it_next it;
-    
-    do counter_account_deserialize_state <- deserialize_data State (account_state counter_account);
-(*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
+    let it := new_iter accounts in
+    do counter_owner_account <- iter_next it; 
+    do counter_account <- iter_next it;
+        
+    do counter_account_deser_state <- deser_data State (account_state counter_account);
     
     let initialized_state := (build_state init_value true (account_address counter_owner_account)) in
-    do serialize_data initialized_state counter_account;
-(*     let counter_account := counter_account<|account_state := ((@serialize State _) initialized_state)|> in  *)
+    do ser_data_account counter_account initialized_state;
     
-    ret tt. 
-
-
-(*   (** Since a contract is essentially a state transition function, we isolate
-      the functionality corresponding to each kind of message into step functions *)
-  Definition counter_init (accounts : list AccountInformation) (init_value : Z)
-    : result unit ProgramError :=
-    let counter_owner_account := (next_account 0 accounts NullAccount) in
-    do check_account counter_owner_account NullAccount;
-    let counter_account := (next_account 1 accounts NullAccount) in
-    do check_account counter_account NullAccount;
-    
-    let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in  
-    
-    let initialized_state := (build_state init_value true (account_address counter_owner_account)) in
-    let counter_account := counter_account<|account_state := ((@serialize State _) initialized_state)|> in 
-    
-    Ok tt.  *)
+    Ok tt.
 
  Definition increment (n : Z) (st : State) : State :=
     {| count := st.(count) + n ;
@@ -103,14 +87,15 @@ Section CounterSolana.
 
   (** The main functionality of the contract.
       Dispatches on a message, validates the input and calls the step functions *)
-  Definition counter (accounts : list AccountInformation) (msg : Msg) : result unit ProgramError :=
-    let it := it_from_list accounts in 
-    do counter_account <- it_next it;
+  Definition counter (accounts : SliceAccountInformation) (msg : Msg) : result unit ProgramError :=
+    let it := new_iter accounts in 
+    do counter_account <- iter_next it;
+    counter_init accounts 0.
+(*     let counter_account_deserialize_state := deserialize_data State (account_state counter_account) in *)
 
-    let counter_account_deserialize_state := deserialize_data State (account_state counter_account) in
 (*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
 
-    match counter_account_deserialize_state with 
+(*     match counter_account_deserialize_state with 
     | Ok state =>
        let new_state := match msg with
                           | Inc i => if (0 <? i) then Some (increment i state) else None
@@ -130,37 +115,10 @@ Section CounterSolana.
        | _      => Err InvalidInstructionData
        end
     end.
-
-
-(*   (** The main functionality of the contract.
-      Dispatches on a message, validates the input and calls the step functions *)
-  Definition counter (accounts : list AccountInformation) (msg : Msg) : result unit ProgramError :=
-    let counter_account := (next_account 0 accounts NullAccount) in
-    do check_account counter_account NullAccount;
-
-    let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in  
-    match counter_account_deserialize_state with 
-    | Some state =>
-       let new_state := match msg with
-                          | Inc i => if (0 <? i) then Some (increment i state) else None
-                          | Dec i => if (0 <? i) then Some (decrement i state) else None
-                          | _     => Some state
-                        end in
-       match new_state with
-       | Some st => 
-         let counter_account := counter_account<|account_state := ((@serialize State _) st)|> in 
-         Ok tt
-       | None => Err InvalidAccountData
-       end
-    | None =>
-       match msg with
-       | Init i => counter_init accounts i
-       | _      => Err InvalidInstructionData
-       end
-    end.
- *)
-  (** The "entry point" of the contract. Dispatches on a message and calls [counter]. *)
-  Definition counter_process (chain : Chain) (accounts : list AccountInformation) (msg : option Msg) 
+(*  *) ret tt. *)
+  
+(** The "entry point" of the contract. Dispatches on a message and calls [counter]. *)
+  Definition counter_process (chain : Chain) (accounts : SliceAccountInformation) (msg : option Msg) 
     : result unit ProgramError :=
      match msg with
      | Some m => counter accounts m

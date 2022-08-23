@@ -4,18 +4,21 @@ From MetaCoq.Template Require Import Kernames.
 From ConCert.Utils Require Import StringExtra.
 From ConCert.Execution Require Import BlockchainSolanav2.
 From ConCert.Execution Require Import Serializable.
+From ConCert.Execution Require Import ProgramError.
+(* From ConCert.Execution Require Import ResultMonad. *)
 From ConCert.Extraction Require Import Common.
 From ConCert.Extraction Require Import Extraction.
 From ConCert.Extraction Require Import RustExtract.
 From ConCert.Extraction Require Import Optimize.
+From ConCert.Extraction Require Import SpecializeChainHelpersSolana.
 From ConCert.Extraction Require Import SpecializeChainBaseSolana.
+From ConCert.Extraction Require Import SpecializeAll.
 From ConCert.Extraction Require Import PrettyPrinterMonad.
 From ConCert.Extraction Require Import Printing.
 From ConCert.Extraction Require Import ResultMonad.
 From ConCert.Extraction Require Import Utils.
 
 Module SolanaRemap.
-Import IteratorImp.
 
 Definition lookup_const (TT : list (kername * string)) (name : kername): option string :=
   match find (fun '(key, _) => eq_kername key name) TT with
@@ -40,17 +43,26 @@ Definition remap_arith : list (kername * string) := Eval compute in
    ; remap <%% Nat.ltb %%> "fn ##name##(&'a self, a: u64, b: u64) -> bool { a < b }"].
 
 Definition remap_blockchain_consts : list (kername * string) :=
-  [ remap <! @Address !> "type ##name##<'a> = solana_program::pubkey::Pubkey;"
+  [remap <! @Address !> "type ##name##<'a> = solana_program::pubkey::Pubkey;"
   (* Ideally we would have two impls here for performance, but Rust does not support this.
      https://github.com/rust-lang/rust/issues/62223 *)
-  ; remap <! @address_eqb !>
+   ; remap <! @address_eqb !>
           "fn ##name##(&'a self) -> impl Fn(solana_program::pubkey::Pubkey) -> &'a dyn Fn(solana_program::pubkey::Pubkey) -> bool { move |a| self.alloc(move |b| a == b) }" 
+   ; remap <! @SliceAccountInformation !> "type ##name##<'a> = &'a[AccountInformation<'a>];"
   ].
 
 Definition remap_aux_consts : list (kername * string) := 
-  [ remap <! @it_from_list !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }"
-  ; remap <! @it_next !> "fn ##name##<'b, I : Iterator<Item = &'a solana_program::account_info::AccountInfo<'b>>>(&'a self, iter: &mut I) -> std::result::Result<I::Item, ProgramError> { iter.next().ok_or(ProgramError::NotEnoughAccountKeys) }"
-  ].
+  [ remap <! @new_iter !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }"
+  ; remap <! @iter_next !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a mut Iterator<Item = solana_program::account_info::AccountInfo<'a>>) -> std::result::Result<solana_program::account_info::AccountInfo<'a>, ProgramError> { self.alloc( move |iter| iter.next().ok_or(ProgramError::NotEnoughAccountKeys)) }"
+  (* Using ConCert Library *) 
+   (* ; remap <! @deser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[u8]) -> Result<A, ProgramError> { self.alloc(move |v| { let res = match <_>::concert_deserial(&mut v, &self.__alloc) { Ok(m) => m, Err(_) => return Err(ProcessError::DeserialMsg.into()) }; res })}"
+  ; remap <! @ser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(SerializedValue) -> &'a [u8] { self.alloc(move |v| { let res; v.concert_serial(&mut res); res })}" *)
+
+  ; remap <! @deser_data !> "fn ##name##<T : BorshDeserialize>(&'a self) -> &'a dyn Fn(&[u8]) -> Result<T, ProgramError> { self.alloc(move |v| { match T::try_from_slice(v) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}"
+  ; remap <! @ser_data !> "fn ##name##<W : std::io::Write, T : BorshSerialize>(&'a self) -> impl Fn(&'a T) -> &'a dyn Fn(&mut W) -> Result<(), ProgramError> { move |v| self.alloc( move |out| { match v.serialize(out) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}})}"
+  ; remap <! @ser_data_account !> "fn ser_data_account<T : BorshSerialize>(&'a self) ->  impl Fn(solana_program::account_info::AccountInfo<'a>) -> &'a dyn Fn(T) -> Result<(), ProgramError> { move |acc| self.alloc( move |v| { match v.serialize(&mut &mut acc.try_borrow_mut_data()?[..]) { Ok(val) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}})}"
+  ] 
+.
 
 Definition remap_inline_bool_ops := Eval compute in
       [ remap <%% andb %%> "__andb!"
@@ -91,6 +103,12 @@ Definition remap_option : remapped_inductive :=
      re_ind_match := None
   |}.
 
+Definition remap_result : remapped_inductive :=
+  {| re_ind_name := "Result";
+     re_ind_ctors := ["Ok"; "Err"];
+     re_ind_match := None
+  |}.
+
 Definition remap_unit : remapped_inductive :=
   {| re_ind_name := "()";
      re_ind_ctors := ["()"];
@@ -109,6 +127,7 @@ Definition remap_std_types :=
   ; (<! bool !>, remap_bool)
   ; (<! prod !>, remap_pair)
   ; (<! option !>, remap_option)
+  ; (<! Execution.ResultMonad.result !>, remap_result)
   ; (<! unit !>, remap_unit)
   ; (<! string !>, remap_string) ].
 
@@ -118,12 +137,12 @@ Definition remap_SerializedValue : remapped_inductive :=
      re_ind_match := None |}.
 
 (* TODO: Delete this *)
-Definition remap_AccountInformation : remapped_inductive :=
+(* Definition remap_AccountInformation : remapped_inductive :=
   {| re_ind_name := "&'a AccountInformation<'a>";
      re_ind_ctors := ["__AccountInformation__Is__Opaque"];
-     re_ind_match := None |}.
+     re_ind_match := None |}. *)
 
-Definition remap_ActionBody : remapped_inductive :=
+Definition remap_WrappedActionBody : remapped_inductive :=
   {| re_ind_name := "ActionBody<'a>";
      re_ind_ctors := ["ActionBody::Transfer"; "ActionBody::Call"; "__Deploy__Is__Not__Supported"; "ActionBody::SpecialCall"];
      re_ind_match := None |}.
@@ -151,25 +170,26 @@ Definition remap_IteratorWrapper : remapped_inductive :=
 
 Definition remap_blockchain_inductives : list (inductive * remapped_inductive) :=
   [ (<! Serializable.SerializedValue !>, remap_SerializedValue);
-    (<! @ActionBody !>, remap_ActionBody);
+    (<! @WrappedActionBody !>, remap_WrappedActionBody);
     (<! @SpecialCallBody !>, remap_SpecialCallBody); 
     (<! @ProgramError !>, remap_ProgramError)
 (*    ; (<! @IteratorWrapper !>, remap_IteratorWrapper) *)
 (*    ; (<! @AccountInformation !>, remap_AccountInformation) *)
   ].
 
+
 Definition ignored_concert :=
   Eval compute in 
-    [ <%% Monads.Monad %%>
-(*     ; <%% @AccountInformation %%> *)
-    ; <%% @ChainBase %%>
+    [
+(*       <%% @Execution.Monads.bind %%> *)
+(*     ; <%% @Execution.Monads.ret %%> *)
+      <%% @Monads.Monad %%>
+(*     ; <%% @Execution.ResultMonad.Monad_result %%> *)
+(*     ; <%% @Execution.ProgramError.Monad_result_error %%> *)
+    ; <%% @AccountInformation %%>
     ; <%% @SerializedValue %%>
-    ; <%% @Execution.ResultMonad.Monad_result %%>
+    ; <%% @Serializable %%>
     ; <%% @RecordSet.SetterFromGetter %%>
-(*     ; <%% @account_info_eqb %%> *)
-(*     ; <%% @check_account %%>    *)
-(*     ; <%% @it_content %%> *)
-(*     ; <%% @Iterator %%>  *)
     ].
 
 Definition lookup_inductive
@@ -361,17 +381,16 @@ Definition get_fn_arg_type (Σ : Ex.global_env) (fn_name : kername) (n : nat)
   | _ => Err "Init declaration must be a constant in the global environment"
   end.
 
-
 Definition specialize_extract_template_env
            (params : extract_template_env_params)
            (Σ : global_env)
            (seeds : KernameSet.t)
            (ignore : kername -> bool) : result ExAst.global_env string :=
-  extract_template_env_general SpecializeChainBaseSolana.specialize_ChainBase_env
-                       params
-                       Σ
-                       seeds
-                       ignore.
+  extract_template_env_general SpecializeAll.specialize_consec_env
+       params
+       Σ
+       seeds
+       ignore.
 
 Section SolanaPrinting.
 
@@ -383,12 +402,13 @@ Section SolanaPrinting.
              (remaps : remaps)
              (params : extract_template_env_params) : result (list string) string :=
     let should_ignore kn :=
-(*         if contains kn ignored_concert then true else *)
+        if contains kn ignored_concert then true else
         if remap_inductive remaps (mkInd kn 0) then true else
         if remap_constant remaps kn then true else
         if remap_inline_constant remaps kn then true else false in
     Σ <- specialize_extract_template_env params Σ seeds should_ignore;;
-    let attrs _ := "#[derive(Clone, ConCertSerial, ConCertDeserial, PartialEq)]" in
+(*     let attrs _ := "#[derive(Clone, ConCertSerial, ConCertDeserial, PartialEq)]" in *)
+    let attrs _ := "#[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]" in
     let p := print_program Σ remaps attrs in
     '(_, s) <- timed "Printing" (fun _ => finish_print_lines p);;
     ret s.
@@ -407,6 +427,8 @@ Section SolanaPrinting.
 
   Definition process_instruction_wrapper (process_name : kername) := 
     <$
+      "const c_program_id : &&Pubkey = &&Pubkey::new_unique();";
+      "";
       "fn process_instruction (";
       "    program_id: &Pubkey,";
       "    accounts: &[AccountInfo],";
@@ -426,7 +448,8 @@ Section SolanaPrinting.
       "            Clock::get().unwrap().unix_timestamp as u64,";
       "            0 // No finalized height";
       "        );";
-      "    let res = prg." ++ RustExtract.const_global_ident_of_kername process_name ++ "(&cchain, &accounts, msg);";
+      "    *c_program_id = program_id;";
+      "    let res = prg." ++ RustExtract.const_global_ident_of_kername process_name ++ "(&cchain, accounts, msg);";
       "    res";
       "}" ;
       "entrypoint!(process_instruction);" $>.
@@ -434,55 +457,56 @@ Section SolanaPrinting.
   Definition list_name : string :=
     RustExtract.ty_const_global_ident_of_kername <%% list %%>.
 
-  Definition convert_special_action : string :=
+  Definition convert_special_action (contract_name : string) : string :=
   <$
-"fn convert_special_action(to_account: &AccountInfo, body: &SpecialCallBody) -> Result<(), ProcessError> {";
+"fn convert_special_action<'a>(to_account: &AccountInfo<'a>, body: &SpecialCallBody<'a>) -> Result<(), ProgramError> {";
 "  let cbody =";
-"      if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
-"          let (pda, _nonce) = Pubkey::find_program_address(&[b'escrow'], program_id);";
+"    if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
+"        let (pda, _nonce) = Pubkey::find_program_address(&[b""" ++ contract_name ++ """], c_program_id);";
 "";
-"          let owner_change_ix = spl_token::instruction::set_authority(";
-"              to_account.key,"; (* Token Program Id *)
-"              owned_account.key,"; (* Account which ownership will be changed *)
-"              Some(&pda),";
-"              spl_token::instruction::AuthorityType::AccountOwner,";
-"              old_owner.key,"; (* Account current owner *)
-"              &[&old_owner.key],";
-"          )?;";
+"        let owner_change_ix = spl_token::instruction::set_authority(";
+"            to_account.key,"; (* Token Program Id *)
+"            owned_account.key,"; (* Account which ownership will be changed *)
+"            Some(&pda),";
+"            spl_token::instruction::AuthorityType::AccountOwner,";
+"            old_owner.key,"; (* Account current owner *)
+"            &[&old_owner.key],";
+"        )?;";
 "";
-"          invoke(";
-"              &owner_change_ix,";
-"              &[";
-"                  owned_account.clone(),";
-"                  old_owner.clone(),";
-"                  to_account.clone(),";
-"               ],";
-"           )?;";
-"      } else if let SpecialCallBody:: CheckRentExempt(account_checked) = act {";
-"           if !to.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
-"               return Err(ProcessError::Error)";
-"           }";
-"      } else {";
-"          return Err(ProcessError::ConvertActions)";
-"      }";
-"      Ok(())";
+"        invoke(";
+"            &owner_change_ix,";
+"            &[";
+"                owned_account.clone(),";
+"                old_owner.clone(),";
+"                to_account.clone(),";
+"            ],";
+"        )?;";
+"    } else if let SpecialCallBody:: CheckRentExempt(account_checked) = body {";
+"        let rent = &Rent::from_account_info(to_account)?;";
+"            if !rent.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
+"                return Err(ProcessError::Error.into())";
+"            }";
+"    } else {";
+"        return Err(ProcessError::ConvertActions.into())";
+"    };";
+"  Ok(())";
 "}" $>.
 
   Definition convert_actions : string :=
   <$
-"fn convert_action(act: &ActionBody) -> Result<(), ProcessError> {";
+"fn convert_action(act: &ActionBody) -> Result<(), ProgramError> {";
 "  let cact =";
 "      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
-"          if **donator_account.try_borrow_mut_lamports()? >= amount {";
+"          if **donator_account.try_borrow_mut_lamports()? >= *amount {";
 "              **receiver_account.try_borrow_mut_lamports()? += amount;";
 "              **donator_account.try_borrow_mut_lamports()? -= amount;";
 "          } else {";
-"              return Err(ProcessError::Error)";
+"              return Err(ProcessError::Error.into())";
 "          };"; 
 "      } else if let ActionBody::SpecialCall(to, body) = act {";
-"          convert_special_action(body);";
+"          convert_special_action(to, body);";
 "      } else {";
-"          return Err(ProcessError::ConvertActions)";
+"          return Err(ProcessError::ConvertActions.into())";
 "      };";
 "      Ok(())";
 "}" $>.
@@ -512,7 +536,7 @@ Definition solana_extraction
   | Ok lines =>
     let process_wrapper := process_instruction_wrapper process_nm in
     let custom_errors := custom_errors_wrapper m.(solana_contract_name) in
-    print_lines (lines ++ [(* ""; custom_errors; *) ""; convert_special_action; ""; convert_actions; ""; process_wrapper])
+    print_lines (lines ++ [(* ""; custom_errors; *) ""; (convert_special_action m.(solana_contract_name)); ""; convert_actions; ""; process_wrapper])
   | Err e => tmFail e
   end. 
 

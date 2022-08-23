@@ -10,11 +10,11 @@ Section ContractMonadsSolana.
 Context `{ChainBase}.
 
 Definition ContractReader (T : Type) : Type :=
-  Chain -> list AccountInfo -> (Chain * list AccountInfo * T).
+  Chain -> SliceAccountInformation -> (Chain * SliceAccountInformation * T).
 
 Definition run_contract_reader
            {T : Type}
-           (chain : Chain) (accounts : list AccountInfo)
+           (chain : Chain) (accounts : SliceAccountInformation)
            (m : ContractReader T) : T :=
   let '(_, _, result) := m chain accounts in result.
 
@@ -37,8 +37,8 @@ Proof.
 Qed.
 
 Definition ContractProcesser (Msg State T : Type) : Type :=
-  Chain -> list AccountInfo -> option Msg -> list ActionBody ->
-  (Chain * list AccountInfo * option Msg * list ActionBody * option T).
+  Chain -> SliceAccountInformation -> option Msg -> list ActionBody ->
+  (Chain * SliceAccountInformation * option Msg * list ActionBody * option T).
 
 Global Instance contract_processer_monad (Msg State : Type) : Monad (ContractProcesser Msg State) :=
   {| ret _ x chain accounts msg acts := (chain, accounts, msg, acts, Some x);
@@ -52,7 +52,7 @@ Global Instance contract_processer_monad (Msg State : Type) : Monad (ContractPro
 Definition run_contract_processer
            {Msg State T : Type}
            (m : ContractProcesser Msg State T)
-           (chain : Chain) (accounts : list AccountInfo) (msg : option Msg) : option (T * list ActionBody) :=
+           (chain : Chain) (accounts : SliceAccountInformation) (msg : option Msg) : option (T * list ActionBody) :=
   let '(_, _, _, acts, result) := m chain accounts msg [] in
   option_map (fun result => (result, acts)) result.
 

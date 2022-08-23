@@ -249,10 +249,10 @@ Qed.
 
 Definition receiver_can_receive_transfer (bstate : ChainState) act_body :=
   match act_body with
-  | act_transfer to _ => address_is_contract to = false \/
+  | act_transfer _ to _ => address_is_contract to = false \/
     (exists wc,
       env_contracts bstate to = Some wc /\
-      forall (bstate_new : ChainState) (accs : list AccountInformation),
+      forall (bstate_new : ChainState) (accs : SliceAccountInformation),
            wc_process wc bstate_new accs None = (ResultMonad.Ok tt))
   | _ => True
   end.
@@ -684,7 +684,7 @@ Lemma evaluate_transfer : forall bstate origin from to amount acts,
   reachable bstate ->
   chain_state_queue bstate = {| act_from := from;
                                 act_origin := origin;
-                                act_body := act_transfer to amount |} :: acts ->
+                                act_body := act_transfer from to amount |} :: acts ->
   amount >= 0 ->
   env_account_balances bstate from >= amount ->
   address_is_contract to = false ->

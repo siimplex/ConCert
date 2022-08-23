@@ -26,7 +26,7 @@ theories/ConcordiumExtract.v
 #theories/ExAst.v
 #theories/ExpandBranches.v
 #theories/ExtractExtraction.v
-#theories/Extraction.v
+theories/Extraction.v
 #theories/ExtractionCorrectness.v
 #theories/Inlining.v
 #theories/LPretty.v
@@ -43,6 +43,8 @@ theories/RustExtract.v
 theories/SolanaExtract.v
 theories/SpecializeChainBase.v
 theories/SpecializeChainBaseSolana.v
+theories/SpecializeChainHelpersSolana.v
+theories/SpecializeAll.v
 theories/TopLevelFixes.v
 theories/Transform.v
 theories/TypeAnnotations.v

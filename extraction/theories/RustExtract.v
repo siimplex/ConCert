@@ -1,4 +1,3 @@
-
 From ConCert.Extraction Require Import ExAst.
 From ConCert.Extraction Require Import ExpandBranches.
 From ConCert.Extraction Require Import Extraction.
