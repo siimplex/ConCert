@@ -26,6 +26,7 @@ Section CounterSolana.
 
   (** The definitions in this section are generalized over the [ChainBase] that specifies the type of addresses and which properties such a type must have *)
   Context {BaseTypes : ChainBase}.
+  Context {AccountGetters : AccountGetters}.
   Context {HelperTypes : ChainHelpers}.
 
   (** The state is a current counter value and the owner's address *)
@@ -38,13 +39,8 @@ Section CounterSolana.
 
   MetaCoq Run (make_setters State).
 
-(*   Inductive CounterError :=
-  | Error1
-  | Error2 
-  | Error3.  *)
-
   (** The contract has 3 kinds of messages: initialize, increment or decrement by some number *)
-  Inductive Msg :=
+  Inductive ContractInstruction :=
   | Init (i : Z)
   | Inc (i : Z)
   | Dec (i : Z).
@@ -53,12 +49,8 @@ Section CounterSolana.
   Global Instance State_serializable : Serializable State :=
     Derive Serializable State_rect<build_state>.
 
-  Global Instance Msg_serializable : Serializable Msg :=
-    Derive Serializable Msg_rect<Init, Inc, Dec>.
-
-(*   Global Instance CounterError_serializable : Serializable CounterError :=
-    Derive Serializable CounterError_rect<Error1, Error2, Error3>. *)
-(* Set Typeclasses Debug Verbosity 10. *)
+  Global Instance ContractInstruction_serializable : Serializable ContractInstruction :=
+    Derive Serializable ContractInstruction_rect<Init, Inc, Dec>.
 
 (** Since a contract is essentially a state transition function, we isolate
       the functionality corresponding to each kind of message into step functions *)
@@ -68,10 +60,10 @@ Section CounterSolana.
     do counter_owner_account <- iter_next it; 
     do counter_account <- iter_next it;
         
-    do counter_account_deser_state <- deser_data State (account_state counter_account);
+    do counter_account_deser_state <- deser_data_account State counter_account;
     
-    let initialized_state := (build_state init_value true (account_address counter_owner_account)) in
-    do ser_data_account counter_account initialized_state;
+    let initialized_state := (build_state init_value true (get_account_address counter_owner_account)) in
+    do ser_data_account initialized_state counter_account;
     
     Ok tt.
 
@@ -87,69 +79,69 @@ Section CounterSolana.
 
   (** The main functionality of the contract.
       Dispatches on a message, validates the input and calls the step functions *)
-  Definition counter (accounts : SliceAccountInformation) (msg : Msg) : result unit ProgramError :=
+  Definition counter (accounts : SliceAccountInformation) (inst : ContractInstruction) : result unit ProgramError :=
     let it := new_iter accounts in 
     do counter_account <- iter_next it;
-    counter_init accounts 0.
-(*     let counter_account_deserialize_state := deserialize_data State (account_state counter_account) in *)
 
-(*     let counter_account_deserialize_state := ((@deserialize State _) (account_state counter_account)) in   *)
-
-(*     match counter_account_deserialize_state with 
+    match  deser_data_account State counter_account with 
     | Ok state =>
-       let new_state := match msg with
+       let new_state := match inst with
                           | Inc i => if (0 <? i) then Some (increment i state) else None
                           | Dec i => if (0 <? i) then Some (decrement i state) else None
                           | _     => Some state
                         end in
        match new_state with
        | Some st => 
-         do serialize_data st counter_account;
-(*          let counter_account := counter_account<|account_state := ((@serialize State _) st)|> in  *)
+         do ser_data_account st counter_account;
          Ok tt
        | None => Err InvalidAccountData
        end
-    | Err _ =>
-       match msg with
-       | Init i => counter_init accounts i
-       | _      => Err InvalidInstructionData
-       end
-    end.
-(*  *) ret tt. *)
+    | Err _ => 
+        match inst with
+          | Init i => counter_init accounts i
+          | _ => Err InvalidInstructionData
+        end
+     end.
   
 (** The "entry point" of the contract. Dispatches on a message and calls [counter]. *)
-  Definition counter_process (chain : Chain) (accounts : SliceAccountInformation) (msg : option Msg) 
+  Definition counter_process (chain : Chain) (accounts : SliceAccountInformation) (inst : option ContractInstruction) 
     : result unit ProgramError :=
-     match msg with
+     match inst with
      | Some m => counter accounts m
      | None => Err InvalidInstructionData
      end.
 
   (** The counter contract *)
-  Definition counter_contract : Contract Msg State :=
+  Definition counter_contract : Contract ContractInstruction State :=
     build_contract counter_process.
 
 End CounterSolana.
-(* 
-(** ** Functional properties *)
+
+(* (** ** Functional properties *)
 Section FunctionalProperties.
 
   Import Lia.
 
   Context {BaseTypes : ChainBase}.
+  Context {AccountGetters : AccountGetters}.
+  Context {HelperTypes : ChainHelpers}.
 
   (** *** Specification *)
 
   (** If the counter call succeeds and returns [next_state] then,
       depending on a message, it either increments or decrements
       by the number sent in the corresponding message *)
-  Lemma counter_correct {prev_state next_state msg} :
-  counter prev_state msg = Some next_state ->
-  match msg with
+  Lemma counter_correct {accounts counter_acc prev_state next_state inst} :
+  accounts = counter_acc :: _ ->
+  counter_acc.(account_state) = prev_state ->
+  counter accounts inst = Ok tt ->
+  counter_acc.(account_state) = next_state ->
+  match inst with
   | Inc n => prev_state.(count) < next_state.(count)
              /\ next_state.(count) = prev_state.(count) + n
   | Dec n => prev_state.(count) > next_state.(count)
              /\ next_state.(count) = prev_state.(count) - n
+  | Init n => next_state.(count) = n
   end.
   Proof.
     intros H.
@@ -239,4 +231,5 @@ Proof.
     now destruct_address_eq.
 Qed.
 End SafetyProperties.
-*)
+
+ *)

@@ -8,7 +8,7 @@ proc-macro = true
 
 [dependencies]
 syn = { version = "1.0.63", features = ["full", "extra-traits"] }
-quote = "=1.0.0"
+quote = "~1.0.0"
 proc-macro2 = "1.0"
 # borsh = "0.9.3"
 # borsh-derive = "0.9.3"

@@ -70,6 +70,8 @@ Definition ignored_concert_types :=
          <%% @SerializedValue %%>;
          <%% @RecordSet.SetterFromGetter %%>].
 
+Print ignored_concert_types.
+
 Definition extract_template_env_specialize
            (params : extract_template_env_params)
            (Σ : T.global_env)
@@ -98,6 +100,8 @@ Definition escrow_extract :=
      (fun kn => contains kn (ignored_concert_types
                            ++ map fst midlang_translation_map
                            ++ map fst TT_escrow)).
+
+Print escrow_extract.
 
 Definition midlang_prelude :=
   ["import Basics exposing (..)";

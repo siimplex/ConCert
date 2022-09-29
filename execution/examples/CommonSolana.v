@@ -78,7 +78,7 @@ Proof.
 Qed.
 Close Scope N_scope.
 
-Definition simulate_action {base : ChainBase} (action : ActionBody) : result unit ProgramError := Ok tt.
+Definition simulate_action {base : ChainBase} (action : WrappedActionBody) : result unit ProgramError := Ok tt.
 
 Definition throwIf (cond : bool) := if cond then None else Some tt.
 

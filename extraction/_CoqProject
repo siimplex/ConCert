@@ -44,6 +44,7 @@ theories/SolanaExtract.v
 theories/SpecializeChainBase.v
 theories/SpecializeChainBaseSolana.v
 theories/SpecializeChainHelpersSolana.v
+theories/SpecializeAccountOpsSolana.v
 theories/SpecializeAll.v
 theories/TopLevelFixes.v
 theories/Transform.v

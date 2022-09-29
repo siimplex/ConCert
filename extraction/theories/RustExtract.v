@@ -824,7 +824,9 @@ Definition print_program : PrettyPrinter unit :=
   append "struct Program {";;
   append_nl;;
   append "__alloc: bumpalo::Bump,";;
-
+(* J### ADDED *)
+  append "__program_id : solana_program::pubkey::Pubkey,";;
+(* J### ADDED *)
   pop_indent;;
   append_nl;;
   append "}";;
@@ -836,7 +838,7 @@ Definition print_program : PrettyPrinter unit :=
   append "impl<'a> Program {";;
 
   append_nl;;
-  append "fn new() -> Self {";;
+  append "fn new(key : Pubkey) -> Self {";; (* J### Modified *)
 
   push_indent (sig_col + indent_size);;
   append_nl;;
@@ -845,6 +847,8 @@ Definition print_program : PrettyPrinter unit :=
   push_indent (sig_col + 2*indent_size);;
   append_nl;;
   append "__alloc: bumpalo::Bump::new(),";;
+  (* J### ADDED *)
+  append "__program_id : key,";;
 
   pop_indent;;
   append_nl;;

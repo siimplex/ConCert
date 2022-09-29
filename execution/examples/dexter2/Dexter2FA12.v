@@ -26,6 +26,8 @@ From Coq Require Import List.
 From Coq Require Import Lia.
 Import ListNotations.
 
+
+
 Definition non_zero_amount (amt : Z) : bool:= (0 <? amt)%Z.
 
 (** * Contract types *)

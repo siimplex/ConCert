@@ -10,6 +10,6 @@ crate-type = ["rlib"]
 bumpalo = "3.5.0"
 concert-std-derive = { path = "../concert-std-derive" }
 immutable-map = "0.1.2"
-solana-program = "1.10.8"
+solana-program = "~1.10.35"
 borsh = "0.9.3"
-borsh-derive = "0.9.3"
+borsh-derive = "0.9.1"

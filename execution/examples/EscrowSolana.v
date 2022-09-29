@@ -1,24 +1,9 @@
-(* This file defines a simple escrow contract based on the "safe remote
-purchase" example in Solidity's docs. This contract allows a seller to sell an
-item in a trustless setting assuming economically rational actors. With the
-premise that the seller wants to sell an item for 1 ETH, the contract works in
-the following way:
-
-1. The seller deploys the contract and commits 2 ETH.
-2. The buyer commits 2 ETH before the deadline.
-3. The seller hands over the item (outside of the smart contract).
-4. The buyer confirms he has received the item. He gets 1 ETH back
-while the seller gets 3 ETH back.
-
-If the buyer does not commit the funds, the seller gets his money back after the
-deadline. The economic rationality shows up in our assumption that the seller
-will confirm he has received the item to get his own funds back. *)
-
 From Coq Require Import List.
 From Coq Require Import Bool.
 From Coq Require Import ZArith.
 From Coq Require Import Permutation.
 From Coq Require Import Psatz.
+From ConCert.Execution Require Import ProgramError.
 From ConCert.Execution Require Import BlockchainSolanav2.
 From ConCert.Execution Require Import CommonSolana.
 From ConCert.Execution Require Import Extras.
@@ -30,16 +15,16 @@ From ConCert.Utils Require Import RecordUpdate.
 
 Import ListNotations.
 Import RecordSetNotations.
-Import AccountInformationEqb.
+
 
 Section EscrowSolana.
-Context `{Base : ChainBase}.
-
-Parameter NullAccount : AccountInformation.
+Context {Base : ChainBase}.
+Context {AccountGetters : AccountGetters}.
+Context {HelperTypes : ChainHelpers}.
 
 Set Nonrecursive Elimination Schemes.
 
-Record Setup :=
+(* Record Setup :=
   build_setup {
       setup_buyer : Address;
     }.
@@ -52,69 +37,87 @@ Inductive NextStep :=
 (* Waiting for buyer and seller to withdraw their funds. *)
 | withdrawals
 (* No next step, sale is done. *)
-| no_next_step.
+| no_next_step. *)
 
 Record State :=
   build_state {
       last_action : nat;
-      next_step : NextStep;
-      seller : Address;
-      buyer : Address;
-      seller_withdrawable : Amount;
-      buyer_withdrawable : Amount;
+(*       next_step : NextStep; *)
       is_initialized : bool;
+      seller : Address;
+(*       buyer : Address; *)
+      seller_temp_account : Address;
+      seller_receiver : Address;
+(*       seller_withdrawable : Amount;
+      buyer_withdrawable : Amount; *)
+      expected_amount : Amount;
     }.
 
-Inductive MsgType :=
+MetaCoq Run (make_setters State).
+
+(* Inductive MsgType :=
 | init_escrow
 | commit_money
 | confirm_item_received
-| withdraw.
+| withdraw. *)
 
-Record Msg :=
+(* Record Msg :=
   build_message {
     instruction : option MsgType;
     setup : option SerializedValue;
     amount : option SerializedValue;
-  }.
+  }. *)
 
-Inductive EscrowError :=
-| InvalidInstruction
-| InvalidAmount
-| InvalidAccounts. 
-
-Definition return_test (chain : Chain) (accounts : list AccountInformation) (setup : Setup) :
-  result unit ProgramError :=
-  if true then Err AccountAlreadyInitialized else Err (Custom InvalidInstruction).
-
-MetaCoq Run (make_setters State).
-MetaCoq Run (make_setters Msg).
-
-Global Instance Setup_serializable : Serializable Setup :=
+(* Global Instance Setup_serializable : Serializable Setup :=
   Derive Serializable Setup_rect<build_setup>.
 
 Global Instance NextStep_serializable : Serializable NextStep :=
-  Derive Serializable NextStep_rect<buyer_commit, buyer_confirm, withdrawals, no_next_step>.
+  Derive Serializable NextStep_rect<buyer_commit, buyer_confirm, withdrawals, no_next_step>. *)
 
 Global Instance State_serializable : Serializable State :=
   Derive Serializable State_rect<build_state>.
 
-Global Instance MsgType_serializable : Serializable MsgType :=
+(* Global Instance MsgType_serializable : Serializable MsgType :=
   Derive Serializable MsgType_rect<init_escrow, commit_money, confirm_item_received, withdraw>.
 
 Global Instance Msg_serializable : Serializable Msg :=
-  Derive Serializable Msg_rect<build_message>.
+  Derive Serializable Msg_rect<build_message>. *)
 
 Open Scope Z.
 
-Definition next_account (n : nat) (accounts : list AccountInformation) (default : AccountInformation) : AccountInformation :=
-  let seller_account := (nth n accounts default) in
-  seller_account.
+Definition escrow_init (chain : Chain) (accounts : SliceAccountInformation) (amount : Z) : result unit ProgramError :=
+  let it := new_iter accounts in
+  do seller_account <- iter_next it;
+  
+  do if (get_account_is_signer seller_account) then Ok tt else Err MissingRequiredSignature;
+  
+  do temp_token_account <- iter_next it;
+  do token_to_receive_account <- iter_next it;
+  
+  do simulate_action (wact_special_call token_to_receive_account (check_token_owner token_to_receive_account));
 
-Definition check_account (account null_account : AccountInformation) : result bool ProgramError :=
-  if (account =? null_account)%accountinfo then Err (Custom InvalidAccounts) else Ok true.
+  do escrow_account <- iter_next it;
+  do simulate_action (wact_special_call escrow_account (check_rent_exempt escrow_account));
 
-Definition escrow_init (chain : Chain) (accounts : list AccountInformation) (setup : Setup)
+  do escrow_info <- deser_data_account State escrow_account;
+  do if escrow_info.(is_initialized) then Err InvalidInstructionData else Ok tt;
+  
+  let new_escrow_info := escrow_info<|last_action := current_slot chain|>
+                                    <|is_initialized := true|>
+                                    <|seller := get_account_address seller_account|>
+                                    <|seller_temp_account := get_account_address temp_token_account|>
+                                    <|seller_receiver := get_account_address token_to_receive_account|>
+                                    <|expected_amount := amount|> in
+
+  do ser_data_account new_escrow_info escrow_account;
+
+  do token_program <- iter_next it;
+
+  do simulate_action (wact_special_call token_program (transfer_ownership seller_account temp_token_account seller_account));
+
+  Ok tt.
+
+(* Definition escrow_init (chain : Chain) (accounts : list AccountInformation) (setup : Setup)
   : result unit ProgramError :=
   let buyer_address := setup_buyer setup in
 
@@ -168,7 +171,7 @@ Definition escrow_init (chain : Chain) (accounts : list AccountInformation) (set
   do if seller_account_balance =? 0 then Err (Custom InvalidAmount) else Ok true;
   do if Z.even seller_account_balance then Ok true else Err (Custom InvalidAmount);
 
-  Ok tt.
+  Ok tt. *)
 
 
 

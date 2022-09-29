@@ -31,17 +31,16 @@ Instance RustConfig : RustPrintConfig :=
 Definition should_inline kn :=
   eq_kername kn <%% @Monads.bind %%>
   || eq_kername kn <%% @ProgramError.Monad_result_error %%>
-  || if String.index 0 "setter_from_getter" (string_of_kername kn) then true else false.
-
-Definition should_inline_default := (fun kn => eq_kername <%% bool_rec %%> kn
-                          || eq_kername <%% bool_rect %%> kn).
+  || if String.index 0 "setter_from_getter" (string_of_kername kn) then true else false
+  || eq_kername <%% bool_rec %%> kn
+  || eq_kername <%% bool_rect %%> kn.
 
 Redirect "/home/johnny/Documents/Tese/ConCert/extraction/examples/extracted-code/solana-extract/counterv2.rs"
 
 MetaCoq Run (solana_extraction
                COUNTER_MODULE1
                (SolanaRemap.build_remaps
-                  (SolanaRemap.remap_arith ++ SolanaRemap.remap_blockchain_consts ++ SolanaRemap.remap_aux_consts)
+                  (SolanaRemap.remap_arith ++ SolanaRemap.remap_blockchain_consts ++ SolanaRemap.remap_aux_consts ++ SolanaRemap.remap_account_operations)
                   []
                   (SolanaRemap.remap_blockchain_inductives
                      ++ SolanaRemap.remap_std_types))

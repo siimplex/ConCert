@@ -34,7 +34,7 @@ Definition txCallTo (addr : Address) (tx : Tx) : bool :=
 
 Definition actTo (addr : Address) (act : ActionBody) : bool :=
   match act with
-  | act_transfer _ to _ => (to =? addr)%address
+  | act_transfer to _ => (to =? addr)%address
   | act_call to _ => (to =? addr)%address
   | _ => false
   end.
@@ -252,6 +252,7 @@ Proof.
       + cbn.
         now rewrite address_eq_ne.
   - destruct_address_eq; subst; auto.
+  - destruct_address_eq; auto; subst.
   - destruct_address_eq; auto; subst.
 Qed.
 End InterContractCommunication.

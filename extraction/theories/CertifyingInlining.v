@@ -104,12 +104,10 @@ Section inlining.
 
 End inlining.
 
-
 Definition inline_in_env (should_inline : kername -> bool) (Σ : global_env) : global_env:=
   let newΣ :=
       fold_right (fun '(kn, decl) Σ => (kn, inline_in_decl should_inline Σ decl) :: Σ) [] Σ in
   filter (fun '(kn, _) => negb (should_inline kn)) newΣ.
-
 
 Definition inline_global_env_template
            (mpath : modpath)

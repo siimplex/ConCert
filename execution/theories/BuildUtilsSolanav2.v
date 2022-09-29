@@ -69,9 +69,6 @@ Proof.
       try rewrite_environment_equiv;
       try (setoid_rewrite env_eq; cbn in *;
       destruct_address_eq; now subst).
-      (* + try (setoid_rewrite new_acts_eq; cbn in *; destruct_address_eq; now subst).
-      + try (setoid_rewrite e; cbn in *; destruct_address_eq; now subst).
-      + try (setoid_rewrite deployed_state0; cbn in *; destruct_address_eq; now subst). *)
 Qed.
 
 (* If a state is reachable and contract state is stored on an address 
@@ -249,7 +246,7 @@ Qed.
 
 Definition receiver_can_receive_transfer (bstate : ChainState) act_body :=
   match act_body with
-  | act_transfer _ to _ => address_is_contract to = false \/
+  | act_transfer to _ => address_is_contract to = false \/
     (exists wc,
       env_contracts bstate to = Some wc /\
       forall (bstate_new : ChainState) (accs : SliceAccountInformation),
@@ -666,27 +663,30 @@ Proof.
   assert (step : ChainStep bstate bstate').
   - eapply step_action; eauto.
     eapply eval_call with (msg0:= Some ((@serialize Msg _) msg)); eauto.
-    + now apply wc_process_to_process in process_some.
-    + constructor; reflexivity.
+    + apply wc_process_to_process in process_some. cbn in *.
+    (* + constructor; reflexivity.
   - exists bstate'.
     split; eauto.
     repeat split; eauto.
     cbn.
     now destruct_address_eq.
   - cbn in *. destruct (from =? caddr)%address; try easy.
-    unfold new_to_balance. assert (0 = amount); try easy.
+    unfold new_to_balance. assert (0 = amount); try easy. *)
     Admitted.
 (* Qed. *)
 
 (* Lemma showing that there exists a future ChainState
     where the transfer action is evaluated *)
-Lemma evaluate_transfer : forall bstate origin from to amount acts,
+Lemma evaluate_transfer : forall bstate origin from to origin_acc from_acc to_acc amount acts,
   reachable bstate ->
   chain_state_queue bstate = {| act_from := from;
                                 act_origin := origin;
-                                act_body := act_transfer from to amount |} :: acts ->
+                                act_body := act_transfer to amount |} :: acts ->
   amount >= 0 ->
   env_account_balances bstate from >= amount ->
+  account_address origin_acc = origin ->
+  account_address from_acc = from ->
+  account_address to_acc = to ->
   address_is_contract to = false ->
     (exists bstate',
        reachable_through bstate bstate'
@@ -695,13 +695,21 @@ Lemma evaluate_transfer : forall bstate origin from to amount acts,
         bstate'
         (transfer_balance from to amount bstate)).
 Proof.
-  intros * reach queue amount_nonnegative enough_balance%Z.ge_le to_not_contract.
+  intros * reach queue amount_nonnegative enough_balance%Z.ge_le origin_acc_eq from_acc_eq to_acc_eq to_not_contract.
   pose (bstate' := (bstate<|chain_state_queue := acts|>
                           <|chain_state_env := (transfer_balance from to amount bstate)|>)).
   assert (step : ChainStep bstate bstate').
   - eapply step_action with (new_acts := []); eauto.
-    eapply eval_transfer; eauto.
-    constructor; reflexivity.
+    eapply eval_transfer. 
+    + eauto. 
+    + eauto.
+    + exact origin_acc_eq.
+    + eauto.
+    + eauto.
+    + eauto.
+    + eauto.
+    + constructor; reflexivity.
+    + auto.
   - eexists bstate'.
     split; eauto.
     repeat split; eauto.
@@ -798,9 +806,10 @@ Proof.
   assert (step : ChainStep bstate bstate').
   - eapply step_action with (new_acts := []); eauto.
     eapply eval_deploy; eauto.
-    + apply wc_process_to_process in process_some. rewrite <- enough_balance. apply Z.ge_le. easy.
     + apply wc_process_to_process in process_some. Admitted. 
-    (* + constructor; try reflexivity. 
+      (* rewrite <- enough_balance. apply Z.ge_le. easy.
+    + apply wc_process_to_process in process_some. 
+    + constructor; try reflexivity. 
   - exists bstate'.
     destruct reach as [trace].
     exists (ChainedList.snoc trace step).

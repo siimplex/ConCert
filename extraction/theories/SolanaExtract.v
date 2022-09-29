@@ -5,13 +5,10 @@ From ConCert.Utils Require Import StringExtra.
 From ConCert.Execution Require Import BlockchainSolanav2.
 From ConCert.Execution Require Import Serializable.
 From ConCert.Execution Require Import ProgramError.
-(* From ConCert.Execution Require Import ResultMonad. *)
 From ConCert.Extraction Require Import Common.
 From ConCert.Extraction Require Import Extraction.
 From ConCert.Extraction Require Import RustExtract.
 From ConCert.Extraction Require Import Optimize.
-From ConCert.Extraction Require Import SpecializeChainHelpersSolana.
-From ConCert.Extraction Require Import SpecializeChainBaseSolana.
 From ConCert.Extraction Require Import SpecializeAll.
 From ConCert.Extraction Require Import PrettyPrinterMonad.
 From ConCert.Extraction Require Import Printing.
@@ -53,16 +50,29 @@ Definition remap_blockchain_consts : list (kername * string) :=
 
 Definition remap_aux_consts : list (kername * string) := 
   [ remap <! @new_iter !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }"
-  ; remap <! @iter_next !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a mut Iterator<Item = solana_program::account_info::AccountInfo<'a>>) -> std::result::Result<solana_program::account_info::AccountInfo<'a>, ProgramError> { self.alloc( move |iter| iter.next().ok_or(ProgramError::NotEnoughAccountKeys)) }"
+  ; remap <! @iter_next !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a mut Iterator<Item = &AccountInfo<'a>>) -> std::result::Result<&'a AccountInfo<'a>, ProgramError> { self.alloc( move |iter| iter.next().ok_or(ProgramError::NotEnoughAccountKeys)) }"
   (* Using ConCert Library *) 
    (* ; remap <! @deser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[u8]) -> Result<A, ProgramError> { self.alloc(move |v| { let res = match <_>::concert_deserial(&mut v, &self.__alloc) { Ok(m) => m, Err(_) => return Err(ProcessError::DeserialMsg.into()) }; res })}"
   ; remap <! @ser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(SerializedValue) -> &'a [u8] { self.alloc(move |v| { let res; v.concert_serial(&mut res); res })}" *)
 
-  ; remap <! @deser_data !> "fn ##name##<T : BorshDeserialize>(&'a self) -> &'a dyn Fn(&[u8]) -> Result<T, ProgramError> { self.alloc(move |v| { match T::try_from_slice(v) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}"
+  ; remap <! @deser_data_account !> "fn deser_data_account(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a AccountInfo) -> Result<State<'a>, ProgramError> { move |_| { self.alloc(move |v| { match State::try_from_slice(&v.data.borrow()) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}}"
+  ; remap <! @deser_data !> "fn ##name##<T : BorshDeserialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(std::rc::Rc<std::cell::RefCell<&'a mut [u8]>>) -> Result<T, ProgramError> { move |_| { self.alloc(move |v| { match T::try_from_slice(*v.borrow()) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}}"
   ; remap <! @ser_data !> "fn ##name##<W : std::io::Write, T : BorshSerialize>(&'a self) -> impl Fn(&'a T) -> &'a dyn Fn(&mut W) -> Result<(), ProgramError> { move |v| self.alloc( move |out| { match v.serialize(out) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}})}"
-  ; remap <! @ser_data_account !> "fn ser_data_account<T : BorshSerialize>(&'a self) ->  impl Fn(solana_program::account_info::AccountInfo<'a>) -> &'a dyn Fn(T) -> Result<(), ProgramError> { move |acc| self.alloc( move |v| { match v.serialize(&mut &mut acc.try_borrow_mut_data()?[..]) { Ok(val) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}})}"
+  ; remap <! @ser_data_account !> "fn ser_data_account<T : BorshSerialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a T) -> &'a dyn Fn(&'a AccountInfo<'a>) -> Result<(), ProgramError> { move |_| { self.alloc( move |v| self.alloc( move |acc| { match (*v).serialize(&mut &mut (*acc).data.borrow_mut()[..]) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}}))}}
+"
   ] 
 .
+
+Definition remap_account_operations : list (kername * string) :=
+  [
+    remap <! @get_account_address !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> Pubkey { self.alloc(move |acc| *acc.key) }";
+    remap <! @get_account_state !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> std::rc::Rc<std::cell::RefCell<&'a mut [u8]>> { self.alloc(move |acc| acc.data) }";
+    remap <! @get_account_balance !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> std::cell::RefCell<&'a mut u64> { self.alloc(move |acc| *acc.lamports) }";
+    remap <! @get_account_owner_address !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> Pubkey { self.alloc(move |acc| *acc.owner) }";
+    remap <! @get_account_is_signer !> "";
+    remap <! @get_account_is_writable !> "";
+    remap <! @get_account_is_executable !> ""
+  ].
 
 Definition remap_inline_bool_ops := Eval compute in
       [ remap <%% andb %%> "__andb!"
@@ -173,19 +183,13 @@ Definition remap_blockchain_inductives : list (inductive * remapped_inductive) :
     (<! @WrappedActionBody !>, remap_WrappedActionBody);
     (<! @SpecialCallBody !>, remap_SpecialCallBody); 
     (<! @ProgramError !>, remap_ProgramError)
-(*    ; (<! @IteratorWrapper !>, remap_IteratorWrapper) *)
-(*    ; (<! @AccountInformation !>, remap_AccountInformation) *)
   ].
 
 
 Definition ignored_concert :=
   Eval compute in 
     [
-(*       <%% @Execution.Monads.bind %%> *)
-(*     ; <%% @Execution.Monads.ret %%> *)
       <%% @Monads.Monad %%>
-(*     ; <%% @Execution.ResultMonad.Monad_result %%> *)
-(*     ; <%% @Execution.ProgramError.Monad_result_error %%> *)
     ; <%% @AccountInformation %%>
     ; <%% @SerializedValue %%>
     ; <%% @Serializable %%>
@@ -213,6 +217,60 @@ End SolanaRemap.
 
 Module SolanaPreamble.
 
+(* Definition convert_special_action (contract_name : string) : string :=
+  <$
+"fn convert_special_action<'a>(to_account: &AccountInfo<'a>, body: &SpecialCallBody<'a>) -> Result<(), ProgramError> {";
+"  let cbody =";
+"    if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
+"        let (pda, _nonce) = Pubkey::find_program_address(&[b""" ++ contract_name ++ """], c_program_id);";
+"";
+"        let owner_change_ix = spl_token::instruction::set_authority(";
+"            to_account.key,"; (* Token Program Id *)
+"            owned_account.key,"; (* Account which ownership will be changed *)
+"            Some(&pda),";
+"            spl_token::instruction::AuthorityType::AccountOwner,";
+"            old_owner.key,"; (* Account current owner *)
+"            &[&old_owner.key],";
+"        )?;";
+"";
+"        invoke(";
+"            &owner_change_ix,";
+"            &[";
+"                owned_account.clone(),";
+"                old_owner.clone(),";
+"                to_account.clone(),";
+"            ],";
+"        )?;";
+"    } else if let SpecialCallBody:: CheckRentExempt(account_checked) = body {";
+"        let rent = &Rent::from_account_info(to_account)?;";
+"            if !rent.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
+"                return Err(ProcessError::Error.into())";
+"            }";
+"    } else {";
+"        return Err(ProcessError::ConvertActions.into())";
+"    };";
+"  Ok(())";
+"}" $>.
+ *)
+(*   Definition convert_actions : string :=
+  <$
+"fn convert_action(act: &ActionBody) -> Result<(), ProgramError> {";
+"  let cact =";
+"      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
+"          if **donator_account.try_borrow_mut_lamports()? >= *amount {";
+"              **receiver_account.try_borrow_mut_lamports()? += amount;";
+"              **donator_account.try_borrow_mut_lamports()? -= amount;";
+"          } else {";
+"              return Err(ProcessError::Error.into())";
+"          };"; 
+"      } else if let ActionBody::SpecialCall(to, body) = act {";
+"          convert_special_action(to, body);";
+"      } else {";
+"          return Err(ProcessError::ConvertActions.into())";
+"      };";
+"      Ok(())";
+"}" $>.
+ *)
 Instance solana_extract_preamble : Preamble :=
 {| top_preamble := [
 "#![allow(dead_code)]";
@@ -221,22 +279,20 @@ Instance solana_extract_preamble : Preamble :=
 "#![allow(unused_variables)]";
 "";
 "use solana_program::{";
-"  account_info::{next_account_info, AccountInfo},";
+"  account_info::AccountInfo,";
 "  clock::Clock,";
 "  entrypoint,";
 "  entrypoint::ProgramResult,";
-"  msg,";
 "  program_error::ProgramError,";
 "  pubkey::Pubkey,";
 "  rent::Rent,";
 "  sysvar::Sysvar,";
-"  program::{invoke, invoke_signed},";
+"  program::invoke,";
 "};";
 "use borsh::{BorshSerialize, BorshDeserialize};";
-"use thiserror::Error;";
-"use concert_std::{ActionBody, SpecialCallBody, ConCertDeserial, ConCertSerial, SerializedValue};";
+"use concert_std::{ActionBody, SpecialCallBody};";
 "use core::marker::PhantomData;";
-"use immutable_map::TreeMap;"; 
+(* "use immutable_map::TreeMap;";  *)
 "use std::slice::Iter;";
 ""; 
 "fn __nat_succ(x: u64) -> u64 {";
@@ -346,7 +402,9 @@ Instance solana_extract_preamble : Preamble :=
 "    fn from(e: ProcessError) -> Self {";
 "        ProgramError::Custom(e as u32)";
 "    }";
-"}"
+"}";
+""
+(* "type AccountInformation<'a> = solana_program::account_info::AccountInfo<'a>;" *)
 ];
 program_preamble := [
 "fn alloc<T>(&'a self, t: T) -> &'a T {";
@@ -355,6 +413,57 @@ program_preamble := [
 "";
 "fn closure<TArg, TRet>(&'a self, F: impl Fn(TArg) -> TRet + 'a) -> &'a dyn Fn(TArg) -> TRet {";
 "  self.__alloc.alloc(F)";
+"}";
+"";
+"";
+"fn convert_special_action(&'a self, to_account: &AccountInfo<'a>, body: &SpecialCallBody<'a>) -> Result<(), ProgramError> {";
+"  let cbody =";
+"    if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
+"        let (pda, _nonce) = Pubkey::find_program_address(&[b""contract""], &self.__program_id);";
+"";
+"        let owner_change_ix = spl_token::instruction::set_authority(";
+"            to_account.key,"; (* Token Program Id *)
+"            owned_account.key,"; (* Account which ownership will be changed *)
+"            Some(&pda),";
+"            spl_token::instruction::AuthorityType::AccountOwner,";
+"            old_owner.key,"; (* Account current owner *)
+"            &[&old_owner.key],";
+"        )?;";
+"";
+"        invoke(";
+"            &owner_change_ix,";
+"            &[";
+"                owned_account.clone(),";
+"                old_owner.clone(),";
+"                to_account.clone(),";
+"            ],";
+"        )?;";
+"    } else if let SpecialCallBody:: CheckRentExempt(account_checked) = body {";
+"        let rent = &Rent::from_account_info(to_account)?;";
+"            if !rent.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
+"                return Err(ProcessError::Error.into())";
+"            }";
+"    } else {";
+"        return Err(ProcessError::ConvertActions.into())";
+"    };";
+"  Ok(())";
+"}";
+"";
+"fn convert_action(&'a self, act: &ActionBody<'a>) -> Result<(), ProgramError> {";
+"  let cact =";
+"      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
+"          if **donator_account.try_borrow_mut_lamports()? >= *amount {";
+"              **receiver_account.try_borrow_mut_lamports()? += amount;";
+"              **donator_account.try_borrow_mut_lamports()? -= amount;";
+"          } else {";
+"              return Err(ProcessError::Error.into())";
+"          };"; 
+"      } else if let ActionBody::SpecialCall(to, body) = act {";
+"          return self.convert_special_action(to, body)";
+"      } else {";
+"          return Err(ProcessError::ConvertActions.into())";
+"      };";
+"      Ok(())";
 "}" ] |}.
 
 End SolanaPreamble.
@@ -396,6 +505,8 @@ Section SolanaPrinting.
 
   Context `{RustPrintConfig}.
 
+  
+
   Definition extract_lines
              (seeds : KernameSet.t)
              (Σ : global_env)
@@ -427,7 +538,7 @@ Section SolanaPrinting.
 
   Definition process_instruction_wrapper (process_name : kername) := 
     <$
-      "const c_program_id : &&Pubkey = &&Pubkey::new_unique();";
+      "const c_program_id : &Pubkey = &Pubkey::new_unique();";
       "";
       "fn process_instruction (";
       "    program_id: &Pubkey,";
@@ -448,7 +559,7 @@ Section SolanaPrinting.
       "            Clock::get().unwrap().unix_timestamp as u64,";
       "            0 // No finalized height";
       "        );";
-      "    *c_program_id = program_id;";
+      "    *c_program_id = *program_id;";
       "    let res = prg." ++ RustExtract.const_global_ident_of_kername process_name ++ "(&cchain, accounts, msg);";
       "    res";
       "}" ;
@@ -457,59 +568,7 @@ Section SolanaPrinting.
   Definition list_name : string :=
     RustExtract.ty_const_global_ident_of_kername <%% list %%>.
 
-  Definition convert_special_action (contract_name : string) : string :=
-  <$
-"fn convert_special_action<'a>(to_account: &AccountInfo<'a>, body: &SpecialCallBody<'a>) -> Result<(), ProgramError> {";
-"  let cbody =";
-"    if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
-"        let (pda, _nonce) = Pubkey::find_program_address(&[b""" ++ contract_name ++ """], c_program_id);";
-"";
-"        let owner_change_ix = spl_token::instruction::set_authority(";
-"            to_account.key,"; (* Token Program Id *)
-"            owned_account.key,"; (* Account which ownership will be changed *)
-"            Some(&pda),";
-"            spl_token::instruction::AuthorityType::AccountOwner,";
-"            old_owner.key,"; (* Account current owner *)
-"            &[&old_owner.key],";
-"        )?;";
-"";
-"        invoke(";
-"            &owner_change_ix,";
-"            &[";
-"                owned_account.clone(),";
-"                old_owner.clone(),";
-"                to_account.clone(),";
-"            ],";
-"        )?;";
-"    } else if let SpecialCallBody:: CheckRentExempt(account_checked) = body {";
-"        let rent = &Rent::from_account_info(to_account)?;";
-"            if !rent.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
-"                return Err(ProcessError::Error.into())";
-"            }";
-"    } else {";
-"        return Err(ProcessError::ConvertActions.into())";
-"    };";
-"  Ok(())";
-"}" $>.
 
-  Definition convert_actions : string :=
-  <$
-"fn convert_action(act: &ActionBody) -> Result<(), ProgramError> {";
-"  let cact =";
-"      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
-"          if **donator_account.try_borrow_mut_lamports()? >= *amount {";
-"              **receiver_account.try_borrow_mut_lamports()? += amount;";
-"              **donator_account.try_borrow_mut_lamports()? -= amount;";
-"          } else {";
-"              return Err(ProcessError::Error.into())";
-"          };"; 
-"      } else if let ActionBody::SpecialCall(to, body) = act {";
-"          convert_special_action(to, body);";
-"      } else {";
-"          return Err(ProcessError::ConvertActions.into())";
-"      };";
-"      Ok(())";
-"}" $>.
 
 Definition print_lines (lines : list string) : TemplateMonad unit :=
     monad_iter tmMsg lines.
@@ -536,7 +595,7 @@ Definition solana_extraction
   | Ok lines =>
     let process_wrapper := process_instruction_wrapper process_nm in
     let custom_errors := custom_errors_wrapper m.(solana_contract_name) in
-    print_lines (lines ++ [(* ""; custom_errors; *) ""; (convert_special_action m.(solana_contract_name)); ""; convert_actions; ""; process_wrapper])
+    print_lines (lines ++ [(* ""; custom_errors; ""; (convert_special_action m.(solana_contract_name)); ""; convert_actions; ""; *) process_wrapper])
   | Err e => tmFail e
   end. 
 
