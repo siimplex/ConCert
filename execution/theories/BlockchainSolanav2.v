@@ -78,14 +78,15 @@ Record Chain :=
   }.
 
 
+
 Record AccountInformation :=
   build_account {  
     account_address : Address;       (* Account address *)
-    account_state : SerializedValue; (* Account data *)
-    account_balance : Amount;        (* Account balance *)
-    account_owner_address : Address; (* Account owner address *)
     account_is_signer : bool;        (* Has the account signed the transaction *)
     account_is_writable : bool;      (* Can the account be written to *)
+    account_balance : Amount;        (* Account balance *)
+    account_state : SerializedValue; (* Account data *)
+    account_owner_address : Address; (* Account owner address *)
     account_is_executable : bool;    (* Is the account a program *)
   }.
 
@@ -94,11 +95,11 @@ MetaCoq Run (make_setters AccountInformation).
 Class AccountGetters :=
   build_account_getters {
     get_account_address : AccountInformation -> Address;       (* Account address *)
-    get_account_state : AccountInformation -> SerializedValue; (* Account data *)
-    get_account_balance : AccountInformation -> Amount;        (* Account balance *)
-    get_account_owner_address : AccountInformation -> Address; (* Account owner address *)
-    get_account_is_signer : AccountInformation -> bool;        (* Has the account signed the transaction *)
     get_account_is_writable : AccountInformation -> bool;      (* Can the account be written to *)
+    get_account_is_signer : AccountInformation -> bool;        (* Has the account signed the transaction *)
+    get_account_balance : AccountInformation -> Amount;        (* Account balance *)
+    get_account_state : AccountInformation -> SerializedValue; (* Account data *)
+    get_account_owner_address : AccountInformation -> Address; (* Account owner address *)
     get_account_is_executable : AccountInformation -> bool;    (* Is the account a program *)
   }.
 
@@ -205,7 +206,7 @@ Record Contract
       SliceAccountInformation ->
       option Msg ->
       result unit ProgramError;
-  }.
+  }.  
 
 Global Arguments process {_ _ _ _}.
 Global Arguments build_contract {_ _ _ _}.
@@ -395,6 +396,7 @@ Definition set_account_owner
 Definition set_contract_state
            (addr : Address) (state : SerializedValue) (env : Environment) :=
   env<|env_contract_states ::= set_chain_contract_state addr state|>.
+  
 
 (* set_chain_contract_state updates a map (function) by returning a
    new map (function).  If this function is immediately applied to a
@@ -613,7 +615,7 @@ Definition eval_from : Address :=
 
 Definition eval_to : Address :=
   match eval with
-  | eval_transfer _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _ 
+  | eval_transfer _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _
   | eval_special_call _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _ _
   | eval_deploy _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
   | eval_call _ _ to _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => to
@@ -621,7 +623,7 @@ Definition eval_to : Address :=
 
 Definition eval_amount : Amount :=
   match eval with
-  | eval_transfer _ _ _ _ _ _ amount _ _ _ _ _ _ _ _ _ 
+  | eval_transfer _ _ _ _ _ _ amount _ _ _ _ _ _ _ _ _
   | eval_special_call _ _ _ _ _ _ _ amount _ _ _ _ _ _ _ _ _
   | eval_deploy _ _ _ _ _ _ amount _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
   | eval_call _ _ _ _ _ _ amount _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ =>  amount
@@ -858,7 +860,6 @@ Inductive TxBody :=
   | tx_deploy (wc : WeakContract)
   | tx_call (msg : option SerializedValue)
   | tx_special_call (body : SpecialCallBody).
-(*   | tx_mult_body (head : TxBody) (tail : TxBody). (* Used for multiple instructions/actions in an transaction *) *)
 
 Record Tx :=
   build_tx {
@@ -1073,6 +1074,17 @@ Ltac destruct_special_body_eval :=
   match goal with
   | [body_eval: SpecialCallBodyEvaluation _ _ _ _ |- _] => destruct body_eval
   end.
+
+Lemma account_state_updated_after_process {env} (accounts : SliceAccountInformation) (contract : WeakContract) (acc : AccountInformation) msg :
+  forall accs_tail prev_state,
+  accounts = acc :: accs_tail ->
+  env_contract_states env (account_address acc) = prev_state ->
+  wc_process contract env accounts msg = Ok tt ->
+  exists new_state, env_contract_states env (account_address acc) = new_state.
+Proof.
+  (* intros accounts_remainder prev_state accounts_has_acc acc_has_state process_some. *)
+  easy.  
+Qed.
 
 Lemma contract_addr_format {to} (addr : Address) (wc : WeakContract) :
   reachable to ->
@@ -1314,7 +1326,7 @@ Proof.
   { assert (deployment_info trace caddr <> None) by congruence.
     eapply (deployment_info_addr_format); eassumption. }
 
-  clear depinfo_eq calls_eq depinfo special_calls_eq msgs.
+  clear depinfo_eq calls_eq depinfo special_calls_eq msgs. 
 
   remember empty_state; induction trace as [|? ? ? ? IH]; subst; cbn in *;
     try tauto.
@@ -2175,25 +2187,25 @@ Class ChainBuilderType :=
 Global Coercion builder_type : ChainBuilderType >-> Sortclass.
 Global Coercion builder_env : builder_type >-> Environment.
 
-Class IteratorWrapper :=
+(* Class IteratorWrapper :=
   build_iterator {
     it_content : SliceAccountInformation;
-  }.
+  }. *)
 
 Class ChainHelpers :=
   build_helpers {
-    new_iter : SliceAccountInformation -> IteratorWrapper;
-    transform_iter : IteratorWrapper -> IteratorWrapper;
-    iter_next : IteratorWrapper -> result AccountInformation ProgramError;
+(*     new_iter : SliceAccountInformation -> IteratorWrapper; *)
+(*     transform_iter atorWrapper -> IteratorWrapper; *)
+    next_account : SliceAccountInformation -> Z -> result AccountInformation ProgramError;
     deser_data (A : Type) : SerializedValue -> result A ProgramError;
     deser_data_account (A : Type) : AccountInformation -> result A ProgramError;
     ser_data {A : Type} : A -> SerializedValue;
     ser_data_account {A : Type} : A -> AccountInformation -> result unit ProgramError;
+    exec_act : WrappedActionBody -> result unit ProgramError;
   }.
 
-Global Opaque new_iter transform_iter iter_next deser_data deser_data_account ser_data ser_data_account.
+Global Opaque (* new_iter transform_iter *) next_account deser_data deser_data_account ser_data ser_data_account exec_act.
 
-(*TODO : Lemmas/Theorems that describe an iterator behaviour *)
 
 End Blockchain.
 

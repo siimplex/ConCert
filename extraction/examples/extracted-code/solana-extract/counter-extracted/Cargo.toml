@@ -5,13 +5,17 @@ edition = "2018"
 
 [dependencies]
 concert-std = { path = "../concert-std" }
-bumpalo = "3.5.0"
+bumpalo = {version = "3.11.0", features = ["collections"] }  
 immutable-map = "0.1.2"
 solana-program = "1.10.8"
 spl-token = "3.3.0"
 borsh = "0.9.3"
 borsh-derive = "0.9.3"
 thiserror = "1.0"
+
+[features]
+default = ["collections"]
+collections = []
 
 [lib]
 crate-type = ["rlib"]

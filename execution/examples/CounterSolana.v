@@ -54,18 +54,20 @@ Section CounterSolana.
 
 (** Since a contract is essentially a state transition function, we isolate
       the functionality corresponding to each kind of message into step functions *)
-  Definition counter_init (accounts : SliceAccountInformation) (init_value : Z)
-    : result unit ProgramError :=
-    let it := new_iter accounts in
-    do counter_owner_account <- iter_next it; 
-    do counter_account <- iter_next it;
+  Definition counter_init (owner_address : Address) (init_value : Z)
+    : State :=
+     {| count := init_value;
+        active := false;
+         owner := owner_address |}.
+    (* let index:= 0 in
+    do counter_owner_account <- next_account accounts index; 
+    let index := 1 in
+    do counter_account <- next_account accounts index;
         
     do counter_account_deser_state <- deser_data_account State counter_account;
     
     let initialized_state := (build_state init_value true (get_account_address counter_owner_account)) in
-    do ser_data_account initialized_state counter_account;
-    
-    Ok tt.
+    ser_data_account initialized_state counter_account *)
 
  Definition increment (n : Z) (st : State) : State :=
     {| count := st.(count) + n ;
@@ -80,15 +82,17 @@ Section CounterSolana.
   (** The main functionality of the contract.
       Dispatches on a message, validates the input and calls the step functions *)
   Definition counter (accounts : SliceAccountInformation) (inst : ContractInstruction) : result unit ProgramError :=
-    let it := new_iter accounts in 
-    do counter_account <- iter_next it;
+    let index := 0 in 
+    do counter_account <- next_account accounts index;
+    let index := 1 in 
+    do counter_owner_account <- next_account accounts index;
 
     match  deser_data_account State counter_account with 
     | Ok state =>
        let new_state := match inst with
-                          | Inc i => if (0 <? i) then Some (increment i state) else None
-                          | Dec i => if (0 <? i) then Some (decrement i state) else None
-                          | _     => Some state
+                          | Init i => Some (counter_init (get_account_owner_address counter_owner_account) i)
+                          | Inc i  => if (0 <? i) then Some (increment i state) else None
+                          | Dec i  => if (0 <? i) then Some (decrement i state) else None
                         end in
        match new_state with
        | Some st => 
@@ -96,11 +100,7 @@ Section CounterSolana.
          Ok tt
        | None => Err InvalidAccountData
        end
-    | Err _ => 
-        match inst with
-          | Init i => counter_init accounts i
-          | _ => Err InvalidInstructionData
-        end
+    | Err e => Err e
      end.
   
 (** The "entry point" of the contract. Dispatches on a message and calls [counter]. *)
@@ -116,8 +116,8 @@ Section CounterSolana.
     build_contract counter_process.
 
 End CounterSolana.
-
-(* (** ** Functional properties *)
+(* 
+(** ** Functional properties *)
 Section FunctionalProperties.
 
   Import Lia.
@@ -125,31 +125,38 @@ Section FunctionalProperties.
   Context {BaseTypes : ChainBase}.
   Context {AccountGetters : AccountGetters}.
   Context {HelperTypes : ChainHelpers}.
+  
+  Context {Env : Environment}.
 
   (** *** Specification *)
 
   (** If the counter call succeeds and returns [next_state] then,
       depending on a message, it either increments or decrements
       by the number sent in the corresponding message *)
-  Lemma counter_correct {accounts counter_acc prev_state next_state inst} :
-  accounts = counter_acc :: _ ->
-  counter_acc.(account_state) = prev_state ->
-  counter accounts inst = Ok tt ->
-  counter_acc.(account_state) = next_state ->
-  match inst with
-  | Inc n => prev_state.(count) < next_state.(count)
-             /\ next_state.(count) = prev_state.(count) + n
-  | Dec n => prev_state.(count) > next_state.(count)
-             /\ next_state.(count) = prev_state.(count) - n
-  | Init n => next_state.(count) = n
-  end.
-  Proof.
-    intros H.
-    all : destruct msg;cbn in *;unfold increment,decrement in *.
-    all : destruct (0 <? i) eqn:Hz;inversion H;cbn in *.
+  Lemma counter_correct {accounts other_accs counter_acc prev_state next_state inst} :
+    accounts = counter_acc :: other_accs ->
+    contract_state Env (account_address counter_acc) = Some prev_state ->
+    counter accounts inst = Ok tt ->
+    contract_state Env (account_address counter_acc) = Some next_state ->
+    match inst with
+    | Inc n => prev_state.(count) < next_state.(count)
+               /\ next_state.(count) = prev_state.(count) + n
+    | Dec n => prev_state.(count) > next_state.(count)
+               /\ next_state.(count) = prev_state.(count) - n
+    | Init n => next_state.(count) = n
+    end.
+  Proof. 
+    intros account_list counter_prev process_ok counter_next.
+    all : destruct inst;cbn in *;unfold increment,decrement in *.
+(*     + cbn in *. apply account_state_updated_after_process. *)
+    all: swap 1 2.
+    + destruct (0 <? i) eqn:Hz. destruct process_ok; split; auto.
+(*     all : destruct (0 <? i) eqn:Hz;inversion H;cbn in *. *)
+      - inversion.
     all : rewrite Z.ltb_lt in *;split;auto;lia.
   Qed.
 
+(* account_state_updated_after_process *)
 End FunctionalProperties.
 
 (** ** Safety properties *)
