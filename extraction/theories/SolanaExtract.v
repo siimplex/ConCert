@@ -45,12 +45,13 @@ Definition remap_blockchain_consts : list (kername * string) :=
      https://github.com/rust-lang/rust/issues/62223 *)
    ; remap <! @address_eqb !>
           "fn ##name##(&'a self) -> impl Fn(solana_program::pubkey::Pubkey) -> &'a dyn Fn(solana_program::pubkey::Pubkey) -> bool { move |a| self.alloc(move |b| a == b) }" 
-   ; remap <! @SliceAccountInformation !> "type ##name##<'a> = &'a[AccountInformation<'a>];"
+   ; remap <! @SliceAccountInformation !> "type ##name##<'a> = &'a[AccountInfo<'a>];"
   ].
 
 Definition remap_aux_consts : list (kername * string) := 
-  [ remap <! @new_iter !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }"
-  ; remap <! @iter_next !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a mut Iterator<Item = &AccountInfo<'a>>) -> std::result::Result<&'a AccountInfo<'a>, ProgramError> { self.alloc( move |iter| iter.next().ok_or(ProgramError::NotEnoughAccountKeys)) }"
+  [ 
+(*   remap <! @new_iter !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }";  *)
+  remap <! @next_account !> "fn ##name##<'t>(&'t self) -> impl (Fn(SliceAccountInformation<'a>) -> &'t dyn Fn(i64) -> Result<&'a AccountInfo<'a>, ProgramError>) + 't where 'a: 't, { move |slc: SliceAccountInformation| { self.alloc(move |index| { slc.get(index as usize).ok_or(ProgramError::AccountBorrowFailed) }) }}"
   (* Using ConCert Library *) 
    (* ; remap <! @deser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[u8]) -> Result<A, ProgramError> { self.alloc(move |v| { let res = match <_>::concert_deserial(&mut v, &self.__alloc) { Ok(m) => m, Err(_) => return Err(ProcessError::DeserialMsg.into()) }; res })}"
   ; remap <! @ser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(SerializedValue) -> &'a [u8] { self.alloc(move |v| { let res; v.concert_serial(&mut res); res })}" *)
@@ -58,17 +59,17 @@ Definition remap_aux_consts : list (kername * string) :=
   ; remap <! @deser_data_account !> "fn deser_data_account(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a AccountInfo) -> Result<State<'a>, ProgramError> { move |_| { self.alloc(move |v| { match State::try_from_slice(&v.data.borrow()) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}}"
   ; remap <! @deser_data !> "fn ##name##<T : BorshDeserialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(std::rc::Rc<std::cell::RefCell<&'a mut [u8]>>) -> Result<T, ProgramError> { move |_| { self.alloc(move |v| { match T::try_from_slice(*v.borrow()) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}}"
   ; remap <! @ser_data !> "fn ##name##<W : std::io::Write, T : BorshSerialize>(&'a self) -> impl Fn(&'a T) -> &'a dyn Fn(&mut W) -> Result<(), ProgramError> { move |v| self.alloc( move |out| { match v.serialize(out) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}})}"
-  ; remap <! @ser_data_account !> "fn ser_data_account<T : BorshSerialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a T) -> &'a dyn Fn(&'a AccountInfo<'a>) -> Result<(), ProgramError> { move |_| { self.alloc( move |v| self.alloc( move |acc| { match (*v).serialize(&mut &mut (*acc).data.borrow_mut()[..]) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}}))}}
+  ; remap <! @ser_data_account !> "fn ser_data_account<'ai, T : BorshSerialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a T) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Result<(), ProgramError> { move |_| { self.alloc( move |v| self.alloc( move |acc| { match (*v).serialize(&mut &mut (*acc).data.borrow_mut()[..]) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}}))}}
 "
   ] 
 .
 
 Definition remap_account_operations : list (kername * string) :=
   [
-    remap <! @get_account_address !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> Pubkey { self.alloc(move |acc| *acc.key) }";
-    remap <! @get_account_state !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> std::rc::Rc<std::cell::RefCell<&'a mut [u8]>> { self.alloc(move |acc| acc.data) }";
-    remap <! @get_account_balance !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> std::cell::RefCell<&'a mut u64> { self.alloc(move |acc| *acc.lamports) }";
-    remap <! @get_account_owner_address !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> Pubkey { self.alloc(move |acc| *acc.owner) }";
+    remap <! @get_account_address !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Pubkey { self.alloc(move |acc| *acc.key) }";
+    remap <! @get_account_state !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> std::rc::Rc<std::cell::RefCell<&'a mut [u8]>> { self.alloc(move |acc| acc.data) }";
+    remap <! @get_account_balance !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> std::cell::RefCell<&'a mut u64> { self.alloc(move |acc| *acc.lamports) }";
+    remap <! @get_account_owner_address !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Pubkey { self.alloc(move |acc| *acc.owner) }";
     remap <! @get_account_is_signer !> "";
     remap <! @get_account_is_writable !> "";
     remap <! @get_account_is_executable !> ""
@@ -407,7 +408,7 @@ Instance solana_extract_preamble : Preamble :=
 (* "type AccountInformation<'a> = solana_program::account_info::AccountInfo<'a>;" *)
 ];
 program_preamble := [
-"fn alloc<T>(&'a self, t: T) -> &'a T {";
+"fn alloc<T>(&self, t: T) -> & T {";
 "  self.__alloc.alloc(t)";
 "}";
 "";
@@ -505,8 +506,6 @@ Section SolanaPrinting.
 
   Context `{RustPrintConfig}.
 
-  
-
   Definition extract_lines
              (seeds : KernameSet.t)
              (Σ : global_env)
@@ -538,17 +537,15 @@ Section SolanaPrinting.
 
   Definition process_instruction_wrapper (process_name : kername) := 
     <$
-      "const c_program_id : &Pubkey = &Pubkey::new_unique();";
-      "";
-      "fn process_instruction (";
+      "fn process_instruction<'ai>(";
       "    program_id: &Pubkey,";
-      "    accounts: &[AccountInfo],";
+      "    accounts: SliceAccountInformation<'ai>,";
       "    instruction_data: &[u8],";
       ") -> ProgramResult {";
-      "    let prg = Program::new();";
+      "    let prg = Program::new(*program_id);";
       (* Probably no needed to deserialize the message like this *)
-      "    let msg =";
-      "        match <_>::concert_deserial(&mut instruction_data, &prg.__alloc) {";
+      "    let msg : ContractInstruction = ";
+      "        match <ContractInstruction>::deserialize(&mut instruction_data) {";
       "            Ok(m) => m,";
       "            Err(_) => return Err(ProcessError::DeserialMsg.into())";
       "        };";
@@ -559,9 +556,7 @@ Section SolanaPrinting.
       "            Clock::get().unwrap().unix_timestamp as u64,";
       "            0 // No finalized height";
       "        );";
-      "    *c_program_id = *program_id;";
-      "    let res = prg." ++ RustExtract.const_global_ident_of_kername process_name ++ "(&cchain, accounts, msg);";
-      "    res";
+      "    prg." ++ RustExtract.const_global_ident_of_kername process_name ++ "(&cchain, accounts, Some(&msg))";
       "}" ;
       "entrypoint!(process_instruction);" $>.
 
