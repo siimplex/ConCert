@@ -151,6 +151,11 @@ Proof. easy. Qed.
 Definition SliceAccountInformation := list AccountInformation.
 Global Opaque SliceAccountInformation.
 
+Inductive SpecialCallBody :=
+       | transfer_ownership (old_owner : AccountInformation) (account : AccountInformation) (new_owner : AccountInformation)
+       | check_rent_exempt (account : AccountInformation)
+       | check_token_owner (account : AccountInformation).
+
 (* Operations that a contract can return or that a user can use
 to interact with a chain. *)
 (* Currently WeakContract is described as a single function, in the future it may be needed to add more *)
@@ -159,10 +164,10 @@ Inductive ActionBody :=
   | act_call (to : Address) (msg : SerializedValue) 
   | act_deploy (c : WeakContract)
   | act_special_call (to : Address) (body : SpecialCallBody)
-    with SpecialCallBody :=
+(*     with SpecialCallBody :=
        | transfer_ownership (old_owner : AccountInformation) (account : AccountInformation) (new_owner : AccountInformation)
        | check_rent_exempt (account : AccountInformation)
-       | check_token_owner (account : AccountInformation)
+       | check_token_owner (account : AccountInformation) *)
     with WeakContract :=
        | build_weak_contract
            (process :
@@ -645,6 +650,13 @@ Lemma account_owner_post (addr owner: Address) :
   else env_account_owners post addr =
        env_account_owners pre addr.
 Proof.
+  intros. destruct_address_eq. all: swap 1 2.
+  +  destruct eval; cbn. destruct e;  rewrite_environment_equiv; cbn; rewrite_environment_equiv; easy.
+    - rewrite_environment_equiv; easy.
+    - rewrite_environment_equiv; easy.
+    - destruct s; cbn; rewrite_environment_equiv.
+      ++ cbn. destruct n. cbn. destruct o.
+        +++ cbn.
 Admitted.
 
 Lemma account_balance_post (addr : Address) :
@@ -870,7 +882,6 @@ Record Tx :=
       tx_body : TxBody;
   }.
 
-(* J> DONE: Removed setup in this definition and adjusted some arguments *)
 Definition eval_tx {pre : Environment} {act : Action}
                    {post : Environment} {new_acts : list Action}
                    (step : ActionEvaluation pre act post new_acts) : Tx :=
@@ -951,7 +962,6 @@ Fixpoint incoming_calls
   | _ => Some []
   end.
 
-(* J> DONE: Modified most of the definitions here (setup and other arguments). *)
 Record DeploymentInfo :=
   build_deployment_info
   {
@@ -1138,6 +1148,8 @@ Proof.
   auto.
 Qed.
 
+Print ChainTrace.
+
 Local Open Scope address.
 (* This next lemma shows that any for a full chain trace,
 the ending state will not have any queued actions from
@@ -1201,7 +1213,7 @@ Local Hint Unfold reachable : core.
 (* With this lemma proven, we can show that the (perhaps seemingly stronger)
 fact, that an undeployed contract has no outgoing txs, holds. *)
 Lemma undeployed_contract_no_out_txs
-      contract state (trace : ChainTrace empty_state state) :
+  contract state (trace : ChainTrace empty_state state) :
   address_is_contract contract = true ->
   env_contracts state contract = None ->
   outgoing_txs trace contract = [].
@@ -1531,35 +1543,6 @@ Proof.
     now rewrite_environment_equiv.
 Qed.
 
-(* J> Removed one of this lemmas and added wc_process_strong *)
-(* j> TODO: Try to add somehow setup in the message in this lemma *)
-(* Lemma wc_init_strong {Msg State : Type}
-          `{Serializable Msg}
-          `{Serializable State}
-          {contract : Contract Msg State }
-          {chain accounts msg new_state} :
-  wc_process (contract : WeakContract) chain accounts msg = Some (new_state, []) ->
-  exists msg_strong new_state_strong,
-    match msg_strong with
-    | Some msg_strong => msg >>= deserialize = Some msg_strong
-    | None => msg = None
-    end /\
-    serialize new_state_strong = new_state /\
-    Blockchain.process contract chain accounts None msg_strong = Some (new_state_strong, []).
-Proof.
-  intros process.
-  cbn in *.
-  exists (msg >>= deserialize).
-  destruct msg as [msg|]; cbn in *.
-  1: destruct (deserialize msg) as [msg_strong|];
-    cbn in *; try congruence.
-  all: destruct (Blockchain.process _ _ _ _ _)
-    as [[resp_state_strong resp_acts_strong]|] eqn:result_eq;
-    cbn in *; try congruence.
-  all: exists resp_state_strong.
-  all: inversion_clear process; auto.
-Qed. *)
-
 Lemma wc_process_strong {Msg State : Type}
           `{Serializable Msg}
           `{Serializable State}
@@ -1680,7 +1663,7 @@ Hint Constructors
      TagFacts TagAddBlock TagDeployment TagOutgoingAct
      TagNonrecursiveCall TagRecursiveCall TagPermuteQueue : core.
 
-(* TODO: Jesus nosso senhor *)
+(* TODO: Finish this proof *)
 Lemma contract_induction
       {Msg State (* Setup *) : Type}
       `{Serializable Msg}
@@ -2187,15 +2170,9 @@ Class ChainBuilderType :=
 Global Coercion builder_type : ChainBuilderType >-> Sortclass.
 Global Coercion builder_env : builder_type >-> Environment.
 
-(* Class IteratorWrapper :=
-  build_iterator {
-    it_content : SliceAccountInformation;
-  }. *)
 
 Class ChainHelpers :=
   build_helpers {
-(*     new_iter : SliceAccountInformation -> IteratorWrapper; *)
-(*     transform_iter atorWrapper -> IteratorWrapper; *)
     next_account : SliceAccountInformation -> Z -> result AccountInformation ProgramError;
     deser_data (A : Type) : SerializedValue -> result A ProgramError;
     deser_data_account (A : Type) : AccountInformation -> result A ProgramError;
@@ -2204,7 +2181,7 @@ Class ChainHelpers :=
     exec_act : WrappedActionBody -> result unit ProgramError;
   }.
 
-Global Opaque (* new_iter transform_iter *) next_account deser_data deser_data_account ser_data ser_data_account exec_act.
+Global Opaque next_account deser_data deser_data_account ser_data ser_data_account exec_act.
 
 
 End Blockchain.
@@ -2254,7 +2231,7 @@ Ltac rewrite_environment_equiv :=
   | [eq: EnvironmentEquiv _ _ |- _] => rewrite eq in *
   end.
 
-(* J> LTac not working *)
+(* Not working *)
 Local Ltac generalize_contract_statement_aux
       bstate caddr trace is_deployed (* Setup *) Msg State post :=
   let P := fresh "P" in

@@ -19,7 +19,6 @@ theories/Finite.v
 theories/InterContractCommunicationSolanav2.v
 #theories/InterContractCommunication.v
 #theories/LocalBlockchainSolanav2.v
-#theories/LocalBlockchainSolana.v
 #theories/LocalBlockchain.v
 theories/Monads.v
 theories/ProgramError.v

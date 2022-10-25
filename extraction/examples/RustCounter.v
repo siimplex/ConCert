@@ -10,7 +10,7 @@ From MetaCoq.Template Require Import All.
 
 Open Scope string.
 
-Definition COUNTER_MODULE1 : SolanaMod _ :=
+Definition COUNTER_MODULE_SOLANA : SolanaMod _ :=
   {| solana_contract_name := "Counter";
      solana_process := @ConCert.Execution.Examples.CounterSolana.counter_process;
      solana_extra := []; |}.
@@ -35,10 +35,11 @@ Definition should_inline kn :=
   || eq_kername <%% bool_rec %%> kn
   || eq_kername <%% bool_rect %%> kn.
 
+(* Redirect "examples/extracted-code/solana-extract/counter.rs" *)
 Redirect "/home/johnny/Documents/Tese/ConCert/extraction/examples/extracted-code/solana-extract/counterv2.rs"
 
 MetaCoq Run (solana_extraction
-               COUNTER_MODULE1
+               COUNTER_MODULE_SOLANA
                (SolanaRemap.build_remaps
                   (SolanaRemap.remap_arith ++ SolanaRemap.remap_blockchain_consts ++ SolanaRemap.remap_aux_consts ++ SolanaRemap.remap_account_operations)
                   []
@@ -46,7 +47,7 @@ MetaCoq Run (solana_extraction
                      ++ SolanaRemap.remap_std_types))
                should_inline).
 
-(* Redirect "/home/johnny/Documents/Tese/ConCert/extraction/examples/extracted-code/concordium-extract/counterv2.rs"
+(* Redirect "examples/extracted-code/concordium-extract/counterv2.rs"
 
 MetaCoq Run (concordium_extraction
                COUNTER_MODULE

@@ -300,7 +300,7 @@ Ltac rewrite_balance :=
     now rewrite <- new_to_balance_eq in *]
   end.
 
-(* J> TODO: Fix this proof *)
+(* TODO: Finish this proof *)
 (* For any reachable state and an action it is decidable if it is
     possible to evaluate the action in the state *)
 Open Scope Z_scope.
@@ -463,7 +463,6 @@ Proof.
       now right.
 Qed.
 
-(* wc_process and contract process are equivalent *)
 Lemma wc_process_to_process : forall {Msg State : Type}
                                     `{Serializable Msg}
                                     `{Serializable State}
@@ -473,14 +472,14 @@ Lemma wc_process_to_process : forall {Msg State : Type}
   wc_process contract chain accounts (Some ((@serialize Msg _) msg)) = result.
 Proof.
   split; intros process_some.
-  - cbn. Admitted. (* easy. 
-    rewrite !deserialize_serialize, process_some.
-  - apply wc_process_strong in process_some.
-    cbn in *.
+  - cbn. (* easy. *) 
+    rewrite !deserialize_serialize. cbn. rewrite process_some. destruct result; easy.
+  - cbn in *. (* apply wc_process_strong in process_some. *)
+(*     cbn in *. *)
     rewrite deserialize_serialize in process_some.
     cbn in *. destruct process_some.
-    destruct x; easy.
-Qed. *)
+    destruct (process contract chain accounts (Some msg)); easy.
+Qed.
 
 
 (* wc_init and contract init are equivalent *)
@@ -820,7 +819,7 @@ Proof.
     + (destruct_action_eval; try destruct_special_body_eval);
         try congruence; cbn in *; subst; rewrite queue in queue_prev; inversion queue_prev; subst.
       * destruct_address_eq.
-        (* J> TODO: fix this subgoal, the rest of this proof is working *)
+        (* TODO: finish this subgoal, the rest of this proof is working *)
         Admitted.
      (* -- rewrite deserialize_serialize.
         -- inversion new_acts_eq.

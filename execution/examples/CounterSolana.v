@@ -69,7 +69,7 @@ Section CounterSolana.
     let initialized_state := (build_state init_value true (get_account_address counter_owner_account)) in
     ser_data_account initialized_state counter_account *)
 
- Definition increment (n : Z) (st : State) : State :=
+(*  Definition increment (n : Z) (st : State) : State :=
     {| count := st.(count) + n ;
        active := true ;
        owner := st.(owner) |}.
@@ -77,7 +77,7 @@ Section CounterSolana.
   Definition decrement (n : Z) (st : State) : State :=
     {| count := st.(count) - n ;
        active := true ;
-       owner := st.(owner) |}.
+       owner := st.(owner) |}. *)
 
   (** The main functionality of the contract.
       Dispatches on a message, validates the input and calls the step functions *)
@@ -91,8 +91,8 @@ Section CounterSolana.
     | Ok state =>
        let new_state := match inst with
                           | Init i => Some (counter_init (get_account_owner_address counter_owner_account) i)
-                          | Inc i  => if (0 <? i) then Some (increment i state) else None
-                          | Dec i  => if (0 <? i) then Some (decrement i state) else None
+                          | Inc i  => if (0 <? i) then Some {| count := state.(count) + i; active := true; owner := state.(owner) |} else None
+                          | Dec i  => if (0 <? i) then Some {| count := state.(count) - i; active := true; owner := state.(owner) |} else None
                         end in
        match new_state with
        | Some st => 

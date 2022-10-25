@@ -50,29 +50,25 @@ Definition remap_blockchain_consts : list (kername * string) :=
 
 Definition remap_aux_consts : list (kername * string) := 
   [ 
-(*   remap <! @new_iter !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[A]) -> &mut Iter<'_, A> { self.alloc(move |l| &mut l.iter()) }";  *)
   remap <! @next_account !> "fn ##name##<'t>(&'t self) -> impl (Fn(SliceAccountInformation<'a>) -> &'t dyn Fn(i64) -> Result<&'a AccountInfo<'a>, ProgramError>) + 't where 'a: 't, { move |slc: SliceAccountInformation| { self.alloc(move |index| { slc.get(index as usize).ok_or(ProgramError::AccountBorrowFailed) }) }}"
-  (* Using ConCert Library *) 
-   (* ; remap <! @deser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(&[u8]) -> Result<A, ProgramError> { self.alloc(move |v| { let res = match <_>::concert_deserial(&mut v, &self.__alloc) { Ok(m) => m, Err(_) => return Err(ProcessError::DeserialMsg.into()) }; res })}"
-  ; remap <! @ser_data !> "fn ##name##<A>(&'a self) -> &'a dyn Fn(SerializedValue) -> &'a [u8] { self.alloc(move |v| { let res; v.concert_serial(&mut res); res })}" *)
 
   ; remap <! @deser_data_account !> "fn deser_data_account(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a AccountInfo) -> Result<State<'a>, ProgramError> { move |_| { self.alloc(move |v| { match State::try_from_slice(&v.data.borrow()) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}}"
   ; remap <! @deser_data !> "fn ##name##<T : BorshDeserialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(std::rc::Rc<std::cell::RefCell<&'a mut [u8]>>) -> Result<T, ProgramError> { move |_| { self.alloc(move |v| { match T::try_from_slice(*v.borrow()) { Ok(val) => Ok(val), Err(_) => Err(ProgramError::BorshIoError(String::from(""Deserialization error"")))}})}}"
   ; remap <! @ser_data !> "fn ##name##<W : std::io::Write, T : BorshSerialize>(&'a self) -> impl Fn(&'a T) -> &'a dyn Fn(&mut W) -> Result<(), ProgramError> { move |v| self.alloc( move |out| { match v.serialize(out) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}})}"
-  ; remap <! @ser_data_account !> "fn ser_data_account<'ai, T : BorshSerialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a T) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Result<(), ProgramError> { move |_| { self.alloc( move |v| self.alloc( move |acc| { match (*v).serialize(&mut &mut (*acc).data.borrow_mut()[..]) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}}))}}
-"
+  ; remap <! @ser_data_account !> "fn ser_data_account<'ai, T : BorshSerialize>(&'a self) -> impl Fn(()) -> &'a dyn Fn(&'a T) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Result<(), ProgramError> { move |_| { self.alloc( move |v| self.alloc( move |acc| { match (*v).serialize(&mut &mut (*acc).data.borrow_mut()[..]) { Ok(_) => Ok(()), Err(_) => Err(ProgramError::BorshIoError(String::from(""Serialization error"")))}}))}}"
+  ; remap <! @exec_act !> "fn ##name##(&'a self) -> &'a dyn Fn(ActionBody<'a>) -> Result<(), ProgramError> { self.alloc(move |act|self.convert_action(&act)) }"
   ] 
 .
 
 Definition remap_account_operations : list (kername * string) :=
   [
     remap <! @get_account_address !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Pubkey { self.alloc(move |acc| *acc.key) }";
-    remap <! @get_account_state !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> std::rc::Rc<std::cell::RefCell<&'a mut [u8]>> { self.alloc(move |acc| acc.data) }";
-    remap <! @get_account_balance !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> std::cell::RefCell<&'a mut u64> { self.alloc(move |acc| *acc.lamports) }";
+    remap <! @get_account_state !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> &std::rc::Rc<std::cell::RefCell<&'a mut [u8]>> { self.alloc(move |acc| &acc.data) }";
+    remap <! @get_account_balance !> "fn ##name##(&'a self) -> &'a dyn Fn(&'a AccountInfo<'a>) -> i64 { self.alloc(move |acc| **acc.lamports.borrow() as i64) }";
     remap <! @get_account_owner_address !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> Pubkey { self.alloc(move |acc| *acc.owner) }";
-    remap <! @get_account_is_signer !> "";
-    remap <! @get_account_is_writable !> "";
-    remap <! @get_account_is_executable !> ""
+    remap <! @get_account_is_signer !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> bool { self.alloc(move |acc| acc.is_signer) }";
+    remap <! @get_account_is_writable !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> bool { self.alloc(move |acc| acc.is_writable) }";
+    remap <! @get_account_is_executable !> "fn ##name##<'ai>(&'a self) -> &'a dyn Fn(&'ai AccountInfo<'ai>) -> bool { self.alloc(move |acc| acc.is_executable) }"
   ].
 
 Definition remap_inline_bool_ops := Eval compute in
@@ -147,12 +143,6 @@ Definition remap_SerializedValue : remapped_inductive :=
      re_ind_ctors := ["__SerializedValue__Is__Opaque"];
      re_ind_match := None |}.
 
-(* TODO: Delete this *)
-(* Definition remap_AccountInformation : remapped_inductive :=
-  {| re_ind_name := "&'a AccountInformation<'a>";
-     re_ind_ctors := ["__AccountInformation__Is__Opaque"];
-     re_ind_match := None |}. *)
-
 Definition remap_WrappedActionBody : remapped_inductive :=
   {| re_ind_name := "ActionBody<'a>";
      re_ind_ctors := ["ActionBody::Transfer"; "ActionBody::Call"; "__Deploy__Is__Not__Supported"; "ActionBody::SpecialCall"];
@@ -160,7 +150,7 @@ Definition remap_WrappedActionBody : remapped_inductive :=
 
 Definition remap_SpecialCallBody : remapped_inductive := 
   {| re_ind_name := "SpecialCallBody<'a>";
-     re_ind_ctors := ["SpecialCallBody::TransferOwnership"; "SpecialCallBody::CheckRentExempt"];  
+     re_ind_ctors := ["SpecialCallBody::TransferOwnership"; "SpecialCallBody::CheckRentExempt"; "SpecialCallBody::CheckTokenOwner"];  
      re_ind_match := None |}.
 
 Definition remap_ProgramError : remapped_inductive :=
@@ -172,11 +162,6 @@ Definition remap_ProgramError : remapped_inductive :=
     "ProgramError::MaxSeedLengthExceeded"; "ProgramError::InvalidSeeds"; "ProgramError::BorshIoError";
     "ProgramError::AccountNotRentExempt"; "ProgramError::UnsupportedSysvar"; "ProgramError::IllegalOwner";
     "ProgramError::MaxAccountsDataSizeExceeded"; "ProgramError::InvalidRealloc" ];
-     re_ind_match := None |}.
-
-Definition remap_IteratorWrapper : remapped_inductive :=
-  {| re_ind_name := "IteratorWrapper";
-     re_ind_ctors := ["IteratorWrapper::BuildIterator"];
      re_ind_match := None |}.
 
 Definition remap_blockchain_inductives : list (inductive * remapped_inductive) :=
@@ -218,60 +203,6 @@ End SolanaRemap.
 
 Module SolanaPreamble.
 
-(* Definition convert_special_action (contract_name : string) : string :=
-  <$
-"fn convert_special_action<'a>(to_account: &AccountInfo<'a>, body: &SpecialCallBody<'a>) -> Result<(), ProgramError> {";
-"  let cbody =";
-"    if let SpecialCallBody::TransferOwnership(old_owner, owned_account, new_owner) = body {";
-"        let (pda, _nonce) = Pubkey::find_program_address(&[b""" ++ contract_name ++ """], c_program_id);";
-"";
-"        let owner_change_ix = spl_token::instruction::set_authority(";
-"            to_account.key,"; (* Token Program Id *)
-"            owned_account.key,"; (* Account which ownership will be changed *)
-"            Some(&pda),";
-"            spl_token::instruction::AuthorityType::AccountOwner,";
-"            old_owner.key,"; (* Account current owner *)
-"            &[&old_owner.key],";
-"        )?;";
-"";
-"        invoke(";
-"            &owner_change_ix,";
-"            &[";
-"                owned_account.clone(),";
-"                old_owner.clone(),";
-"                to_account.clone(),";
-"            ],";
-"        )?;";
-"    } else if let SpecialCallBody:: CheckRentExempt(account_checked) = body {";
-"        let rent = &Rent::from_account_info(to_account)?;";
-"            if !rent.is_exempt(account_checked.lamports(), account_checked.data_len()) {";
-"                return Err(ProcessError::Error.into())";
-"            }";
-"    } else {";
-"        return Err(ProcessError::ConvertActions.into())";
-"    };";
-"  Ok(())";
-"}" $>.
- *)
-(*   Definition convert_actions : string :=
-  <$
-"fn convert_action(act: &ActionBody) -> Result<(), ProgramError> {";
-"  let cact =";
-"      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
-"          if **donator_account.try_borrow_mut_lamports()? >= *amount {";
-"              **receiver_account.try_borrow_mut_lamports()? += amount;";
-"              **donator_account.try_borrow_mut_lamports()? -= amount;";
-"          } else {";
-"              return Err(ProcessError::Error.into())";
-"          };"; 
-"      } else if let ActionBody::SpecialCall(to, body) = act {";
-"          convert_special_action(to, body);";
-"      } else {";
-"          return Err(ProcessError::ConvertActions.into())";
-"      };";
-"      Ok(())";
-"}" $>.
- *)
 Instance solana_extract_preamble : Preamble :=
 {| top_preamble := [
 "#![allow(dead_code)]";
@@ -293,8 +224,6 @@ Instance solana_extract_preamble : Preamble :=
 "use borsh::{BorshSerialize, BorshDeserialize};";
 "use concert_std::{ActionBody, SpecialCallBody};";
 "use core::marker::PhantomData;";
-(* "use immutable_map::TreeMap;";  *)
-"use std::slice::Iter;";
 ""; 
 "fn __nat_succ(x: u64) -> u64 {";
 "  x.checked_add(1).unwrap()";
@@ -405,7 +334,6 @@ Instance solana_extract_preamble : Preamble :=
 "    }";
 "}";
 ""
-(* "type AccountInformation<'a> = solana_program::account_info::AccountInfo<'a>;" *)
 ];
 program_preamble := [
 "fn alloc<T>(&self, t: T) -> & T {";
@@ -434,8 +362,8 @@ program_preamble := [
 "        invoke(";
 "            &owner_change_ix,";
 "            &[";
-"                owned_account.clone(),";
-"                old_owner.clone(),";
+"                *owned_account.clone(),";
+"                *old_owner.clone(),";
 "                to_account.clone(),";
 "            ],";
 "        )?;";
@@ -453,9 +381,9 @@ program_preamble := [
 "fn convert_action(&'a self, act: &ActionBody<'a>) -> Result<(), ProgramError> {";
 "  let cact =";
 "      if let ActionBody::Transfer(donator_account, receiver_account, amount) = act {";
-"          if **donator_account.try_borrow_mut_lamports()? >= *amount {";
-"              **receiver_account.try_borrow_mut_lamports()? += amount;";
-"              **donator_account.try_borrow_mut_lamports()? -= amount;";
+"          if **donator_account.try_borrow_mut_lamports()? >= *amount as u64 {";
+"              **receiver_account.try_borrow_mut_lamports()? += *amount as u64;";
+"              **donator_account.try_borrow_mut_lamports()? -= *amount as u64;";
 "          } else {";
 "              return Err(ProcessError::Error.into())";
 "          };"; 
@@ -517,15 +445,12 @@ Section SolanaPrinting.
         if remap_constant remaps kn then true else
         if remap_inline_constant remaps kn then true else false in
     Σ <- specialize_extract_template_env params Σ seeds should_ignore;;
-(*     let attrs _ := "#[derive(Clone, ConCertSerial, ConCertDeserial, PartialEq)]" in *)
     let attrs _ := "#[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]" in
     let p := print_program Σ remaps attrs in
     '(_, s) <- timed "Printing" (fun _ => finish_print_lines p);;
     ret s.
 
   Open Scope string.
-
-  (* TODO: Modify all of this *)
 
   Definition custom_errors_wrapper (contract_name : string) :=
     <$
@@ -543,9 +468,8 @@ Section SolanaPrinting.
       "    instruction_data: &[u8],";
       ") -> ProgramResult {";
       "    let prg = Program::new(*program_id);";
-      (* Probably no needed to deserialize the message like this *)
       "    let msg : ContractInstruction = ";
-      "        match <ContractInstruction>::deserialize(&mut instruction_data) {";
+      "        match ContractInstruction::try_from_slice(instruction_data) {";
       "            Ok(m) => m,";
       "            Err(_) => return Err(ProcessError::DeserialMsg.into())";
       "        };";
@@ -560,10 +484,8 @@ Section SolanaPrinting.
       "}" ;
       "entrypoint!(process_instruction);" $>.
 
-  Definition list_name : string :=
+Definition list_name : string :=
     RustExtract.ty_const_global_ident_of_kername <%% list %%>.
-
-
 
 Definition print_lines (lines : list string) : TemplateMonad unit :=
     monad_iter tmMsg lines.

@@ -95,6 +95,7 @@ Section ExecuteActions.
 
 Locate ActionEvaluationError.
 
+  (* TODO: fix this definition *)
   Definition send_or_call
              (origin : Address)
              (from to : Address)
@@ -121,7 +122,7 @@ Locate ActionEvaluationError.
       Ok (map (build_act origin to) new_actions, lc)
     end.
 
-  (* J> TODO: Improve this def *)
+  (* TODO: Improve this def *)
   Definition special_call
               (origin : Address)
               (from to : Address)
