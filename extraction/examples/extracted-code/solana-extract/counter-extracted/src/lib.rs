@@ -294,6 +294,28 @@ fn owner__curried(&'a self) -> &'a dyn Fn(&'a State<'a>) -> Address<'a> {
   })
 }
 
+fn increment(&'a self, n: i64, st: &'a State<'a>) -> &'a State<'a> {
+  self.alloc(
+    State::build_state(
+      PhantomData,
+      self.add(
+        self.count(
+          st),
+        n),
+      true,
+      self.owner(
+        st)))
+}
+fn increment__curried(&'a self) -> &'a dyn Fn(i64) -> &'a dyn Fn(&'a State<'a>) -> &'a State<'a> {
+  self.closure(move |n| {
+    self.closure(move |st| {
+      self.increment(
+        n,
+        st)
+    })
+  })
+}
+
 fn sub(&'a self, a: i64, b: i64) -> i64 { a.checked_sub(b).unwrap() }
 fn sub__curried(&'a self) -> &'a dyn Fn(i64) -> &'a dyn Fn(i64) -> i64 {
   self.closure(move |m| {
@@ -301,6 +323,28 @@ fn sub__curried(&'a self) -> &'a dyn Fn(i64) -> &'a dyn Fn(i64) -> i64 {
       self.sub(
         m,
         n)
+    })
+  })
+}
+
+fn decrement(&'a self, n: i64, st: &'a State<'a>) -> &'a State<'a> {
+  self.alloc(
+    State::build_state(
+      PhantomData,
+      self.sub(
+        self.count(
+          st),
+        n),
+      true,
+      self.owner(
+        st)))
+}
+fn decrement__curried(&'a self) -> &'a dyn Fn(i64) -> &'a dyn Fn(&'a State<'a>) -> &'a State<'a> {
+  self.closure(move |n| {
+    self.closure(move |st| {
+      self.decrement(
+        n,
+        st)
     })
   })
 }
@@ -340,16 +384,9 @@ fn counter(&'a self, accounts: SliceAccountInformation<'a>, inst: &'a ContractIn
                             i) {
                       true => {
                         Some(
-                          self.alloc(
-                            State::build_state(
-                              PhantomData,
-                              self.add(
-                                self.count(
-                                  state),
-                                i),
-                              true,
-                              self.owner(
-                                state))))
+                          self.increment(
+                            i,
+                            state))
                       },
                       false => {
                         None
@@ -362,16 +399,9 @@ fn counter(&'a self, accounts: SliceAccountInformation<'a>, inst: &'a ContractIn
                             i) {
                       true => {
                         Some(
-                          self.alloc(
-                            State::build_state(
-                              PhantomData,
-                              self.sub(
-                                self.count(
-                                  state),
-                                i),
-                              true,
-                              self.owner(
-                                state))))
+                          self.decrement(
+                            i,
+                            state))
                       },
                       false => {
                         None
