@@ -121,6 +121,30 @@ Section FunctionalProperties.
 
   (** *** Specification *)
 
+  Lemma counter_increment_correct {prev_state next_state i} :
+    increment i prev_state = next_state ->
+    0 < i ->
+    prev_state.(count) < next_state.(count) 
+        /\ next_state.(count) = prev_state.(count) + i.
+  Proof.
+    intros H pos_inc.
+    unfold increment in *.
+    inversion H.
+    split; auto; cbn in *; lia. 
+  Qed.
+
+  Lemma counter_decrement_correct {prev_state next_state i} :
+    decrement i prev_state = next_state ->
+    0 > i ->
+    prev_state.(count) < next_state.(count) 
+        /\ next_state.(count) = prev_state.(count) - i.
+  Proof.
+    intros H neg_enc.
+    unfold decrement in *.
+    inversion H.
+    split; auto; cbn in *; lia. 
+  Qed.
+
   (** If the counter call succeeds and returns [next_state] then,
       depending on a message, it either increments or decrements
       by the number sent in the corresponding message *)

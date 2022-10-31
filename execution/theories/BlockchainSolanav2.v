@@ -106,45 +106,52 @@ Class AccountGetters :=
 Global Opaque get_account_address get_account_state get_account_balance get_account_owner_address
               get_account_is_signer get_account_is_writable get_account_is_executable.
 
-Lemma get_account_address_correct `{AccountGetters} acc addr : 
-  account_address acc = addr ->
-  get_account_address acc = addr -> 
+Lemma get_account_address_correct `{AccountGetters} acc addr1 addr2 : 
+  account_address acc = addr1 ->
+  get_account_address acc = addr2 -> 
+  addr1 = addr2 ->
   account_address acc = get_account_address acc.
 Proof. easy. Qed.
 
-Lemma get_account_state_correct `{AccountGetters} acc st : 
-  account_state acc = st ->
-  get_account_state acc = st -> 
+Lemma get_account_state_correct `{AccountGetters} acc st1 st2 : 
+  account_state acc = st1 ->
+  get_account_state acc = st2 ->
+  st1 = st2 ->
   account_state acc = get_account_state acc.
 Proof. easy. Qed.
 
-Lemma get_account_balance_correct `{AccountGetters} acc bal : 
-  account_balance acc = bal ->
-  get_account_balance acc = bal -> 
+Lemma get_account_balance_correct `{AccountGetters} acc bal1 bal2 : 
+  account_balance acc = bal1 ->
+  get_account_balance acc = bal2 -> 
+  bal1 = bal2 ->
   account_balance acc = get_account_balance acc.
 Proof. easy. Qed.
 
-Lemma get_account_owner_address_correct `{AccountGetters} acc owner_addr : 
-  account_owner_address acc = owner_addr ->
-  get_account_owner_address acc = owner_addr -> 
+Lemma get_account_owner_address_correct `{AccountGetters} acc owner_addr1 owner_addr2 : 
+  account_owner_address acc = owner_addr1 ->
+  get_account_owner_address acc = owner_addr2 ->
+  owner_addr1 = owner_addr2 -> 
   account_owner_address acc = get_account_owner_address acc.
 Proof. easy. Qed.
 
-Lemma get_account_is_signer_correct `{AccountGetters} acc x : 
-  account_is_signer acc = x ->
-  get_account_is_signer acc = x -> 
+Lemma get_account_is_signer_correct `{AccountGetters} acc x1 x2 : 
+  account_is_signer acc = x1 ->
+  get_account_is_signer acc = x2 ->
+  x1 = x2 -> 
   account_is_signer acc = get_account_is_signer acc.
 Proof. easy. Qed.
 
-Lemma get_account_is_writable_correct `{AccountGetters} acc x : 
-  account_is_writable acc = x ->
-  get_account_is_writable acc = x -> 
+Lemma get_account_is_writable_correct `{AccountGetters} acc x1 x2 : 
+  account_is_writable acc = x1 ->
+  get_account_is_writable acc = x2 ->
+  x1 = x2 -> 
   account_is_writable acc = get_account_is_writable acc.
 Proof. easy. Qed.
 
-Lemma get_account_is_executable_correct `{AccountGetters} acc x : 
-  account_is_executable acc = x ->
-  get_account_is_executable acc = x -> 
+Lemma get_account_is_executable_correct `{AccountGetters} acc x1 x2 : 
+  account_is_executable acc = x1 ->
+  get_account_is_executable acc = x2 -> 
+  x1 = x2 ->
   account_is_executable acc = get_account_is_executable acc.
 Proof. easy. Qed.
 
@@ -2170,6 +2177,9 @@ Class ChainBuilderType :=
 Global Coercion builder_type : ChainBuilderType >-> Sortclass.
 Global Coercion builder_env : builder_type >-> Environment.
 
+(*     next_account_spec :
+      forall (lacc : SliceAccountInformation) (index : Z), Bool.reflect (result_of_option (nth_error lacc (Z.to_nat index)) InvalidAccountData) (next_account lacc index);
+ *)    
 
 Class ChainHelpers :=
   build_helpers {
@@ -2182,7 +2192,6 @@ Class ChainHelpers :=
   }.
 
 Global Opaque next_account deser_data deser_data_account ser_data ser_data_account exec_act.
-
 
 End Blockchain.
 
