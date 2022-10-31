@@ -57,4 +57,5 @@ MetaCoq Run (concordium_extraction
                   (ConcordiumRemap.remap_blockchain_inductives
                      ++ ConcordiumRemap.remap_std_types))
                (fun kn => eq_kername <%% bool_rec %%> kn
-                          || eq_kername <%% bool_rect %%> kn)). *)
+                          || eq_kername <%% bool_rect %%> kn)).
+ *)

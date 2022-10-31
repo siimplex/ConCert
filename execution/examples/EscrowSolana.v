@@ -16,7 +16,6 @@ From ConCert.Utils Require Import RecordUpdate.
 Import ListNotations.
 Import RecordSetNotations.
 
-
 Section EscrowSolana.
 Context {Base : ChainBase}.
 Context {AccountGetters : AccountGetters}.
@@ -38,7 +37,6 @@ Record State :=
   build_state {
       last_action : nat;
       next_step : NextStep;
-(*       is_initialized : bool; *)
       seller : Address;
       buyer : Address;
       seller_withdrawable : Amount;
